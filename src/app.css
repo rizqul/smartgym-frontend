@@ -3,5 +3,35 @@
 @import "tailwindcss";
 
 @theme {
+  --color-background: #0F1115;
+  --color-surface: #1A1D24;
+  --color-card: #242833;
+  --color-border: #343A46;
+  --color-overlay: #08090C;
+  
+  --color-primary: #FF6B00;
+  --color-primary-hover: #FF8A33;
+  --color-secondary: #FFD166;
+  
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #B8BDC7;
+  --color-text-muted: #858C99;
+  
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #38BDF8;
+
   --font-inter: "Inter", sans-serif;
+
+  --default-transition-duration: 200ms;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
 }
