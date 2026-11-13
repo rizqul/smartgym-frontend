@@ -38,7 +38,7 @@ export default function Login() {
     console.log("Form Data Terkirim:", data)
 
     await new Promise((resolve) => setTimeout(resolve, 1500))
-    navigate("/")
+    navigate("/dashboard")
   }
 
   return (
