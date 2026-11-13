@@ -10,6 +10,7 @@ import Home from "./app/Home"
 import Login from "./app/auth/Login"
 import Dashboard from "./app/dashboard/Dashboard"
 import MembershipPage from "./app/membership/MembershipPage"
+import ForgotPassword from "./app/auth/ForgotPassword"
 
 export const router = createBrowserRouter([
   {
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
           {
             path: "login",
             Component: Login
+          },
+          {
+            path: "forgot-password",
+            Component: ForgotPassword
           }
         ]
       },
