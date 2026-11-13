@@ -1,7 +1,13 @@
 import { isRouteErrorResponse, Link, Outlet, useRouteError } from "react-router"
+import { Toaster } from "./components/ui/Toaster"
 
 export default function App() {
-  return <Outlet />
+  return (
+    <>
+      <Outlet />
+      <Toaster />
+    </>
+  )
 }
 
 export function AppErrorBoundary() {
