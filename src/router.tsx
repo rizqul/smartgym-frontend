@@ -10,6 +10,7 @@ import Home from "./app/Home"
 import Login from "./app/auth/Login"
 import Dashboard from "./app/dashboard/Dashboard"
 import MembershipPage from "./app/membership/MembershipPage"
+import ManageMembers from "./app/dashboard/members/Members"
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, Component: Dashboard },
           { path: "membership", Component: MembershipPage },
+          { path: "members", Component: ManageMembers }
         ]
       }
     ]

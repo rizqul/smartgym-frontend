@@ -1,0 +1,75 @@
+import { Download, TrendingUp, UserPlus, Users } from "lucide-react"
+import { Button } from "../../../components/ui/Button"
+import { CardStats } from "../../../components/ui/CardStats"
+
+export default function ManageMembers() {
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-white">Membership Overview</h1>
+
+      <div className="border-primary/20 mt-8 flex h-400 w-full flex-col gap-6 rounded-2xl border-2 border-dashed p-4">
+        {/* header and button */}
+        <div className="flex flex-row items-center justify-between">
+          <div className="flex w-150 flex-col gap-2">
+            <h2 className="text-2xl font-bold text-white">Manajement Member</h2>
+            <p className="text-text-muted">
+              Kelola data master member, status membership, riwayat dan pendaftaran akun dalam ekosistem SmartGym.
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              leftIcon={<Download />}
+            >
+              Export Data
+            </Button>
+
+            <Button
+              variant="primary"
+              leftIcon={<UserPlus />}
+            >
+              Tambah member baru
+            </Button>
+          </div>
+        </div>
+
+        {/* cardStats */}
+        <div className="flex w-full gap-2">
+          <CardStats
+            topIcon={<Users />}
+            bottomIcon={<TrendingUp />}
+            label="Total terdaftar"
+            subLabel="All-Time"
+            value={2585}
+          />
+
+          <CardStats
+            topIcon={<Users />}
+            bottomIcon={<TrendingUp />}
+            label="Total terdaftar"
+            subLabel="All-Time"
+            value={2585}
+          />
+          <CardStats
+            topIcon={<Users />}
+            bottomIcon={<TrendingUp />}
+            label="Total terdaftar"
+            subLabel="All-Time"
+            value={2585}
+          />
+          <CardStats
+            topIcon={<Users />}
+            bottomIcon={<TrendingUp />}
+            label="Total terdaftar"
+            subLabel="All-Time"
+            value={2585}
+          />
+        </div>
+
+        {/* table */}
+        <div className="bg-surface"></div>
+      </div>
+    </div>
+  )
+}
