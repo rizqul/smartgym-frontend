@@ -8,6 +8,7 @@ import TableHead from "../../../components/ui/TableHead"
 import TableTR from "../../../components/ui/TableTR"
 import TableTH from "../../../components/ui/TableTH"
 import TableBody from "../../../components/ui/TableBody"
+import Badge from "../../../components/ui/Badge"
 
 export default function ManageMembers() {
   return (
@@ -94,6 +95,12 @@ export default function ManageMembers() {
               <option value="gold">Gold Member</option>
             </Select>
           </div>
+
+          <Badge
+            label="danger"
+            icon={<Search size={18} />}
+            variant="blue"
+          />
 
           <Table>
             <TableHead>
