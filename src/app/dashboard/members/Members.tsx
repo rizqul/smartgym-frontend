@@ -3,6 +3,11 @@ import { Button } from "../../../components/ui/Button"
 import { CardStats } from "../../../components/ui/CardStats"
 import { Input } from "../../../components/ui/Input"
 import { Select } from "../../../components/ui/Select"
+import Table from "../../../components/ui/Table"
+import TableHead from "../../../components/ui/TableHead"
+import TableTR from "../../../components/ui/TableTR"
+import TableTH from "../../../components/ui/TableTH"
+import TableTD from "../../../components/ui/TableTD"
 
 export default function ManageMembers() {
   return (
@@ -91,42 +96,27 @@ export default function ManageMembers() {
           </div>
 
           <p>this is table</p>
-          <div className="mx-auto w-full overflow-x-auto rounded-md">
-            <table className="w-full">
-              <thead className="text-center text-sm whitespace-nowrap">
-                <tr className="bg-[#282A2E]">
-                  <th className="px-4 py-3">member details</th>
-                  <th className="px-4 py-3">kontak</th>
-                  <th className="px-4 py-3">status akun</th>
-                  <th className="px-4 py-3">status membership</th>
-                  <th className="px-4 py-3">paket terakhir</th>
-                  <th className="px-4 py-3">bergabung</th>
-                  <th className="px-4 py-3">action</th>
-                </tr>
-              </thead>
-
-              <tbody className="text-left text-sm">
-                <tr className="bg-[#1A1C20]">
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                </tr>
-                <tr className="bg-[#0C0E12]/30">
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                  <td className="px-4 py-3">Dimas pratama</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHead>
+              <TableTR
+                isEven={2 % 2 == 0}
+                isHeader={true}
+              >
+                <TableTH>tes</TableTH>
+                <TableTH>
+                  <span>tes</span>
+                </TableTH>
+                <TableTH>
+                  <span>tes</span>
+                </TableTH>
+              </TableTR>
+              <TableTR isEven={3 % 2 == 0}>
+                <TableTD>ini</TableTD>
+                <TableTD>ini</TableTD>
+                <TableTD>ini</TableTD>
+              </TableTR>
+            </TableHead>
+          </Table>
         </div>
       </div>
     </div>
