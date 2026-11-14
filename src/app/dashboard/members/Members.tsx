@@ -90,8 +90,42 @@ export default function ManageMembers() {
             </Select>
           </div>
 
-          <div className="">
-            <p>this is table</p>
+          <p>this is table</p>
+          <div className="mx-auto w-full overflow-x-auto rounded-md">
+            <table className="w-full">
+              <thead className="text-center text-sm whitespace-nowrap">
+                <tr className="bg-[#282A2E]">
+                  <th className="px-4 py-3">member details</th>
+                  <th className="px-4 py-3">kontak</th>
+                  <th className="px-4 py-3">status akun</th>
+                  <th className="px-4 py-3">status membership</th>
+                  <th className="px-4 py-3">paket terakhir</th>
+                  <th className="px-4 py-3">bergabung</th>
+                  <th className="px-4 py-3">action</th>
+                </tr>
+              </thead>
+
+              <tbody className="text-left text-sm">
+                <tr className="bg-[#1A1C20]">
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                </tr>
+                <tr className="bg-[#0C0E12]/30">
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                  <td className="px-4 py-3">Dimas pratama</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
