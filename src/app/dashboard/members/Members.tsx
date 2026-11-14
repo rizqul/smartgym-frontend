@@ -1,6 +1,8 @@
-import { Download, TrendingUp, UserPlus, Users } from "lucide-react"
+import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users } from "lucide-react"
 import { Button } from "../../../components/ui/Button"
 import { CardStats } from "../../../components/ui/CardStats"
+import { Input } from "../../../components/ui/Input"
+import { Select } from "../../../components/ui/Select"
 
 export default function ManageMembers() {
   return (
@@ -68,7 +70,30 @@ export default function ManageMembers() {
         </div>
 
         {/* table */}
-        <div className="bg-surface"></div>
+        <div className="bg-surface flex flex-col gap-2 rounded-xl p-3">
+          <div className="flex gap-2">
+            <Input
+              rightElement={<Search />}
+              placeholder="cari nama member, email, atau ID"
+            />
+
+            <Select rightElement={<ChevronDown />}>
+              <option
+                value=""
+                disabled
+              >
+                Select tier...
+              </option>
+              <option value="bronze">Bronze Member</option>
+              <option value="silver">Silver Member</option>
+              <option value="gold">Gold Member</option>
+            </Select>
+          </div>
+
+          <div className="">
+            <p>this is table</p>
+          </div>
+        </div>
       </div>
     </div>
   )

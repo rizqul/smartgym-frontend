@@ -11,7 +11,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, icon: Icon, error, rightElement, className = "", ...props }, ref) => {
     return (
-      <div className="space-y-2">
+      <div className="flex-1 space-y-2">
         {label && <label className="text-text-muted block text-[11px] font-bold tracking-wider uppercase">{label}</label>}
 
         <div className="relative">
