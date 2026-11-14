@@ -12,6 +12,7 @@ import Dashboard from "./app/dashboard/Dashboard"
 import MembershipPage from "./app/membership/MembershipPage"
 import ManageMembers from "./app/dashboard/members/Members"
 import ForgotPassword from "./app/auth/ForgotPassword"
+import Settings from "./app/settings/Settings"
 
 export const router = createBrowserRouter([
   {
@@ -47,7 +48,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, Component: Dashboard },
           { path: "membership", Component: MembershipPage },
-          { path: "members", Component: ManageMembers }
+          { path: "members", Component: ManageMembers },
+          { path: "settings", Component: Settings }
         ]
       }
     ]
