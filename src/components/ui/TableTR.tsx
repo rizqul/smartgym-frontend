@@ -1,7 +1,7 @@
 import { type ReactNode } from "react"
 
 export interface TableTRProps {
-  isEven: boolean
+  isEven?: boolean
   isHeader?: boolean
   children: ReactNode
 }

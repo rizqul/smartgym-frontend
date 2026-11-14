@@ -5,5 +5,5 @@ export interface TableBody {
 }
 
 export default function TableBody({ children }: TableBody) {
-  return <td className="text-left text-sm">{children}</td>
+  return <tbody className="text-left text-sm">{children}</tbody>
 }

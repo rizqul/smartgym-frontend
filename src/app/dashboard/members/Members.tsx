@@ -7,7 +7,7 @@ import Table from "../../../components/ui/Table"
 import TableHead from "../../../components/ui/TableHead"
 import TableTR from "../../../components/ui/TableTR"
 import TableTH from "../../../components/ui/TableTH"
-import TableTD from "../../../components/ui/TableTD"
+import TableBody from "../../../components/ui/TableBody"
 
 export default function ManageMembers() {
   return (
@@ -74,7 +74,7 @@ export default function ManageMembers() {
           />
         </div>
 
-        {/* table */}
+        {/* table and filter section*/}
         <div className="bg-surface flex flex-col gap-2 rounded-xl p-3">
           <div className="flex gap-2">
             <Input
@@ -95,27 +95,21 @@ export default function ManageMembers() {
             </Select>
           </div>
 
-          <p>this is table</p>
           <Table>
             <TableHead>
-              <TableTR
-                isEven={2 % 2 == 0}
-                isHeader={true}
-              >
+              <TableTR isHeader={true}>
                 <TableTH>tes</TableTH>
-                <TableTH>
-                  <span>tes</span>
-                </TableTH>
-                <TableTH>
-                  <span>tes</span>
-                </TableTH>
-              </TableTR>
-              <TableTR isEven={3 % 2 == 0}>
-                <TableTD>ini</TableTD>
-                <TableTD>ini</TableTD>
-                <TableTD>ini</TableTD>
+                <TableTH>tes</TableTH>
+                <TableTH>tes</TableTH>
               </TableTR>
             </TableHead>
+            <TableBody>
+              <TableTR isEven={2 % 2 == 0}>
+                <TableTH>tes</TableTH>
+                <TableTH>tes</TableTH>
+                <TableTH>tes</TableTH>
+              </TableTR>
+            </TableBody>
           </Table>
         </div>
       </div>
