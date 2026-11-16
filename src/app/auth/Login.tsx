@@ -1,45 +1,35 @@
 import { useState } from "react"
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react"
-import { useNavigate, Link } from "react-router"
+import { Link } from "react-router"
 import { useForm } from "react-hook-form"
+
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react"
+
+import useAuth from "~/hooks/useAuth"
 
 import logoGym from "../../assets/logo.png"
 import { Input } from "../../components/ui/Input"
 import { Button } from "../../components/ui/Button"
 import { Card, CardHeader, CardContent } from "../../components/ui/Card"
 
-const loginSchema = z.object({
-  email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
-  password: z.string().min(6, "Kata sandi minimal 6 karakter"),
-  rememberMe: z.boolean().optional()
-})
-
-type LoginFormValues = z.infer<typeof loginSchema>
+import { LoginValidation, type LoginFormData } from "~/validation/authentication"
 
 export default function Login() {
+  const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
-  const navigate = useNavigate()
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(LoginValidation),
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false
+      remember: false
     }
   })
-
-  const onSubmit = async (data: LoginFormValues) => {
-    console.log("Form Data Terkirim:", data)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    navigate("/dashboard")
-  }
 
   return (
     <Card className="mx-auto w-full max-w-105 shadow-2xl">
@@ -57,7 +47,7 @@ export default function Login() {
 
       <CardContent className="pt-6">
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(login)}
           className="space-y-5"
         >
           <Input
@@ -106,12 +96,13 @@ export default function Login() {
               <input
                 id="remember-me"
                 type="checkbox"
-                {...register("rememberMe")}
+                {...register("remember")}
                 className="peer bg-background checked:bg-primary checked:border-primary focus:ring-primary/50 h-4 w-4 cursor-pointer appearance-none rounded border border-white/20 transition-all focus:ring-2 focus:ring-offset-1 focus:ring-offset-[#1C1F26] focus:outline-none"
               />
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity peer-checked:opacity-100">
                 <div className="h-1.5 w-1.5 rounded-sm bg-white"></div>
               </div>
+
               <label
                 htmlFor="remember-me"
                 className="text-text-secondary ml-2.5 block cursor-pointer text-[13px] transition-colors hover:text-white"
