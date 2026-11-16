@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import toast, { Toaster } from "react-hot-toast"
+import toast from "react-hot-toast"
+
 
 import { ForgotPasswordEmail } from "../../components/auth/ForgotPasswordEmail"
 import { ForgotPasswordReset } from "../../components/auth/ForgotPasswordReset"
@@ -27,7 +28,6 @@ export default function ForgotPassword() {
 
   return (
     <div className="w-full">
-      <Toaster />
 
       {step === 1 ? (
         <ForgotPasswordEmail onSuccess={handleEmailSuccess} />

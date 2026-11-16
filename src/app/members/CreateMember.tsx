@@ -1,0 +1,220 @@
+import { useState } from "react"
+import { useNavigate } from "react-router"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import toast from "react-hot-toast"
+import { ArrowLeft, User, Mail, Phone, Hash, Lock, Eye, EyeOff, Save, Info, Send } from "lucide-react"
+
+import { Card, CardHeader, CardContent } from "../../components/ui/Card"
+import { Input } from "../../components/ui/Input"
+import { Button } from "../../components/ui/Button"
+
+const createMemberSchema = z.object({
+  name: z.string().min(1, "Nama lengkap wajib diisi"),
+  email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
+  phoneNumber: z.string().min(10, "Nomor telepon wajib diisi (min. 10 angka)"),
+  code: z.string().length(6, "Kode OTP harus tepat 6 karakter"),
+  password: z.string().min(8, "Password minimal 8 karakter")
+})
+
+type CreateMemberFormValues = z.infer<typeof createMemberSchema>
+
+export default function CreateMember() {
+  const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
+  const [isSendingOtp, setIsSendingOtp] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    trigger,
+    formState: { errors, isSubmitting }
+  } = useForm<CreateMemberFormValues>({
+    resolver: zodResolver(createMemberSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phoneNumber: "",
+      code: "",
+      password: ""
+    }
+  })
+
+  const handleSendOtp = async () => {
+    const isContactValid = await trigger(["email"])
+
+    if (!isContactValid) {
+      toast.error("Isi Email dengan benar sebelum meminta OTP.")
+      return
+    }
+
+    const { email, phoneNumber } = getValues()
+
+    try {
+      setIsSendingOtp(true)
+      console.log("Requesting OTP for:", { email, phoneNumber })
+
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      toast.success("Kode OTP berhasil dikirim ke Email member!")
+    } catch (error) {
+      toast.error("Gagal mengirim OTP. Silakan coba lagi.")
+    } finally {
+      setIsSendingOtp(false)
+    }
+  }
+
+  const onSubmit = async (data: CreateMemberFormValues) => {
+    try {
+      console.log("Payload ke Backend (DTO):", data)
+
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      toast.success("Member baru berhasil didaftarkan!")
+
+      setTimeout(() => {
+        navigate("/dashboard/members")
+      }, 1000)
+    } catch (error) {
+      toast.error("Gagal mendaftarkan member. Silakan periksa kembali OTP atau data Anda.")
+    }
+  }
+
+  return (
+    <div className="mx-auto mt-4 w-full max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => navigate("/dashboard/members")}
+          className="text-text-muted flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Tambah Member Baru</h1>
+          <p className="text-text-secondary mt-1 text-[13px]">Daftarkan akun member baru ke dalam sistem operasional SmartGym.</p>
+        </div>
+      </div>
+
+      <Card className="shadow-2xl">
+        <CardHeader className="border-b border-white/5 pb-4">
+          <h2 className="text-[16px] font-bold text-white">Informasi Dasar Member</h2>
+          <p className="text-text-secondary text-[12px]">Pastikan nomor WhatsApp aktif untuk menerima kode OTP.</p>
+        </CardHeader>
+
+        <CardContent className="pt-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <Input
+                  label="Nama Lengkap"
+                  placeholder="Masukkan nama sesuai identitas"
+                  icon={User}
+                  error={errors.name?.message}
+                  {...register("name")}
+                />
+              </div>
+
+              <Input
+                label="Alamat Email"
+                type="email"
+                placeholder="email@contoh.com"
+                icon={Mail}
+                error={errors.email?.message}
+                {...register("email")}
+              />
+
+              <Input
+                label="Nomor WhatsApp / Telepon"
+                type="tel"
+                placeholder="081234567890"
+                icon={Phone}
+                error={errors.phoneNumber?.message}
+                {...register("phoneNumber")}
+              />
+
+              <Input
+                label="Kode Verifikasi (OTP)"
+                placeholder="6 Digit OTP"
+                icon={Hash}
+                maxLength={6}
+                error={errors.code?.message}
+                {...register("code")}
+                rightElement={
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={isSendingOtp}
+                    className="bg-primary/10 text-primary hover:bg-primary/20 flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isSendingOtp ? (
+                      "Mengirim..."
+                    ) : (
+                      <>
+                        <Send className="h-3 w-3" />
+                        Minta OTP
+                      </>
+                    )}
+                  </button>
+                }
+              />
+
+              <Input
+                label="Kata Sandi Awal"
+                type={showPassword ? "text" : "password"}
+                placeholder="Min. 8 karakter"
+                icon={Lock}
+                error={errors.password?.message}
+                {...register("password")}
+                rightElement={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-text-muted transition-colors hover:text-white"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                }
+              />
+            </div>
+
+            <div className="bg-primary/10 border-primary/20 flex items-start gap-3 rounded-xl border p-4">
+              <Info className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+              <div className="flex flex-col">
+                <span className="text-primary text-[13px] font-semibold">Alur Pendaftaran (OTP)</span>
+                <span className="text-primary/80 mt-1 text-[12px]">
+                  Isi Email dan No. WhatsApp terlebih dahulu, lalu klik <strong>"Minta OTP"</strong>. Sistem akan mengirimkan kode 6 digit
+                  ke kontak calon member untuk dimasukkan ke dalam form sebelum disimpan.
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3 border-t border-white/5 pt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate("/dashboard/members")}
+                disabled={isSubmitting}
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                isLoading={isSubmitting}
+                leftIcon={!isSubmitting && <Save className="h-4 w-4" />}
+                className="font-bold"
+              >
+                {isSubmitting ? "Menyimpan..." : "Simpan Data Member"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
