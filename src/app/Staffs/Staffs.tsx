@@ -19,7 +19,7 @@ export default function Staff() {
   const navigate = useNavigate()
 
   return (
-    <div className="border-primary/20 mt-8 flex w-full flex-col gap-6 rounded-2xl p-4">
+    <div className="border-primary/20 flex w-full flex-col gap-6 rounded-2xl p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full max-w-150 flex-col gap-1.5">
           <h2 className="text-2xl font-bold text-white">Manajemen Staf</h2>
