@@ -33,7 +33,7 @@ export const navigationMenu: NavItem[] = [
       },
       {
         title: "Manajemen Staff",
-        path: "/dashboard/staff",
+        path: "/dashboard/staffs",
         roles: ["admin"]
       }
     ]

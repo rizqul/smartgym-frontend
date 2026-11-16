@@ -16,6 +16,9 @@ import Settings from "./app/settings/Settings"
 import ManageMembers from "./app/members/Members"
 import CreateMember from "./app/members/CreateMember"
 import EditMember from "./app/members/EditMember"
+import ManageStaffs from "./app/Staffs/Staffs"
+import EditStaff from "./app/Staffs/EditStaff"
+import CreateStaff from "./app/Staffs/CreateStaff"
 
 export const router = createBrowserRouter([
   {
@@ -75,6 +78,23 @@ export const router = createBrowserRouter([
               {
                 path: ":id/edit",
                 Component: EditMember
+              }
+            ]
+          },
+          {
+            path: "staffs",
+            children: [
+              {
+                index: true,
+                Component: ManageStaffs
+              },
+              {
+                path: "create",
+                Component: CreateStaff
+              },
+              {
+                path: ":id/edit",
+                Component: EditStaff
               }
             ]
           }

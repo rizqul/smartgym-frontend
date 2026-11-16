@@ -1,0 +1,186 @@
+import { useState } from "react"
+import { useNavigate } from "react-router"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import toast from "react-hot-toast"
+import { ArrowLeft, User, Mail, Phone, Lock, Eye, EyeOff, Save, Info, ShieldCheck } from "lucide-react"
+
+import { Card, CardHeader, CardContent } from "../../components/ui/Card"
+import { Input } from "../../components/ui/Input"
+import { Button } from "../../components/ui/Button"
+import { Select } from "../../components/ui/Select"
+
+const createStaffSchema = z.object({
+  name: z.string().min(1, "Nama lengkap wajib diisi"),
+  email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
+  phoneNumber: z.string().min(10, "Nomor telepon wajib diisi (min. 10 angka)"),
+  role: z.enum(["ADMIN", "STAFF"]),
+  password: z.string().min(8, "Password minimal 8 karakter")
+})
+
+type CreateStaffFormValues = z.infer<typeof createStaffSchema>
+
+export default function CreateStaff() {
+  const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<CreateStaffFormValues>({
+    resolver: zodResolver(createStaffSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phoneNumber: "",
+      role: "STAFF",
+      password: ""
+    }
+  })
+
+  const onSubmit = async (data: CreateStaffFormValues) => {
+    try {
+      console.log("Payload ke Backend (DTO):", data)
+
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      toast.success("Staf baru berhasil didaftarkan!")
+
+      setTimeout(() => {
+        navigate("/dashboard/staffs")
+      }, 1000)
+    } catch (error) {
+      toast.error("Gagal mendaftarkan staf. Silakan periksa kembali data Anda.")
+    }
+  }
+
+  return (
+    <div className="mx-auto mt-4 w-full max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => navigate("/dashboard/staffs")}
+          className="text-text-muted flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold text-white">Tambah Staf Baru</h1>
+          <p className="text-text-secondary mt-1 text-[13px]">Daftarkan akun staf atau admin baru ke dalam sistem SmartGym.</p>
+        </div>
+      </div>
+
+      <Card className="shadow-2xl">
+        <CardHeader className="border-b border-white/5 pb-4">
+          <h2 className="text-[16px] font-bold text-white">Informasi Dasar Staf</h2>
+          <p className="text-text-secondary text-[12px]">Lengkapi data profil dan tentukan hak akses (role) staf.</p>
+        </CardHeader>
+
+        <CardContent className="pt-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <Input
+                  label="Nama Lengkap"
+                  placeholder="Masukkan nama sesuai identitas"
+                  icon={User}
+                  error={errors.name?.message}
+                  {...register("name")}
+                />
+              </div>
+
+              <Input
+                label="Alamat Email"
+                type="email"
+                placeholder="email@contoh.com"
+                icon={Mail}
+                error={errors.email?.message}
+                {...register("email")}
+              />
+
+              <Input
+                label="Nomor WhatsApp / Telepon"
+                type="tel"
+                placeholder="081234567890"
+                icon={Phone}
+                error={errors.phoneNumber?.message}
+                {...register("phoneNumber")}
+              />
+
+              <div className="space-y-1">
+                <label className="text-text-secondary text-[13px] font-medium">Peran / Hak Akses</label>
+                <div className="relative">
+                  <Select
+                    {...register("role")}
+                    className="pl-10"
+                  >
+                    <option value="ADMIN">Administrator</option>
+                    <option value="STAFF">Staf / Resepsionis</option>
+                  </Select>
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <ShieldCheck className="text-text-muted h-4 w-4" />
+                  </div>
+                </div>
+                {errors.role && <p className="text-danger mt-1 text-[12px]">{errors.role.message}</p>}
+              </div>
+
+              <Input
+                label="Kata Sandi Awal"
+                type={showPassword ? "text" : "password"}
+                placeholder="Min. 8 karakter"
+                icon={Lock}
+                error={errors.password?.message}
+                {...register("password")}
+                rightElement={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-text-muted transition-colors hover:text-white"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                }
+              />
+            </div>
+
+            <div className="bg-primary/10 border-primary/20 flex items-start gap-3 rounded-xl border p-4">
+              <Info className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+              <div className="flex flex-col">
+                <span className="text-primary text-[13px] font-semibold">Terkait Akses Sistem</span>
+                <span className="text-primary/80 mt-1 text-[12px]">
+                  Berikan email dan kata sandi awal ini kepada staf yang bersangkutan. Staf <strong>Admin</strong> memiliki hak penuh,
+                  sedangkan <strong>Staf/Resepsionis</strong> hanya dapat mengakses modul operasional harian.
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3 border-t border-white/5 pt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate("/dashboard/staffs")}
+                disabled={isSubmitting}
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                isLoading={isSubmitting}
+                leftIcon={!isSubmitting && <Save className="h-4 w-4" />}
+                className="font-bold"
+              >
+                {isSubmitting ? "Menyimpan..." : "Simpan Data Staf"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
