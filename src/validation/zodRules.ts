@@ -1,43 +1,45 @@
 import * as z from "zod"
 
-const name = z.string({
-  error: (iss) => (iss.input == undefined ? "The name field is required." : "The name field must be a string.")
-})
+const name = z
+  .string()
+  .trim()
+  .min(1, "Nama lengkap tidak boleh kosong.")
+  .max(100, "Nama lengkap maksimal 100 karakter.")
 
-const email = z.email({
-  error: (iss) => (iss.input == undefined ? "The email field is required." : "The email field must be a valid email address.")
-})
+const email = z
+  .string()
+  .trim()
+  .min(1, "Alamat email wajib diisi.")
+  .email("Format email tidak valid (contoh: user@gymmick.my.id).")
 
 const password = z
-  .string({
-    error: (iss) => (iss.input == undefined ? "The password field is required." : "The password field must be a string.")
-  })
-  .min(8, "The password field must be at least 8 characters.")
+  .string()
+  .min(8, "Kata sandi minimal harus 8 karakter.")
 
 const passwordConfirmation = z
-  .string({
-    error: (iss) =>
-      iss.input == undefined ? "The password confirmation field is required." : "The password confirmation field must be a string."
-  })
-  .min(8, "The password confirmation field must be at least 8 characters.")
+  .string()
+  .min(1, "Konfirmasi kata sandi tidak boleh kosong.")
 
 const remember = z.boolean().optional()
 
 const code = z
-  .string({
-    error: (iss) => (iss.input == undefined ? "The code field is required." : "The code field must be a number.")
-  })
-  .length(6, "The code field must be 6 number length.")
+  .string()
+  .min(1, "Kode OTP wajib diisi.")
+  .length(6, "Kode OTP harus tepat 6 digit.")
+  .regex(/^\d+$/, "Kode OTP hanya boleh berisi kombinasi angka.")
 
 const avatar = z
-  .union([
-    z.instanceof(FileList, {
-      error: "The avatar field is required."
-    }),
-    z.string().optional()
-  ])
-  .refine((data) => data instanceof FileList || typeof data === "string", {
-    error: "The avatar field is required."
-  })
+  .any()
+  .refine(
+    (value) =>
+      value === undefined ||
+      value === null ||
+      value instanceof FileList ||
+      typeof value === "string",
+    {
+      message: "Harap unggah file gambar yang valid."
+    }
+  )
+  .optional()
 
 export { avatar, code, email, name, password, passwordConfirmation, remember }
