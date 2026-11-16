@@ -10,10 +10,11 @@ import Home from "./app/Home"
 import Login from "./app/auth/Login"
 import Dashboard from "./app/dashboard/Dashboard"
 import MembershipPage from "./app/membership/MembershipPage"
-import ManageMembers from "./app/dashboard/members/Members"
 import ForgotPassword from "./app/auth/ForgotPassword"
 import Settings from "./app/settings/Settings"
-import ManageMembers from "./app/dashboard/members/Members"
+import ManageMembers from "./app/members/Members"
+import CreateMember from "./app/members/CreateMember"
+import EditMember from "./app/members/EditMember"
 
 export const router = createBrowserRouter([
   {
@@ -50,7 +51,9 @@ export const router = createBrowserRouter([
           { index: true, Component: Dashboard },
           { path: "membership", Component: MembershipPage },
           { path: "settings", Component: Settings },
-          { path: "members", Component: ManageMembers }
+          { path: "members", Component: ManageMembers },
+          { path: "members/create", Component: CreateMember },
+          { path: "members/:id/edit", Component: EditMember }
         ]
       }
     ]
