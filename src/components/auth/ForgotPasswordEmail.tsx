@@ -2,38 +2,42 @@ import { Mail, ArrowLeft } from "lucide-react"
 import { Link } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import toast from "react-hot-toast"
+
+import useAuth from "~/hooks/useAuth"
+import { ForgotPasswordEmailValidation, type ForgotPasswordEmailFormData } from "~/validation/authentication"
 
 import { Button } from "../ui/Button"
 import { Card, CardHeader, CardContent } from "../ui/Card"
 import { Input } from "../ui/Input"
 import logoGym from "../../assets/logo.png"
 
-const forgotPasswordSchema = z.object({
-  email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid")
-})
-
-type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
-
 interface Props {
   onSuccess: (email: string) => void
 }
 
 export function ForgotPasswordEmail({ onSuccess }: Props) {
+  const { requestPasswordReset } = useAuth()
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<ForgotPasswordFormValues>({
-    resolver: zodResolver(forgotPasswordSchema),
+  } = useForm<ForgotPasswordEmailFormData>({
+    resolver: zodResolver(ForgotPasswordEmailValidation),
     defaultValues: {
       email: ""
     }
   })
 
-  const onSubmit = async (data: ForgotPasswordFormValues) => {
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    onSuccess(data.email)
+  const onSubmit = async (data: ForgotPasswordEmailFormData) => {
+    try {
+      await requestPasswordReset(data)
+
+      onSuccess(data.email)
+    } catch (error: any) {
+      toast.error(error.message)
+    }
   }
 
   return (
@@ -46,7 +50,7 @@ export function ForgotPasswordEmail({ onSuccess }: Props) {
             className="h-8 w-8 object-contain drop-shadow-md"
           />
         </div>
-        <h1 className="text-2xl font-bold text-white">Lupa Password?</h1>
+        <h1 className="text-2xl font-bold text-white">Lupa Kata Sandi?</h1>
         <p className="text-text-secondary mt-2 text-[14px]">
           Masukkan alamat email yang terdaftar. Kami akan mengirimkan kode OTP untuk mereset kata sandi Anda.
         </p>
