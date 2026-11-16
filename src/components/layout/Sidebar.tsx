@@ -3,11 +3,8 @@ import { Link, useLocation } from "react-router"
 import { LogOut, ChevronDown, ChevronRight, X } from "lucide-react"
 
 import useAuth from "~/hooks/useAuth"
-
-import { Button } from "../ui/Button"
 import { Alert } from "../../utils/alert"
 import { navigationMenu } from "../../config/navigation"
-
 import logoGym from "../../assets/logo.png"
 
 interface SidebarProps {
@@ -16,7 +13,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
   const location = useLocation()
 
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
@@ -67,7 +64,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-white/4 px-6">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/4 px-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center text-xl font-black tracking-tighter italic">
               <img
@@ -121,10 +118,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 key={child.title}
                                 to={child.path!}
                                 onClick={onClose}
-                                className={`block rounded-lg px-3 py-2 text-[13px] font-medium transition-colors ${
+                                className={`relative block rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
                                   isActive(child.path!)
-                                    ? "text-primary bg-primary/10"
-                                    : "text-text-secondary hover:bg-white/5 hover:text-white"
+                                    ? "overflow-hidden border-l-[3px] border-l-[#F97316] bg-white/5 text-[#FDBA74]"
+                                    : "text-text-secondary border-l-[3px] border-l-transparent hover:bg-white/5 hover:text-white"
                                 }`}
                               >
                                 {child.title}
@@ -141,13 +138,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       key={menu.title}
                       to={menu.path!}
                       onClick={onClose}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${
+                      className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all ${
                         isActive(menu.path!)
-                          ? "bg-primary shadow-primary/20 text-white shadow-lg"
-                          : "text-text-secondary hover:bg-white/5 hover:text-white"
+                          ? "border-l-4 border-l-[#F97316] bg-white/5 text-[#FDBA74]"
+                          : "text-text-secondary border-l-4 border-l-transparent hover:bg-white/5 hover:text-white"
                       }`}
                     >
-                      {Icon && <Icon className="h-5 w-5" />}
+                      {Icon && <Icon className={`h-5 w-5 ${isActive(menu.path!) ? "text-[#FDBA74]" : ""}`} />}
                       {menu.title}
                     </Link>
                   )
@@ -157,21 +154,33 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           ))}
         </div>
 
-        <div className="border-t border-white/4 p-4">
-          <div className="flex items-center justify-between rounded-xl border border-white/4 bg-[#0B0C10] p-1.5">
-            <div className="flex items-center gap-3 pl-3">
-              <span className="text-text-secondary text-[11px] font-medium">Role</span>
-              <span className="bg-primary rounded-md px-3 py-1 text-[11px] font-bold text-white shadow-sm">Admin</span>
+        <div className="border-primary/25 shrink-0 border-t p-4">
+          <div className="bg-primary flex items-center justify-between rounded-xl p-2 transition-colors">
+            <div className="flex items-center gap-3 pl-1">
+              <div className="relative">
+                <img
+                  src={user?.profileUrl ?? "https://i.pravatar.cc/150?img=11"}
+                  alt={user?.name ?? "User"}
+                  className="size-9 rounded-full border border-white/10 object-cover shadow-sm"
+                />
+                <div className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-[#1C1F26] bg-[#FACC15]"></div>
+              </div>
+
+              <div className="flex flex-col justify-center">
+                <span className="w-28 truncate text-[13px] leading-tight font-bold text-white">{user?.name ?? "Guest User"}</span>
+                <span className="mt-0.5 text-[10px] font-semibold tracking-wider text-white/80">
+                  {user?.role ?? "Administrator"}
+                </span>
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
+
+            <button
               title="Keluar"
               onClick={handleLogout}
-              className="text-text-muted hover:text-danger hover:bg-danger/10"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-amber-50 hover:text-primary"
             >
               <LogOut className="h-5 w-5" />
-            </Button>
+            </button>
           </div>
         </div>
       </aside>
