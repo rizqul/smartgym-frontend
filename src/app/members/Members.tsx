@@ -1,17 +1,5 @@
 import { useNavigate } from "react-router"
-import {
-  ChevronDown,
-  Download,
-  Search,
-  TrendingUp,
-  UserPlus,
-  Users,
-  Eye,
-  Pencil,
-  History,
-  Award,
-  MinusCircle
-} from "lucide-react"
+import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, History, Award, MinusCircle } from "lucide-react"
 
 import { Button } from "../../components/ui/Button"
 import { CardStats } from "../../components/ui/CardStats"
@@ -24,11 +12,15 @@ import TableTH from "../../components/ui/TableTH"
 import TableBody from "../../components/ui/TableBody"
 import TableTD from "../../components/ui/TableTD"
 import Badge from "../../components/ui/Badge"
-
-import { MOCK_MEMBERS } from "../../data/mockMembers"
+ 
+import { useGetAllMemberQuery } from "~/services/member"
+import { useState } from "react"
 
 export default function Member() {
   const navigate = useNavigate()
+
+  const [searchName, setSearchName] = useState<string>("")
+  const { data } = useGetAllMemberQuery({ name: searchName })
 
   return (
     <div className="border-primary/20 mt-8 flex w-full flex-col gap-6 rounded-2xl p-4">
@@ -96,6 +88,7 @@ export default function Member() {
                 type="text"
                 placeholder="Cari nama member, email, atau ID..."
                 className="placeholder:text-text-muted focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
+                onChange={(e) => setSearchName(e.currentTarget.value)}
               />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
                 <Search className="text-text-muted h-4 w-4" />
@@ -145,24 +138,18 @@ export default function Member() {
             </TableTR>
           </TableHead>
           <TableBody>
-            {MOCK_MEMBERS.map((member, index) => (
+            {data?.data.map((member, index) => (
               <TableTR
                 key={member.id}
                 isEven={index % 2 === 0}
               >
                 <TableTD>
                   <div className="flex items-center gap-3">
-                    {member.avatar ? (
-                      <img
-                        src={member.avatar}
-                        alt={member.name}
-                        className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-sm"
-                      />
-                    ) : (
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-bold ${member.avatarBg}`}>
-                        {member.initials}
-                      </div>
-                    )}
+                    <img
+                      src={member.profileUrl ?? ""}
+                      alt={member.name}
+                      className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-sm"
+                    />
                     <div className="flex flex-col">
                       <span className="text-[14px] font-bold text-white">{member.name}</span>
                       <span className="text-primary text-[12px] font-semibold">{member.id}</span>
@@ -173,22 +160,22 @@ export default function Member() {
                 <TableTD>
                   <div className="flex flex-col">
                     <span className="text-[13px] text-white">{member.email}</span>
-                    <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{member.phone}</span>
+                    <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{member.phoneNumber}</span>
                   </div>
                 </TableTD>
 
                 <TableTD>
-                  <Badge
+                  {/* <Badge
                     variant={member.accountStatus === "Active" ? "yellow" : "plain"}
                     label={member.accountStatus}
                     icon={
                       <div className={`h-1.5 w-1.5 rounded-full ${member.accountStatus === "Active" ? "bg-yellow-400" : "bg-gray-400"}`} />
                     }
-                  />
+                  /> */}
                 </TableTD>
 
                 <TableTD>
-                  <Badge
+                  {/* <Badge
                     variant={member.membershipStatus === "Active Pass" ? "orange" : "plain"}
                     label={member.membershipStatus}
                     icon={
@@ -198,18 +185,18 @@ export default function Member() {
                         <MinusCircle className="h-3.5 w-3.5" />
                       )
                     }
-                  />
+                  /> */}
                 </TableTD>
 
                 <TableTD>
                   <div className="flex flex-col">
-                    <span className="text-[13px] font-medium text-white">{member.package}</span>
-                    <span className="text-text-muted text-[12px]">{member.expDate}</span>
+                    {/* <span className="text-[13px] font-medium text-white">{member.package}</span>
+                    <span className="text-text-muted text-[12px]">{member.expDate}</span> */}
                   </div>
                 </TableTD>
 
                 <TableTD>
-                  <span className="text-[13px] text-white">{member.joinDate}</span>
+                  <span className="text-[13px] text-white">{member.createdAt}</span>
                 </TableTD>
 
                 <TableTD>
