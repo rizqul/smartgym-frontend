@@ -5,6 +5,7 @@ export type User = {
   name: string
   email: string
   profileUrl: string | null
+  phoneNumber: string
   role: UserRole
   createdAt: string
   updatedAt: string

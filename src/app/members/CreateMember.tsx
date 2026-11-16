@@ -2,25 +2,18 @@ import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import toast from "react-hot-toast"
 import { ArrowLeft, User, Mail, Phone, Hash, Lock, Eye, EyeOff, Save, Info, Send } from "lucide-react"
 
 import { Card, CardHeader, CardContent } from "../../components/ui/Card"
 import { Input } from "../../components/ui/Input"
 import { Button } from "../../components/ui/Button"
-
-const createMemberSchema = z.object({
-  name: z.string().min(1, "Nama lengkap wajib diisi"),
-  email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
-  phoneNumber: z.string().min(10, "Nomor telepon wajib diisi (min. 10 angka)"),
-  code: z.string().length(6, "Kode OTP harus tepat 6 karakter"),
-  password: z.string().min(8, "Password minimal 8 karakter")
-})
-
-type CreateMemberFormValues = z.infer<typeof createMemberSchema>
+import { CreateMemberValidation, type CreateMemberData } from "~/validation/member"
+import { memberService, useCreateMemberMutation } from "~/services/member"
 
 export default function CreateMember() {
+  const [createMember, { error }] = useCreateMemberMutation()
+
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [isSendingOtp, setIsSendingOtp] = useState(false)
@@ -31,8 +24,8 @@ export default function CreateMember() {
     getValues,
     trigger,
     formState: { errors, isSubmitting }
-  } = useForm<CreateMemberFormValues>({
-    resolver: zodResolver(createMemberSchema),
+  } = useForm<CreateMemberData>({
+    resolver: zodResolver(CreateMemberValidation),
     defaultValues: {
       name: "",
       email: "",
@@ -50,33 +43,31 @@ export default function CreateMember() {
       return
     }
 
-    const { email, phoneNumber } = getValues()
+    const { email } = getValues()
 
     try {
       setIsSendingOtp(true)
-      console.log("Requesting OTP for:", { email, phoneNumber })
-
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await memberService.getOtpCode({ email })
 
       toast.success("Kode OTP berhasil dikirim ke Email member!")
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengirim OTP. Silakan coba lagi.")
     } finally {
       setIsSendingOtp(false)
     }
   }
 
-  const onSubmit = async (data: CreateMemberFormValues) => {
+  const onSubmit = async (data: CreateMemberData) => {
     try {
       console.log("Payload ke Backend (DTO):", data)
 
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await createMember(data)
+      if (error) throw Error
+
       toast.success("Member baru berhasil didaftarkan!")
 
-      setTimeout(() => {
-        navigate("/dashboard/members")
-      }, 1000)
-    } catch (error) {
+      navigate("/dashboard/members")
+    } catch {
       toast.error("Gagal mendaftarkan member. Silakan periksa kembali OTP atau data Anda.")
     }
   }
