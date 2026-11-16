@@ -1,6 +1,8 @@
 import { useState } from "react"
-import { Link, useLocation, useNavigate } from "react-router"
+import { Link, useLocation } from "react-router"
 import { LogOut, ChevronDown, ChevronRight, X } from "lucide-react"
+
+import useAuth from "~/hooks/useAuth"
 
 import { Button } from "../ui/Button"
 import { Alert } from "../../utils/alert"
@@ -14,11 +16,11 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { logout } = useAuth()
   const location = useLocation()
-  const navigate = useNavigate()
 
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
-    "Manajemen User": true 
+    "Manajemen User": true
   })
 
   const isActive = (path: string) => location.pathname === path
@@ -48,9 +50,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       isDanger: true
     })
 
-    if (result.isConfirmed) {
-      navigate("/auth/login")
-    }
+    if (result.isConfirmed) await logout()
   }
 
   return (

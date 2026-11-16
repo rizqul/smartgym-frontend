@@ -6,17 +6,16 @@ import logoGym from "../assets/logo.png"
 export default function AuthLayout() {
   return (
     <div className="bg-background relative flex min-h-screen w-full flex-col overflow-hidden">
-
       <div className="bg-primary/[0.07] pointer-events-none absolute top-[-10%] left-1/2 h-150 w-200 -translate-x-1/2 rounded-full blur-[150px]"></div>
 
       <header className="relative z-10 flex w-full items-center justify-between px-6 py-6 md:px-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-[10px] border border-primary/50 bg-[#0B0C10] drop-shadow-xl drop-shadow-primary/50">
-              <img
-                src={logoGym}
-                alt="SmartGym Logo"
-                className="h-10 w-10 object-contain drop-shadow-md"
-              />
+          <div className="border-primary/50 drop-shadow-primary/50 flex h-11 w-11 items-center justify-center rounded-[10px] border bg-[#0B0C10] drop-shadow-xl">
+            <img
+              src={logoGym}
+              alt="SmartGym Logo"
+              className="h-10 w-10 object-contain drop-shadow-md"
+            />
           </div>
 
           <div className="mt-0.5 flex flex-col justify-center">
@@ -28,7 +27,7 @@ export default function AuthLayout() {
           </div>
         </div>
 
-        <div className="hidden items-center gap-2 rounded-full border border-white/5 bg-surface/60 px-3 py-1.5 shadow-sm backdrop-blur-sm sm:flex">
+        <div className="bg-surface/60 hidden items-center gap-2 rounded-full border border-white/5 px-3 py-1.5 shadow-sm backdrop-blur-sm sm:flex">
           <ShieldCheck
             className="text-primary h-3.5 w-3.5"
             strokeWidth={2.5}
