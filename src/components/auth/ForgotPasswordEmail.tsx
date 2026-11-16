@@ -50,7 +50,7 @@ export function ForgotPasswordEmail({ onSuccess }: Props) {
             className="h-8 w-8 object-contain drop-shadow-md"
           />
         </div>
-        <h1 className="text-2xl font-bold text-white">Lupa Password?</h1>
+        <h1 className="text-2xl font-bold text-white">Lupa Kata Sandi?</h1>
         <p className="text-text-secondary mt-2 text-[14px]">
           Masukkan alamat email yang terdaftar. Kami akan mengirimkan kode OTP untuk mereset kata sandi Anda.
         </p>

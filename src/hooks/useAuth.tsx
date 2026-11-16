@@ -56,6 +56,7 @@ export default function useAuth() {
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.status === 400) throw new Error("Kode OTP salah atau sudah kedaluwarsa.")
+        if (error.response?.status === 422) throw new Error("Format data tidak valid/tidak sesuai dengan server.")
         throw new Error(error.response?.data?.message || "Gagal mereset kata sandi.")
       }
       throw new Error("Terjadi kesalahan sistem.")
@@ -65,10 +66,8 @@ export default function useAuth() {
   async function logout() {
     try {
       await axiosClient.post(API_AUTH_LOGOUT)
-      
     } catch (error) {
       console.warn("Sesi di server mungkin sudah berakhir atau terjadi masalah jaringan.")
-      
     } finally {
       dispatch(clearUser())
       localStorage.setItem("isAuthenticated", String(false))

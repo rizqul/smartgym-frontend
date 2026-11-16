@@ -18,7 +18,7 @@ export type ForgotPasswordEmailFormData = z.infer<typeof ForgotPasswordEmailVali
 
 export const ForgotPasswordResetValidation = z.object({
   code: rules.code,
-  newPassword: rules.password, 
+  password: rules.password, 
   confirmPassword: rules.passwordConfirmation,
 })
 
