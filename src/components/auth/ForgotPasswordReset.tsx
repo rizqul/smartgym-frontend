@@ -25,7 +25,7 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
   const [showConfirm, setShowConfirm] = useState(false)
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""])
 
-  const [timeLeft, setTimeLeft] = useState(45)
+  const [timeLeft, setTimeLeft] = useState(120)
   const [isResending, setIsResending] = useState(false)
 
   const maskedEmail = email.replace(/(.{2})(.*)(?=@)/, "$1***")
@@ -39,7 +39,7 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
     resolver: zodResolver(ForgotPasswordResetValidation),
     defaultValues: {
       code: "",
-      newPassword: "",
+      password: "",
       confirmPassword: ""
     }
   })
@@ -118,8 +118,8 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
             className="h-8 w-8 object-contain drop-shadow-md"
           />
         </div>
-        <h1 className="mb-2 text-xl font-bold text-white sm:text-2xl">Reset Password</h1>
-        <p className="text-text-secondary text-[13px] sm:text-[14px]">Masukkan kode OTP verifikasi dan buat kata password Anda.</p>
+        <h1 className="mb-2 text-xl font-bold text-white sm:text-2xl">Reset Kata Sandi</h1>
+        <p className="text-text-secondary text-[13px] sm:text-[14px]">Masukkan kode OTP verifikasi dan buat kata sandi baru Anda.</p>
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[12px] sm:text-[13px]">
           <div className="text-text-secondary flex items-center gap-1.5">
@@ -185,8 +185,8 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
               type={showPassword ? "text" : "password"}
               placeholder="Masukkan password baru (min. 8 karakter)"
               icon={Lock}
-              error={errors.newPassword?.message}
-              {...register("newPassword")}
+              error={errors.password?.message}
+              {...register("password")}
               disabled={timeLeft === 0}
               rightElement={
                 <button
@@ -226,7 +226,7 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
             isLoading={isSubmitting}
             disabled={timeLeft === 0}
           >
-            {isSubmitting ? "Menyimpan..." : "Simpan Password"}
+            {isSubmitting ? "Menyimpan..." : "Simpan Kata Sandi"}
           </Button>
 
           <div className="pt-2 text-center">
