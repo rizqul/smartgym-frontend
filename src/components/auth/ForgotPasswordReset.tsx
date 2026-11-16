@@ -1,27 +1,17 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Lock, ArrowLeft, Mail, ShieldCheck, Eye, EyeOff } from "lucide-react"
 import { Link } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import toast from "react-hot-toast"
+
+import useAuth from "~/hooks/useAuth"
+import { ForgotPasswordResetValidation, type ForgotPasswordResetFormData } from "~/validation/authentication"
 
 import { Button } from "../ui/Button"
 import { Card, CardHeader, CardContent } from "../ui/Card"
 import { Input } from "../ui/Input"
 import logoGym from "../../assets/logo.png"
-
-const resetPasswordSchema = z
-  .object({
-    otp: z.string().length(6, "Kode OTP harus 6 digit"),
-    password: z.string().min(8, "Kata sandi minimal 8 karakter"),
-    confirmPassword: z.string().min(1, "Konfirmasi kata sandi wajib diisi")
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Konfirmasi kata sandi tidak cocok",
-    path: ["confirmPassword"]
-  })
-
-type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
 
 interface Props {
   email: string
@@ -29,9 +19,14 @@ interface Props {
 }
 
 export function ForgotPasswordReset({ email, onSubmit }: Props) {
+  const { resetPassword, requestPasswordReset } = useAuth()
+
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""])
+
+  const [timeLeft, setTimeLeft] = useState(45)
+  const [isResending, setIsResending] = useState(false)
 
   const maskedEmail = email.replace(/(.{2})(.*)(?=@)/, "$1***")
 
@@ -40,14 +35,46 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
     handleSubmit,
     setValue,
     formState: { errors, isSubmitting }
-  } = useForm<ResetPasswordFormValues>({
-    resolver: zodResolver(resetPasswordSchema),
+  } = useForm<ForgotPasswordResetFormData>({
+    resolver: zodResolver(ForgotPasswordResetValidation),
     defaultValues: {
-      otp: "",
-      password: "",
+      code: "",
+      newPassword: "",
       confirmPassword: ""
     }
   })
+
+  useEffect(() => {
+    if (timeLeft <= 0) return
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [timeLeft])
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+  }
+
+  const handleResendOtp = async () => {
+    try {
+      setIsResending(true)
+      await requestPasswordReset({ email })
+      toast.success("Kode OTP baru telah dikirim!")
+      setTimeLeft(45)
+
+      setOtpValues(["", "", "", "", "", ""])
+      setValue("code", "")
+    } catch (error: any) {
+      toast.error(error.message)
+    } finally {
+      setIsResending(false)
+    }
+  }
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^[0-9]*$/.test(value)) return
@@ -56,7 +83,7 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
     newOtp[index] = value
     setOtpValues(newOtp)
 
-    setValue("otp", newOtp.join(""), { shouldValidate: true })
+    setValue("code", newOtp.join(""), { shouldValidate: true })
 
     if (value && index < 5) {
       const nextInput = document.getElementById(`otp-${index + 1}`)
@@ -71,10 +98,14 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
     }
   }
 
-  const handleFormSubmit = async (data: ResetPasswordFormValues) => {
-    console.log("Data Reset:", data)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    onSubmit()
+  const handleFormSubmit = async (data: ForgotPasswordResetFormData) => {
+    try {
+      await resetPassword({ email, ...data })
+
+      onSubmit()
+    } catch (error: any) {
+      toast.error(error.message)
+    }
   }
 
   return (
@@ -96,11 +127,16 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
             <span>Kode dikirim ke {maskedEmail}</span>
           </div>
           <span className="text-text-muted hidden sm:inline">•</span>
+
           <button
             type="button"
-            className="text-primary hover:text-primary-hover font-semibold transition-colors"
+            onClick={handleResendOtp}
+            disabled={timeLeft > 0 || isResending}
+            className={`${
+              timeLeft > 0 ? "text-text-muted cursor-not-allowed" : "text-primary hover:text-primary-hover font-semibold transition-colors"
+            }`}
           >
-            Kirim Ulang
+            {isResending ? "Mengirim..." : "Kirim Ulang"}
           </button>
         </div>
       </CardHeader>
@@ -113,7 +149,10 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
           <div>
             <div className="mb-3 flex items-center justify-between">
               <label className="text-text-muted text-[10px] font-bold tracking-wider uppercase sm:text-[11px]">Kode OTP (6-Digit)</label>
-              <span className="text-primary text-[10px] font-semibold sm:text-[11px]">Kedaluwarsa dlm 00:45</span>
+
+              <span className={`text-[10px] font-semibold sm:text-[11px] ${timeLeft > 0 ? "text-primary" : "text-danger"}`}>
+                {timeLeft > 0 ? `Kedaluwarsa dlm ${formatTime(timeLeft)}` : "Waktu habis"}
+              </span>
             </div>
 
             <div className="flex justify-between gap-1.5 sm:gap-3">
@@ -127,16 +166,17 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
                   value={val}
                   onChange={(e) => handleOtpChange(i, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                  disabled={timeLeft === 0}
                   className={`text-primary placeholder:text-text-muted h-12 w-10 rounded-xl border bg-[#0B0C10] text-center text-xl font-bold transition-all focus:ring-1 focus:outline-none sm:h-16 sm:w-14 sm:text-2xl ${
-                    errors.otp
+                    errors.code || timeLeft === 0
                       ? "border-danger focus:border-danger focus:ring-danger"
                       : "focus:border-primary focus:ring-primary border-white/4"
-                  }`}
+                  } ${timeLeft === 0 ? "opacity-50" : ""}`}
                   placeholder="•"
                 />
               ))}
             </div>
-            {errors.otp && <p className="text-danger mt-2 text-xs font-medium">{errors.otp.message}</p>}
+            {errors.code && <p className="text-danger mt-2 text-xs font-medium">{errors.code.message}</p>}
           </div>
 
           <div className="space-y-4 pt-2">
@@ -145,8 +185,9 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
               type={showPassword ? "text" : "password"}
               placeholder="Masukkan password baru (min. 8 karakter)"
               icon={Lock}
-              error={errors.password?.message}
-              {...register("password")}
+              error={errors.newPassword?.message}
+              {...register("newPassword")}
+              disabled={timeLeft === 0}
               rightElement={
                 <button
                   type="button"
@@ -165,6 +206,7 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
               icon={ShieldCheck}
               error={errors.confirmPassword?.message}
               {...register("confirmPassword")}
+              disabled={timeLeft === 0}
               rightElement={
                 <button
                   type="button"
@@ -182,6 +224,7 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
             variant="primary"
             className="mt-2 w-full py-3.5 text-[14px] font-bold sm:text-[15px]"
             isLoading={isSubmitting}
+            disabled={timeLeft === 0}
           >
             {isSubmitting ? "Menyimpan..." : "Simpan Password"}
           </Button>
