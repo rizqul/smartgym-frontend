@@ -182,7 +182,6 @@ export default function TerminalKehadiran() {
                             <span className={`text-[14px] font-bold ${isDenied ? "text-[#EAA1A1]" : "text-white"}`}>
                               {stream.memberName}
                             </span>
-                            <span className="text-text-muted text-[11px] tracking-wide">{stream.memberId}</span>
                           </div>
                         </div>
                       </TableTD>
