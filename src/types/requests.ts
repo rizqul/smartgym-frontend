@@ -3,3 +3,9 @@ export type MemberSearchQuery = {
   size?: number
   name?: string
 }
+
+export type StaffSearchQuery = {
+  page?: number
+  size?: number
+  name?: string 
+}

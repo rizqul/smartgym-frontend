@@ -2,7 +2,6 @@ import { useState } from "react"
 import { useNavigate } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import toast from "react-hot-toast"
 import { ArrowLeft, User, Mail, Phone, Lock, Eye, EyeOff, Save, Info, ShieldCheck } from "lucide-react"
 
@@ -11,17 +10,12 @@ import { Input } from "../../components/ui/Input"
 import { Button } from "../../components/ui/Button"
 import { Select } from "../../components/ui/Select"
 
-const createStaffSchema = z.object({
-  name: z.string().min(1, "Nama lengkap wajib diisi"),
-  email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
-  phoneNumber: z.string().min(10, "Nomor telepon wajib diisi (min. 10 angka)"),
-  role: z.enum(["ADMIN", "STAFF"]),
-  password: z.string().min(8, "Password minimal 8 karakter")
-})
-
-type CreateStaffFormValues = z.infer<typeof createStaffSchema>
+import { CreateStaffValidation, type CreateStaffData } from "~/validation/staff"
+import { useCreateStaffMutation } from "~/services/staff"
 
 export default function CreateStaff() {
+  const [createStaff, { error }] = useCreateStaffMutation()
+
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
 
@@ -29,8 +23,8 @@ export default function CreateStaff() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<CreateStaffFormValues>({
-    resolver: zodResolver(createStaffSchema),
+  } = useForm<CreateStaffData>({
+    resolver: zodResolver(CreateStaffValidation),
     defaultValues: {
       name: "",
       email: "",
@@ -40,19 +34,23 @@ export default function CreateStaff() {
     }
   })
 
-  const onSubmit = async (data: CreateStaffFormValues) => {
+  const onSubmit = async (data: CreateStaffData) => {
     try {
       console.log("Payload ke Backend (DTO):", data)
 
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // await createStaff(data)
+      // if (error) throw Error
+
+      await createStaff(data).unwrap()
 
       toast.success("Staf baru berhasil didaftarkan!")
 
-      setTimeout(() => {
-        navigate("/dashboard/staffs")
-      }, 1000)
-    } catch (error) {
+      navigate("/dashboard/staffs")
+    } catch (err: any){
+      console.error("Detail Error 422 dari Backend:", err)
+      const errorMessage = err?.data?.message || err?.message || "Gagal mendaftarkan staf. Periksa kembali data Anda."
       toast.error("Gagal mendaftarkan staf. Silakan periksa kembali data Anda.")
+      toast.error(errorMessage)
     }
   }
 
@@ -67,7 +65,7 @@ export default function CreateStaff() {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-white">Tambah Staf Baru</h1>
-          <p className="text-text-secondary mt-1 text-[13px]">Daftarkan akun staf atau admin baru ke dalam sistem SmartGym.</p>
+          <p className="text-text-secondary mt-1 text-[13px]">Daftarkan akun staf atau admin baru ke dalam sistem operasional SmartGym.</p>
         </div>
       </div>
 

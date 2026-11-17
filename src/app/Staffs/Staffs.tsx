@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useNavigate } from "react-router"
 import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, Trash, ShieldCheck } from "lucide-react"
 
@@ -12,11 +13,37 @@ import TableTH from "../../components/ui/TableTH"
 import TableBody from "../../components/ui/TableBody"
 import TableTD from "../../components/ui/TableTD"
 import Badge from "../../components/ui/Badge"
+import LocalDate from "../../components/ui/LocalDate"
 
-import { MOCK_STAFF } from "../../data/mockStaffs"
+import { useGetAllStaffQuery } from "../../services/staff"
+import { getAvatarUrl } from "../../utils/avatar"
 
 export default function Staff() {
   const navigate = useNavigate()
+
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const { data, isLoading, isFetching } = useGetAllStaffQuery({
+    name: searchQuery,
+    page: currentPage,
+    size: 10
+  })
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+    setCurrentPage(1)
+  }
+
+  const handlePageChange = (url: string) => {
+    try {
+      const urlObj = new URL(url)
+      const pageParam = urlObj.searchParams.get("page")
+      if (pageParam) setCurrentPage(Number(pageParam))
+    } catch (e) {
+      console.error("Gagal parse URL", e)
+    }
+  }
 
   return (
     <div className="border-primary/20 flex w-full flex-col gap-6 rounded-2xl p-4">
@@ -26,10 +53,11 @@ export default function Staff() {
           <p className="text-text-muted text-[14px]">Kelola data staf, admin, dan hak akses dalam sistem operasional SmartGym.</p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
           <Button
             variant="secondary"
             leftIcon={<Download className="h-4 w-4" />}
+            className="w-full whitespace-nowrap sm:w-auto"
           >
             Export Data
           </Button>
@@ -37,8 +65,9 @@ export default function Staff() {
             variant="primary"
             leftIcon={<UserPlus className="h-4 w-4" />}
             onClick={() => navigate("/dashboard/staffs/create")}
+            className="w-full whitespace-nowrap sm:w-auto"
           >
-            Tambah Staf Baru
+            Tambah Staff
           </Button>
         </div>
       </div>
@@ -49,14 +78,14 @@ export default function Staff() {
           bottomIcon={<TrendingUp className="text-blue-400" />}
           label="Staf Terdaftar"
           subLabel="Total Keseluruhan"
-          value={124}
+          value={data?.paginate?.totalData || 0}
         />
         <CardStats
           topIcon={<ShieldCheck className="text-green-400" />}
           bottomIcon={<TrendingUp className="text-green-400" />}
           label="Staf Aktif"
           subLabel="Bulan Ini"
-          value={118}
+          value={data?.paginate?.totalData || 0}
         />
       </div>
 
@@ -66,7 +95,9 @@ export default function Staff() {
             <div className="relative w-full sm:w-[320px]">
               <Input
                 type="text"
-                placeholder="Cari nama staf, email, atau ID..."
+                placeholder="Cari nama staf..."
+                value={searchQuery}
+                onChange={handleSearch}
                 className="placeholder:text-text-muted focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
               />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
@@ -80,8 +111,8 @@ export default function Staff() {
                 className="focus:border-primary focus:ring-primary w-full appearance-none rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
               >
                 <option value="">Semua Peran</option>
-                <option value="admin">Admin</option>
-                <option value="staff">Staff</option>
+                <option value="ADMIN">Admin</option>
+                <option value="STAFF">Staff</option>
               </Select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
                 <ChevronDown className="text-text-muted h-4 w-4" />
@@ -90,7 +121,10 @@ export default function Staff() {
           </div>
         </div>
 
-        <Table>
+        <Table
+          meta={data?.paginate}
+          onPageChange={handlePageChange}
+        >
           <TableHead>
             <TableTR isHeader={true}>
               <TableTH>
@@ -114,77 +148,94 @@ export default function Staff() {
             </TableTR>
           </TableHead>
           <TableBody>
-            {MOCK_STAFF.map((staff, index) => (
-              <TableTR
-                key={staff.id}
-                isEven={index % 2 === 0}
-              >
+            {isLoading || isFetching ? (
+              <TableTR>
                 <TableTD>
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-bold ${staff.avatarBg}`}>
-                      {staff.initials}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[14px] font-bold text-white">{staff.name}</span>
-                      <span className="text-primary text-[12px] font-semibold">{staff.id}</span>
-                    </div>
-                  </div>
-                </TableTD>
-
-                <TableTD>
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-white">{staff.email}</span>
-                    <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{staff.phone}</span>
-                  </div>
-                </TableTD>
-
-                <TableTD>
-                  <Badge
-                    variant={staff.role === "ADMIN" ? "orange" : "plain"}
-                    label={staff.role}
-                    icon={<div className={`h-1.5 w-1.5 rounded-full ${staff.role === "ADMIN" ? "bg-orange-400" : "bg-gray-400"}`} />}
-                  />
-                </TableTD>
-
-                <TableTD>
-                  <Badge
-                    variant={staff.accountStatus === "Active" ? "yellow" : "plain"}
-                    label={staff.accountStatus}
-                    icon={
-                      <div className={`h-1.5 w-1.5 rounded-full ${staff.accountStatus === "Active" ? "bg-yellow-400" : "bg-gray-400"}`} />
-                    }
-                  />
-                </TableTD>
-
-                <TableTD>
-                  <span className="text-[13px] text-white">{staff.joinDate}</span>
-                </TableTD>
-
-                <TableTD>
-                  <div className="text-text-muted flex items-center justify-end gap-4">
-                    <button
-                      className="transition-colors hover:text-white"
-                      title="Lihat Detail"
-                    >
-                      <Eye className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => navigate(`/dashboard/staffs/${staff.id.replace("#", "")}/edit`)}
-                      className="transition-colors hover:text-white"
-                      title="Edit Data"
-                    >
-                      <Pencil className="h-5 w-5" />
-                    </button>
-                    <button
-                      className="transition-colors hover:text-white"
-                      title="Riwayat"
-                    >
-                      <Trash className="h-5 w-5" />
-                    </button>
-                  </div>
+                  <div className="text-text-muted flex w-full justify-center py-4">Memuat data staf...</div>
                 </TableTD>
               </TableTR>
-            ))}
+            ) : data?.data?.length === 0 ? (
+              <TableTR>
+                <TableTD>
+                  <div className="text-text-muted flex w-full justify-center py-4">Tidak ada staf ditemukan</div>
+                </TableTD>
+              </TableTR>
+            ) : (
+              data?.data.map((staff, index) => (
+                <TableTR
+                  key={staff.id}
+                  isEven={index % 2 === 0}
+                >
+                  <TableTD>
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={getAvatarUrl(staff.name, staff.profileUrl)}
+                        alt={staff.name}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-[14px] font-bold text-white">{staff.name}</span>
+                        <span className="text-primary text-[12px] font-semibold">#{staff.id.substring(0, 8)}</span>
+                      </div>
+                    </div>
+                  </TableTD>
+
+                  <TableTD>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] text-white">{staff.email}</span>
+                      <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{staff.phoneNumber}</span>
+                    </div>
+                  </TableTD>
+
+                  <TableTD>
+                    <Badge
+                      variant={staff.role === "ADMIN" ? "orange" : "plain"}
+                      label={staff.role}
+                      icon={<div className={`h-1.5 w-1.5 rounded-full ${staff.role === "ADMIN" ? "bg-orange-400" : "bg-gray-400"}`} />}
+                    />
+                  </TableTD>
+
+                  <TableTD>
+                    <Badge
+                      variant="yellow"
+                      label="Active"
+                      icon={<div className="h-1.5 w-1.5 rounded-full bg-yellow-400" />}
+                    />
+                  </TableTD>
+
+                  <TableTD>
+                    <LocalDate
+                      date={staff.createdAt}
+                      className="text-[13px] text-white"
+                    />
+                  </TableTD>
+
+                  <TableTD>
+                    <div className="text-text-muted flex items-center justify-end gap-4">
+                      <button
+                        className="transition-colors hover:text-white"
+                        title="Lihat Detail"
+                      >
+                        <Eye className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => navigate(`/dashboard/staffs/${staff.id}/edit`)}
+                        className="transition-colors hover:text-white"
+                        title="Edit Data"
+                      >
+                        <Pencil className="h-5 w-5" />
+                      </button>
+                      <button
+                        className="transition-colors hover:text-white"
+                        title="Hapus"
+                      >
+                        <Trash className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </TableTD>
+                </TableTR>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

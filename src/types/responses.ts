@@ -34,3 +34,7 @@ export type UserApi = ApiResponse & {
 export type MembersApi = ApiResponsePaginate & {
   data: Array<User>
 }
+
+export type StaffsApi = ApiResponsePaginate & {
+  data: Array<User>
+}
