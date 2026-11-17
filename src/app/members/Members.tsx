@@ -204,7 +204,7 @@ export default function Member() {
                 </TableTD> */}
                 {/* 
                 <TableTD>
-                  {/* <Badge
+                  <Badge
                     variant={member.membershipStatus === "Active Pass" ? "orange" : "plain"}
                     label={member.membershipStatus}
                     icon={
