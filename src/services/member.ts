@@ -18,11 +18,13 @@ export const memberServiceApi = createApi({
   tagTypes: ["Members"],
   endpoints: (build) => ({
     getAllMember: build.query<MembersApi, MemberSearchQuery>({
-      query: ({ name = "", size = 10 }) => ({
+      query: ({ name = "", size = 10, page = 1 }) => ({
         url: API_ADMIN_MEMBERS_LIST,
+        method: "GET",
         params: {
           name,
-          size
+          size,
+          page
         }
       })
     }),
