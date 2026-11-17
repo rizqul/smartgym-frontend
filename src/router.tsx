@@ -22,6 +22,7 @@ import CreateStaff from "./app/staffs/CreateStaff"
 import CreateMembership from "./app/membership/CreateMembership"
 import EditMembership from "./app/membership/EditMembership"
 import Transaction from "./app/transactions/Transaction"
+import TerminalKehadiran from "./app/attendance/TerminalKehadiran"
 
 export const router = createBrowserRouter([
   {
@@ -117,6 +118,10 @@ export const router = createBrowserRouter([
           {
             path: "transactions",
             Component: Transaction
+          },
+          {
+            path: "attendance",
+            Component: TerminalKehadiran
           }
         ]
       }
