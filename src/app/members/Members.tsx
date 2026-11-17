@@ -11,16 +11,40 @@ import TableTR from "../../components/ui/TableTR"
 import TableTH from "../../components/ui/TableTH"
 import TableBody from "../../components/ui/TableBody"
 import TableTD from "../../components/ui/TableTD"
-import Badge from "../../components/ui/Badge"
- 
+// import Badge from "../../components/ui/Badge"
+
 import { useGetAllMemberQuery } from "~/services/member"
 import { useState } from "react"
+import { getAvatarUrl } from "~/utils/avatar"
+import LocalDate from "~/components/ui/LocalDate"
 
 export default function Member() {
   const navigate = useNavigate()
 
-  const [searchName, setSearchName] = useState<string>("")
-  const { data } = useGetAllMemberQuery({ name: searchName })
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [currentPage, setCurrentPage] = useState<number>(1)
+
+  const { data } = useGetAllMemberQuery({
+    name: searchQuery,
+    page: currentPage
+  })
+
+  const handlePageChange = (url: string) => {
+    try {
+      const urlObj = new URL(url)
+      const pageParam = urlObj.searchParams.get("page")
+      if (pageParam) {
+        setCurrentPage(Number(pageParam))
+      }
+    } catch (e) {
+      console.error("Gagal membaca URL paginasi", e)
+    }
+  }
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+    setCurrentPage(1)
+  }
 
   return (
     <div className="border-primary/20 flex w-full flex-col gap-6 rounded-2xl p-4">
@@ -32,10 +56,11 @@ export default function Member() {
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
           <Button
             variant="secondary"
             leftIcon={<Download className="h-4 w-4" />}
+            className="w-full whitespace-nowrap sm:w-auto"
           >
             Export Data
           </Button>
@@ -43,8 +68,9 @@ export default function Member() {
             variant="primary"
             leftIcon={<UserPlus className="h-4 w-4" />}
             onClick={() => navigate("/dashboard/members/create")}
+            className="w-full whitespace-nowrap sm:w-auto"
           >
-            Tambah Member Baru
+            Tambah Member
           </Button>
         </div>
       </div>
@@ -86,9 +112,10 @@ export default function Member() {
             <div className="relative w-full sm:w-[320px]">
               <Input
                 type="text"
-                placeholder="Cari nama member, email, atau ID..."
+                placeholder="Cari nama member"
                 className="placeholder:text-text-muted focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
-                onChange={(e) => setSearchName(e.currentTarget.value)}
+                value={searchQuery}
+                onChange={handleSearch}
               />
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
                 <Search className="text-text-muted h-4 w-4" />
@@ -111,7 +138,10 @@ export default function Member() {
           </div>
         </div>
 
-        <Table>
+        <Table
+          meta={data?.paginate}
+          onPageChange={handlePageChange}
+        >
           <TableHead>
             <TableTR isHeader={true}>
               <TableTH>
@@ -120,15 +150,15 @@ export default function Member() {
               <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>
               </TableTH>
-              <TableTH>
+              {/* <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS AKUN</div>
-              </TableTH>
-              <TableTH>
+              </TableTH> */}
+              {/* <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS MEMBERSHIP</div>
               </TableTH>
               <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">PAKET TERAKHIR</div>
-              </TableTH>
+              </TableTH> */}
               <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">BERGABUNG</div>
               </TableTH>
@@ -146,13 +176,12 @@ export default function Member() {
                 <TableTD>
                   <div className="flex items-center gap-3">
                     <img
-                      src={member.profileUrl ?? ""}
+                      src={getAvatarUrl(member.name, member.profileUrl)}
                       alt={member.name}
                       className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-sm"
                     />
                     <div className="flex flex-col">
                       <span className="text-[14px] font-bold text-white">{member.name}</span>
-                      <span className="text-primary text-[12px] font-semibold">{member.id}</span>
                     </div>
                   </div>
                 </TableTD>
@@ -164,18 +193,18 @@ export default function Member() {
                   </div>
                 </TableTD>
 
-                <TableTD>
-                  {/* <Badge
+                {/* <TableTD>
+                  <Badge
                     variant={member.accountStatus === "Active" ? "yellow" : "plain"}
                     label={member.accountStatus}
                     icon={
                       <div className={`h-1.5 w-1.5 rounded-full ${member.accountStatus === "Active" ? "bg-yellow-400" : "bg-gray-400"}`} />
                     }
-                  /> */}
-                </TableTD>
-
+                  />
+                </TableTD> */}
+                {/* 
                 <TableTD>
-                  {/* <Badge
+                  <Badge
                     variant={member.membershipStatus === "Active Pass" ? "orange" : "plain"}
                     label={member.membershipStatus}
                     icon={
@@ -185,18 +214,21 @@ export default function Member() {
                         <MinusCircle className="h-3.5 w-3.5" />
                       )
                     }
-                  /> */}
-                </TableTD>
+                  />
+                </TableTD> */}
 
-                <TableTD>
+                {/* <TableTD>
                   <div className="flex flex-col">
-                    {/* <span className="text-[13px] font-medium text-white">{member.package}</span>
-                    <span className="text-text-muted text-[12px]">{member.expDate}</span> */}
+                    <span className="text-[13px] font-medium text-white">{member.package}</span>
+                    <span className="text-text-muted text-[12px]">{member.expDate}</span>
                   </div>
-                </TableTD>
+                </TableTD> */}
 
                 <TableTD>
-                  <span className="text-[13px] text-white">{member.createdAt}</span>
+                  <LocalDate
+                    date={member.createdAt}
+                    className="text-[13px] text-white"
+                  />
                 </TableTD>
 
                 <TableTD>

@@ -6,6 +6,7 @@ import useAuth from "~/hooks/useAuth"
 import { Alert } from "../../utils/alert"
 import { navigationMenu } from "../../config/navigation"
 import logoGym from "../../assets/logo.png"
+import { getAvatarUrl } from "~/utils/avatar"
 
 interface SidebarProps {
   isOpen: boolean
@@ -159,7 +160,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div className="flex items-center gap-3 pl-1">
               <div className="relative">
                 <img
-                  src={user?.profileUrl ?? "https://i.pravatar.cc/150?img=11"}
+                  src={getAvatarUrl(user?.name ?? "Guest", user?.profileUrl)}
                   alt={user?.name ?? "User"}
                   className="size-9 rounded-full border border-white/10 object-cover shadow-sm"
                 />
@@ -168,16 +169,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
               <div className="flex flex-col justify-center">
                 <span className="w-28 truncate text-[13px] leading-tight font-bold text-white">{user?.name ?? "Guest User"}</span>
-                <span className="mt-0.5 text-[10px] font-semibold tracking-wider text-white/80">
-                  {user?.role ?? "Administrator"}
-                </span>
+                <span className="mt-0.5 text-[10px] font-semibold tracking-wider text-white/80">{user?.role ?? "Administrator"}</span>
               </div>
             </div>
 
             <button
               title="Keluar"
               onClick={handleLogout}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-amber-50 hover:text-primary"
+              className="hover:text-primary flex h-9 w-9 items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-amber-50"
             >
               <LogOut className="h-5 w-5" />
             </button>
