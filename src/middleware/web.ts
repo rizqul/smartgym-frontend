@@ -24,6 +24,6 @@ export const guestMiddleware: MiddlewareFunction = () => {
   const user = store.getState().user
 
   if (user.status == "authenticated") {
-    throw redirect("/")
+    throw redirect("/dashboard")
   }
 }

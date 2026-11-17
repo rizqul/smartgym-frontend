@@ -1,10 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit"
+
 import userReducer from "./slices/authSlice"
+import { memberServiceApi } from "~/services/member"
 
 export const store = configureStore({
   reducer: {
-    user: userReducer
-  }
+    user: userReducer,
+    [memberServiceApi.reducerPath]: memberServiceApi.reducer
+  },
+  middleware: (getDefault) => getDefault().concat(memberServiceApi.middleware)
 })
 
 export type AppStore = typeof store
