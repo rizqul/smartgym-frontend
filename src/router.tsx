@@ -16,11 +16,12 @@ import Settings from "./app/settings/Settings"
 import ManageMembers from "./app/members/Members"
 import CreateMember from "./app/members/CreateMember"
 import EditMember from "./app/members/EditMember"
-import ManageStaffs from "./app/Staffs/Staffs"
-import EditStaff from "./app/Staffs/EditStaff"
-import CreateStaff from "./app/Staffs/CreateStaff"
+import ManageStaffs from "./app/staffs/Staffs"
+import EditStaff from "./app/staffs/EditStaff"
+import CreateStaff from "./app/staffs/CreateStaff"
 import CreateMembership from "./app/membership/CreateMembership"
 import EditMembership from "./app/membership/EditMembership"
+import Transaction from "./app/transactions/Transaction"
 
 export const router = createBrowserRouter([
   {
@@ -112,6 +113,10 @@ export const router = createBrowserRouter([
                 Component: EditStaff
               }
             ]
+          },
+          {
+            path: "transactions",
+            Component: Transaction
           }
         ]
       }
