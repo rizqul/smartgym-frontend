@@ -17,13 +17,13 @@ export const navigationMenu: NavItem[] = [
     title: "Dashboard",
     path: "/dashboard",
     icon: LayoutDashboard,
-    roles: ["admin", "staff"],
+    roles: ["admin"],
     category: "Overview"
   },
   {
     title: "Manajemen User",
     icon: Users,
-    roles: ["admin"],
+    roles: ["admin", "staff"],
     category: "Management",
     children: [
       {
@@ -49,7 +49,7 @@ export const navigationMenu: NavItem[] = [
     title: "Transaksi",
     path: "/dashboard/transactions",
     icon: ClipboardList,
-    roles: ["admin", "staff"],
+    roles: ["admin"],
     category: "Management"
   },
   {

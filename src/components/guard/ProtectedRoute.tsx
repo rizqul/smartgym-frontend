@@ -24,10 +24,11 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     )
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.map((r) => r.toLowerCase()).includes(user.role.toLowerCase())) {
+    const fallbackPath = user.role.toLowerCase() === "staff" ? "/dashboard/attendance" : "/dashboard"
     return (
       <Navigate
-        to="/dashboard"
+        to={fallbackPath}
         replace
       />
     )
