@@ -4,7 +4,7 @@ import { LogOut, ChevronDown, ChevronRight, X } from "lucide-react"
 
 import useAuth from "~/hooks/useAuth"
 import { Alert } from "../../utils/alert"
-import { navigationMenu } from "../../config/navigation"
+import { navigationMenu, type UserRole } from "../../config/navigation"
 import logoGym from "../../assets/logo.png"
 import { getAvatarUrl } from "~/utils/avatar"
 
@@ -16,6 +16,8 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user, logout } = useAuth()
   const location = useLocation()
+
+  const userRole = user?.role?.toLowerCase() as UserRole
 
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
     "Manajemen User": true
@@ -30,7 +32,31 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     }))
   }
 
-  const groupedMenus = navigationMenu.reduce(
+  const filteredMenus = navigationMenu
+    .filter((item) => userRole && item.roles.includes(userRole))
+    .map((item) => {
+      if (item.children) {
+        const visibleChildren = item.children.filter((child) => userRole && child.roles.includes(userRole))
+
+        if (visibleChildren.length === 1) {
+          return {
+            ...item,
+            title: visibleChildren[0].title,
+            path: visibleChildren[0].path,
+            children: undefined
+          }
+        }
+
+        return {
+          ...item,
+          children: visibleChildren
+        }
+      }
+      return item
+    })
+    .filter((item) => !item.children || item.children.length > 0)
+
+  const groupedMenus = filteredMenus.reduce(
     (acc, item) => {
       const cat = item.category || "Lainnya"
       if (!acc[cat]) acc[cat] = []

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router"
+import { createBrowserRouter, Navigate } from "react-router"
 
 import App, { AppErrorBoundary } from "./App"
 import { authMiddleware, guestMiddleware, userGlobalMiddleware } from "./middleware/web"
@@ -25,6 +25,8 @@ import CreateMembership from "./app/membership/CreateMembership"
 import EditMembership from "./app/membership/EditMembership"
 import Transaction from "./app/transactions/Transaction"
 import TerminalKehadiran from "./app/attendance/TerminalKehadiran"
+import Trainers from "./app/trainers/Trainers"
+import NotFound from "./app/NotFound"
 
 export const router = createBrowserRouter([
   {
@@ -59,8 +61,13 @@ export const router = createBrowserRouter([
         middleware: [authMiddleware],
         children: [
           {
-            index: true,
-            Component: Dashboard
+            element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
+            children: [
+              {
+                index: true,
+                Component: Dashboard
+              }
+            ]
           },
           {
             path: "membership",
@@ -100,10 +107,22 @@ export const router = createBrowserRouter([
               {
                 path: "transactions",
                 Component: Transaction
-              },
+              }
             ]
+          },
+          {
+            path: "trainers",
+            Component: Trainers
           }
         ]
+      },
+      {
+        path: "404",
+        Component: NotFound
+      },
+      {
+        path: "*",
+        element: <Navigate to="/404" replace />
       }
     ]
   }
