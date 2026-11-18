@@ -3,12 +3,11 @@ import { useNavigate } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import toast from "react-hot-toast"
-import { ArrowLeft, User, Mail, Phone, Lock, Eye, EyeOff, Save, Info, ShieldCheck } from "lucide-react"
+import { ArrowLeft, User, Mail, Phone, Lock, Eye, EyeOff, Save, Info } from "lucide-react"
 
 import { Card, CardHeader, CardContent } from "../../components/ui/Card"
 import { Input } from "../../components/ui/Input"
 import { Button } from "../../components/ui/Button"
-import { Select } from "../../components/ui/Select"
 
 import { CreateStaffValidation, type CreateStaffData } from "~/validation/staff"
 import { useCreateStaffMutation } from "~/services/staff"
@@ -29,28 +28,22 @@ export default function CreateStaff() {
       name: "",
       email: "",
       phoneNumber: "",
-      role: "STAFF",
       password: ""
     }
   })
 
   const onSubmit = async (data: CreateStaffData) => {
     try {
-      console.log("Payload ke Backend (DTO):", data)
+      await createStaff(data)
+      if (error) throw Error
 
-      // await createStaff(data)
-      // if (error) throw Error
-
-      await createStaff(data).unwrap()
+      await createStaff(data)
 
       toast.success("Staf baru berhasil didaftarkan!")
 
       navigate("/dashboard/staffs")
-    } catch (err: any){
-      console.error("Detail Error 422 dari Backend:", err)
-      const errorMessage = err?.data?.message || err?.message || "Gagal mendaftarkan staf. Periksa kembali data Anda."
+    } catch {
       toast.error("Gagal mendaftarkan staf. Silakan periksa kembali data Anda.")
-      toast.error(errorMessage)
     }
   }
 
@@ -108,23 +101,6 @@ export default function CreateStaff() {
                 error={errors.phoneNumber?.message}
                 {...register("phoneNumber")}
               />
-
-              <div className="space-y-1">
-                <label className="text-text-secondary text-[13px] font-medium">Peran / Hak Akses</label>
-                <div className="relative">
-                  <Select
-                    {...register("role")}
-                    className="pl-10"
-                  >
-                    <option value="ADMIN">Administrator</option>
-                    <option value="STAFF">Staf / Resepsionis</option>
-                  </Select>
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <ShieldCheck className="text-text-muted h-4 w-4" />
-                  </div>
-                </div>
-                {errors.role && <p className="text-danger mt-1 text-[12px]">{errors.role.message}</p>}
-              </div>
 
               <Input
                 label="Kata Sandi Awal"

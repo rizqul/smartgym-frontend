@@ -3,7 +3,7 @@ import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { StaffSearchQuery } from "~/types/requests"
 import type { ApiResponse, StaffsApi } from "~/types/responses"
 import { axiosClient } from "~/utils/axios"
-import { API_ADMIN_STAFF_CREATE, API_ADMIN_STAFF_LIST } from "~/utils/endpoints"
+import { API_ADMIN_STAFF_CREATE, API_ADMIN_STAFF_LIST, API_ADMIN_STAFF_DELETE } from "~/utils/endpoints"
 
 import type { CreateStaffData } from "~/validation/staff"
 
@@ -34,8 +34,15 @@ export const staffServiceApi = createApi({
         method: "POST"
       }),
       invalidatesTags: ["Staffs"]
+    }),
+    deleteStaff: build.mutation<ApiResponse, string>({
+      query: (id) => ({
+        url: `${API_ADMIN_STAFF_DELETE}/${id}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: ["Staffs"]
     })
   })
 })
 
-export const { useGetAllStaffQuery, useCreateStaffMutation } = staffServiceApi
+export const { useGetAllStaffQuery, useCreateStaffMutation, useDeleteStaffMutation } = staffServiceApi
