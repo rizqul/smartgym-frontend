@@ -1,21 +1,21 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, Trash, ShieldCheck } from "lucide-react"
+import { Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, Trash, ShieldCheck } from "lucide-react"
 
 import { Button } from "../../components/ui/Button"
 import { CardStats } from "../../components/ui/CardStats"
 import { Input } from "../../components/ui/Input"
-import { Select } from "../../components/ui/Select"
 import Table from "../../components/ui/Table"
 import TableHead from "../../components/ui/TableHead"
 import TableTR from "../../components/ui/TableTR"
 import TableTH from "../../components/ui/TableTH"
 import TableBody from "../../components/ui/TableBody"
 import TableTD from "../../components/ui/TableTD"
-import Badge from "../../components/ui/Badge"
 import LocalDate from "../../components/ui/LocalDate"
+import toast from "react-hot-toast"
+import { Alert } from "~/utils/alert"
 
-import { useGetAllStaffQuery } from "../../services/staff"
+import { useGetAllStaffQuery, useDeleteStaffMutation } from "../../services/staff"
 import { getAvatarUrl } from "../../utils/avatar"
 
 export default function Staff() {
@@ -26,9 +26,10 @@ export default function Staff() {
 
   const { data, isLoading, isFetching } = useGetAllStaffQuery({
     name: searchQuery,
-    page: currentPage,
-    size: 10
+    page: currentPage
   })
+
+  const [deleteStaff] = useDeleteStaffMutation()
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
@@ -42,6 +43,24 @@ export default function Staff() {
       if (pageParam) setCurrentPage(Number(pageParam))
     } catch (e) {
       console.error("Gagal parse URL", e)
+    }
+  }
+
+  const handleDelete = async (id: string, name: string) => {
+    const result = await Alert.confirm({
+      title: "Hapus Staf?",
+      text: `Apakah Anda yakin ingin menghapus staf "${name}"? Data yang sudah dihapus tidak dapat dikembalikan.`,
+      confirmText: "Ya, Hapus",
+      isDanger: true
+    })
+
+    if (result.isConfirmed) {
+      try {
+        await deleteStaff(id)
+        toast.success(`Staf ${name} berhasil dihapus!`)
+      } catch {
+        toast.error("Gagal menghapus staf.")
+      }
     }
   }
 
@@ -78,14 +97,14 @@ export default function Staff() {
           bottomIcon={<TrendingUp className="text-blue-400" />}
           label="Staf Terdaftar"
           subLabel="Total Keseluruhan"
-          value={data?.paginate?.totalData || 0}
+          value={0}
         />
         <CardStats
           topIcon={<ShieldCheck className="text-green-400" />}
           bottomIcon={<TrendingUp className="text-green-400" />}
           label="Staf Aktif"
           subLabel="Bulan Ini"
-          value={data?.paginate?.totalData || 0}
+          value={0}
         />
       </div>
 
@@ -105,7 +124,7 @@ export default function Staff() {
               </div>
             </div>
 
-            <div className="relative w-full sm:w-45">
+            {/* <div className="relative w-full sm:w-45">
               <Select
                 defaultValue=""
                 className="focus:border-primary focus:ring-primary w-full appearance-none rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
@@ -117,7 +136,7 @@ export default function Staff() {
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
                 <ChevronDown className="text-text-muted h-4 w-4" />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -132,12 +151,6 @@ export default function Staff() {
               </TableTH>
               <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>
-              </TableTH>
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">PERAN (ROLE)</div>
-              </TableTH>
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS AKUN</div>
               </TableTH>
               <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">BERGABUNG</div>
@@ -175,7 +188,6 @@ export default function Staff() {
                       />
                       <div className="flex flex-col">
                         <span className="text-[14px] font-bold text-white">{staff.name}</span>
-                        <span className="text-primary text-[12px] font-semibold">#{staff.id.substring(0, 8)}</span>
                       </div>
                     </div>
                   </TableTD>
@@ -185,22 +197,6 @@ export default function Staff() {
                       <span className="text-[13px] text-white">{staff.email}</span>
                       <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{staff.phoneNumber}</span>
                     </div>
-                  </TableTD>
-
-                  <TableTD>
-                    <Badge
-                      variant={staff.role === "ADMIN" ? "orange" : "plain"}
-                      label={staff.role}
-                      icon={<div className={`h-1.5 w-1.5 rounded-full ${staff.role === "ADMIN" ? "bg-orange-400" : "bg-gray-400"}`} />}
-                    />
-                  </TableTD>
-
-                  <TableTD>
-                    <Badge
-                      variant="yellow"
-                      label="Active"
-                      icon={<div className="h-1.5 w-1.5 rounded-full bg-yellow-400" />}
-                    />
                   </TableTD>
 
                   <TableTD>
@@ -226,7 +222,8 @@ export default function Staff() {
                         <Pencil className="h-5 w-5" />
                       </button>
                       <button
-                        className="transition-colors hover:text-white"
+                        onClick={() => handleDelete(staff.id, staff.name)}
+                        className="transition-colors hover:text-red-400"
                         title="Hapus"
                       >
                         <Trash className="h-5 w-5" />
