@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router"
-import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, History, Award, MinusCircle } from "lucide-react"
+import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, Award, MinusCircle, Trash } from "lucide-react"
 
 import { Button } from "../../components/ui/Button"
 import { CardStats } from "../../components/ui/CardStats"
@@ -250,7 +250,7 @@ export default function Member() {
                       className="transition-colors hover:text-white"
                       title="Riwayat"
                     >
-                      <History className="h-5 w-5" />
+                      <Trash className="h-5 w-5" />
                     </button>
                   </div>
                 </TableTD>
