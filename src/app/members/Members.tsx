@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useNavigate } from "react-router"
 import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, Award, MinusCircle, Trash } from "lucide-react"
 
@@ -11,12 +12,13 @@ import TableTR from "../../components/ui/TableTR"
 import TableTH from "../../components/ui/TableTH"
 import TableBody from "../../components/ui/TableBody"
 import TableTD from "../../components/ui/TableTD"
-// import Badge from "../../components/ui/Badge"
-
-import { useGetAllMemberQuery } from "~/services/member"
-import { useState } from "react"
-import { getAvatarUrl } from "~/utils/avatar"
 import LocalDate from "~/components/ui/LocalDate"
+// import Badge from "../../components/ui/Badge"
+import toast from "react-hot-toast"
+import { Alert } from "~/utils/alert"
+
+import { useGetAllMemberQuery, useDeleteMemberMutation } from "~/services/member"
+import { getAvatarUrl } from "~/utils/avatar"
 
 export default function Member() {
   const navigate = useNavigate()
@@ -28,6 +30,13 @@ export default function Member() {
     name: searchQuery,
     page: currentPage
   })
+
+  const [deleteMember] = useDeleteMemberMutation()
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
+    setCurrentPage(1)
+  }
 
   const handlePageChange = (url: string) => {
     try {
@@ -41,9 +50,22 @@ export default function Member() {
     }
   }
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
+  const handleDelete = async (id: string, name: string) => {
+    const result = await Alert.confirm({
+      title: "Hapus Member?",
+      text: `Apakah Anda yakin ingin menghapus Member "${name}"? Data yang sudah dihapus tidak dapat dikembalikan.`,
+      confirmText: "Ya, Hapus",
+      isDanger: true
+    })
+
+    if (result.isConfirmed) {
+      try {
+        await deleteMember(id).unwrap()
+        toast.success(`Member ${name} berhasil dihapus!`)
+      }catch (error: any) {
+        toast.error(error?.data?.message || "Gagal menghapus member.")
+      }
+    }
   }
 
   return (
@@ -247,8 +269,9 @@ export default function Member() {
                       <Pencil className="h-5 w-5" />
                     </button>
                     <button
+                      onClick={() => handleDelete(member.id, member.name)}
                       className="transition-colors hover:text-white"
-                      title="Riwayat"
+                      title="Hapus"
                     >
                       <Trash className="h-5 w-5" />
                     </button>
