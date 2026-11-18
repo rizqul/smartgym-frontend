@@ -21,6 +21,7 @@ export default function Login() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting }
   } = useForm<LoginFormData>({
     resolver: zodResolver(LoginValidation),
@@ -30,6 +31,14 @@ export default function Login() {
       remember: false
     }
   })
+
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      await login(data)
+    } catch (error: any) {
+      setError("email", { type: "server", message: error.message })
+    }
+  }
 
   return (
     <Card className="mx-auto w-full max-w-105 shadow-2xl">
@@ -47,7 +56,7 @@ export default function Login() {
 
       <CardContent className="pt-6">
         <form
-          onSubmit={handleSubmit(login)}
+          onSubmit={handleSubmit(onSubmit)}
           className="space-y-5"
         >
           <Input

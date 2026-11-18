@@ -3,6 +3,8 @@ import { createBrowserRouter } from "react-router"
 import App, { AppErrorBoundary } from "./App"
 import { authMiddleware, guestMiddleware, userGlobalMiddleware } from "./middleware/web"
 
+import ProtectedRoute from "./components/guard/ProtectedRoute"
+
 import AuthLayout from "./layouts/AuthLayout"
 import AppLayout from "./layouts/AppLayout"
 
@@ -63,18 +65,9 @@ export const router = createBrowserRouter([
           {
             path: "membership",
             children: [
-              {
-                index: true,
-                Component: MembershipPage
-              },
-              {
-                path: "create",
-                Component: CreateMembership
-              },
-              {
-                path: ":id/edit",
-                Component: EditMembership
-              }
+              { index: true, Component: MembershipPage },
+              { path: "create", Component: CreateMembership },
+              { path: ":id/edit", Component: EditMembership }
             ]
           },
           {
@@ -84,44 +77,31 @@ export const router = createBrowserRouter([
           {
             path: "members",
             children: [
-              {
-                index: true,
-                Component: ManageMembers
-              },
-              {
-                path: "create",
-                Component: CreateMember
-              },
-              {
-                path: ":id/edit",
-                Component: EditMember
-              }
+              { index: true, Component: ManageMembers },
+              { path: "create", Component: CreateMember },
+              { path: ":id/edit", Component: EditMember }
             ]
-          },
-          {
-            path: "staffs",
-            children: [
-              {
-                index: true,
-                Component: ManageStaffs
-              },
-              {
-                path: "create",
-                Component: CreateStaff
-              },
-              {
-                path: ":id/edit",
-                Component: EditStaff
-              }
-            ]
-          },
-          {
-            path: "transactions",
-            Component: Transaction
           },
           {
             path: "attendance",
             Component: TerminalKehadiran
+          },
+          {
+            element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
+            children: [
+              {
+                path: "staffs",
+                children: [
+                  { index: true, Component: ManageStaffs },
+                  { path: "create", Component: CreateStaff },
+                  { path: ":id/edit", Component: EditStaff }
+                ]
+              },
+              {
+                path: "transactions",
+                Component: Transaction
+              },
+            ]
           }
         ]
       }
