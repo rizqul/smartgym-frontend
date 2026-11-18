@@ -1,65 +1,57 @@
 import { useNavigate } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import toast from "react-hot-toast"
-import { ArrowLeft, Tag, Package, CreditCard, Clock, Activity, Save, Info } from "lucide-react"
+import { ArrowLeft, Tag, Package, CreditCard, Clock, Info, Save } from "lucide-react"
 
 import { Card, CardHeader, CardContent } from "../../components/ui/Card"
 import { Input } from "../../components/ui/Input"
 import { Button } from "../../components/ui/Button"
 import { Select } from "../../components/ui/Select"
 
-const createPackageSchema = z.object({
-  tier: z.string().min(1, "Kategori Tier wajib diisi (Cth: ANNUAL VIP)"),
-  name: z.string().min(1, "Nama paket wajib diisi"),
-  description: z.string().min(1, "Deskripsi paket wajib diisi"),
-  price: z.string().min(1, "Harga wajib diisi"),
-  period: z.string().min(1, "Periode wajib diisi (Cth: / bulan)"),
-  activeInfo: z.string().min(1, "Info masa aktif wajib diisi"),
-  features: z.string().min(1, "Minimal satu fasilitas wajib diisi"),
-  status: z.enum(["Active", "Inactive"])
-})
-
-type CreatePackageFormValues = z.infer<typeof createPackageSchema>
+import { CreateMembershipPackageValidation, type CreateMembershipPackageData } from "~/validation/membership"
+import { useCreateMembershipPackageMutation } from "~/services/membershipPackage"
 
 export default function CreateMembership() {
+  const [createPackage, { error }] = useCreateMembershipPackageMutation()
   const navigate = useNavigate()
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
-  } = useForm<CreatePackageFormValues>({
-    resolver: zodResolver(createPackageSchema),
+  } = useForm({
+    resolver: zodResolver(CreateMembershipPackageValidation),
     defaultValues: {
-      tier: "",
+      type: "MONTHLY",
       name: "",
       description: "",
-      price: "",
-      period: "",
-      activeInfo: "",
-      features: "",
-      status: "Active"
+      price: 0,
+      duration: 30,
+      features: ""
     }
   })
 
-  const onSubmit = async (data: CreatePackageFormValues) => {
+  const onSubmit = async (data: CreateMembershipPackageData) => {
     try {
+      const featuresArray = data.features.split("\n").filter((f) => f.trim() !== "")
+      const combinedDescription = `${data.description} \n\nFasilitas:\n- ${featuresArray.join("\n- ")}`
+
       const payload = {
-        ...data,
-        features: data.features.split("\n").filter((f) => f.trim() !== "")
+        type: data.type,
+        name: data.name,
+        description: combinedDescription,
+        duration: data.duration,
+        price: data.price
       }
-      console.log("Payload ke Backend (DTO):", payload)
 
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await createPackage(payload as any)
+      if (error) throw Error
+
       toast.success("Paket membership baru berhasil ditambahkan!")
-
-      setTimeout(() => {
-        navigate("/dashboard/membership")
-      }, 1000)
-    } catch (error) {
-      toast.error("Gagal menambahkan paket. Silakan coba lagi.")
+      navigate("/dashboard/membership")
+    } catch {
+      toast.error("Gagal menambahkan paket. Silakan periksa kembali form Anda.")
     }
   }
 
@@ -90,16 +82,27 @@ export default function CreateMembership() {
             className="space-y-6"
           >
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <Input
-                label="Kategori Tier"
-                placeholder="Cth: DAILY PASS, ANNUAL VIP"
-                icon={Tag}
-                error={errors.tier?.message}
-                {...register("tier")}
-              />
+              <div className="space-y-1">
+                <label className="text-text-secondary text-[13px] font-medium">Kategori Tipe (Wajib)</label>
+                <div className="relative">
+                  <Select
+                    {...register("type")}
+                    className="pl-10"
+                  >
+                    <option value="WEEKLY">Mingguan</option>
+                    <option value="MONTHLY">Bulanan</option>
+                    <option value="YEARLY">Tahunan</option>
+                  </Select>
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Tag className="text-text-muted h-4 w-4" />
+                  </div>
+                </div>
+                {errors.type && <p className="mt-1 text-[12px] text-red-500">{errors.type.message}</p>}
+              </div>
+
               <Input
                 label="Nama Paket"
-                placeholder="Cth: Annual Pro VIP"
+                placeholder="Cth: Year Pro VIP"
                 icon={Package}
                 error={errors.name?.message}
                 {...register("name")}
@@ -116,58 +119,36 @@ export default function CreateMembership() {
               </div>
 
               <Input
-                label="Harga (Rp)"
+                label="Harga Paket (Rp)"
                 type="number"
                 placeholder="Cth: 4200000"
                 icon={CreditCard}
                 error={errors.price?.message}
-                {...register("price")}
-              />
-              <Input
-                label="Format Periode"
-                placeholder="Cth: / hari, / bulan, / tahun"
-                icon={Clock}
-                error={errors.period?.message}
-                {...register("period")}
+                {...register("price", { valueAsNumber: true })}
               />
 
-              <div className="sm:col-span-2">
-                <Input
-                  label="Teks Masa Aktif"
-                  placeholder="Cth: Masa aktif: 365 Hari (Setara Rp 350.000/bln)"
-                  icon={Clock}
-                  error={errors.activeInfo?.message}
-                  {...register("activeInfo")}
-                />
-              </div>
+              <Input
+                label="Durasi Aktif (Total Hari)"
+                type="number"
+                placeholder="Cth: 365"
+                icon={Clock}
+                error={errors.duration?.message}
+                {...register("duration", { valueAsNumber: true })}
+              />
 
               <div className="space-y-1 sm:col-span-2">
                 <label className="text-text-secondary text-[13px] font-medium">Fasilitas Termasuk (Pisahkan dengan Enter)</label>
                 <textarea
                   {...register("features")}
                   rows={5}
-                  className={`focus:border-primary focus:ring-primary placeholder:text-text-muted w-full rounded-xl border bg-[#0B0C10] p-3 text-[13px] text-white transition-all focus:ring-1 focus:outline-none ${
-                    errors.features ? "border-danger focus:ring-danger" : "border-white/10"
+                  className={`placeholder:text-text-muted w-full rounded-xl border bg-[#0B0C10] p-3 text-[13px] text-white transition-all focus:ring-1 focus:outline-none ${
+                    errors.features
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      : "focus:border-primary focus:ring-primary border-white/10"
                   }`}
                   placeholder="Akses Gym 24 jam penuh&#10;Free Locker & Shower room&#10;Diskon 10% SmartGym Cafe"
                 />
-                {errors.features && <p className="text-danger mt-1 text-[12px]">{errors.features.message}</p>}
-              </div>
-
-              <div className="space-y-1 sm:col-span-2 md:col-span-1">
-                <label className="text-text-secondary text-[13px] font-medium">Status Publikasi</label>
-                <div className="relative">
-                  <Select
-                    {...register("status")}
-                    className="pl-10"
-                  >
-                    <option value="Active">Aktif (Ditampilkan)</option>
-                    <option value="Inactive">Tidak Aktif (Disembunyikan)</option>
-                  </Select>
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Activity className="text-text-muted h-4 w-4" />
-                  </div>
-                </div>
+                {errors.features && <p className="mt-1 text-[12px] text-red-500">{errors.features.message}</p>}
               </div>
             </div>
 
@@ -183,7 +164,7 @@ export default function CreateMembership() {
               <Button
                 type="submit"
                 variant="primary"
-                isLoading={isSubmitting}
+                disabled={isSubmitting}
                 leftIcon={!isSubmitting && <Save className="h-4 w-4" />}
                 className="font-bold"
               >

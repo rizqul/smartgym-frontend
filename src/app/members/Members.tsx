@@ -222,7 +222,7 @@ export default function Member() {
                     <span className="text-[13px] font-medium text-white">{member.package}</span>
                     <span className="text-text-muted text-[12px]">{member.expDate}</span>
                   </div>
-                </TableTD> */}
+                </TableTD>  */}
 
                 <TableTD>
                   <LocalDate
