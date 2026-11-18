@@ -14,20 +14,28 @@ export default function useAuth() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.user.data)
+  const ALLOWED_PORTAL_ROLES = ["admin", "staff"]
 
   const login = async (data: LoginFormData) => {
     try {
-      const payload = {
-        email: data.email,
-        password: data.password
-      }
-
+      const payload = { email: data.email, password: data.password }
       const { data: response } = await axiosClient.post<LoginApi>(API_AUTH_LOGIN, payload)
+
+      const userRole = response.data.role?.toLowerCase()
+
+      if (!userRole || !ALLOWED_PORTAL_ROLES.includes(userRole)) {
+        await axiosClient.post(API_AUTH_LOGOUT).catch(() => {})
+        throw new Error("Akses ditolak! Portal ini hanya untuk Admin dan Staff.")
+      }
 
       dispatch(storeUser(response.data))
       localStorage.setItem("isAuthenticated", "true")
 
-      navigate("/dashboard")
+      if (userRole === "staff") {
+        navigate("/dashboard/attendance")
+      } else {
+        navigate("/dashboard")
+      }
     } catch (error) {
       if (isAxiosError(error)) {
         const backendMessage = error.response?.data?.message
@@ -38,7 +46,7 @@ export default function useAuth() {
 
         throw new Error(error.response?.data?.message || "Gagal melakukan login.")
       }
-      throw new Error("Terjadi kesalahan sistem yang tidak terduga.")
+      throw new Error("Masukan Email dan Kata Sandi yang sesuai")
     }
   }
 
