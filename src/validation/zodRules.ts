@@ -42,4 +42,23 @@ const avatar = z
   )
   .optional()
 
-export { avatar, code, email, name, password, passwordConfirmation, remember }
+const packageName = z
+  .string()
+  .trim()
+  .min(1, "Nama paket tidak boleh kosong.")
+  .max(100, "Nama paket maksimal 100 karakter.")
+
+const description = z
+  .string()
+  .trim()
+  .min(1, "Deskripsi wajib diisi.")
+
+const price = z.coerce
+  .number()
+  .min(0, "Harga wajib diisi dan tidak boleh negatif.")
+
+const duration = z.coerce
+  .number()
+  .min(1, "Durasi masa aktif wajib diisi (minimal 1 hari).")
+
+export { avatar, code, email, name, password, passwordConfirmation, remember, packageName, description, price, duration }
