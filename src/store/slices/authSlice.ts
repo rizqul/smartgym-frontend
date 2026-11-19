@@ -1,10 +1,9 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit"
+import type { User, UserApi } from "~/types/user"
 
 import { axiosClient } from "~/utils/axios"
 import { API_USER } from "~/utils/endpoints"
 
-import type { UserApi } from "~/types/responses"
-import type { User } from "~/types/schema"
 
 export const fetchUser = createAsyncThunk("user/fetchUser", async (_, { rejectWithValue }) => {
   try {

@@ -4,15 +4,23 @@ import userReducer from "./slices/authSlice"
 import { memberServiceApi } from "~/services/member"
 import { staffServiceApi } from "~/services/staff"
 import { membershipPackageServiceApi } from "~/services/membershipPackage"
+import { userServiceApi } from "~/services/user"
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     [memberServiceApi.reducerPath]: memberServiceApi.reducer,
     [staffServiceApi.reducerPath]: staffServiceApi.reducer,
-    [membershipPackageServiceApi.reducerPath]: membershipPackageServiceApi.reducer
+    [membershipPackageServiceApi.reducerPath]: membershipPackageServiceApi.reducer,
+    [userServiceApi.reducerPath]: userServiceApi.reducer
   },
-  middleware: (getDefault) => getDefault().concat(memberServiceApi.middleware, staffServiceApi.middleware, membershipPackageServiceApi.middleware)
+  middleware: (getDefault) =>
+    getDefault().concat(
+      memberServiceApi.middleware,
+      staffServiceApi.middleware,
+      membershipPackageServiceApi.middleware,
+      userServiceApi.middleware
+    )
 })
 
 export type AppStore = typeof store

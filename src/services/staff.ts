@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { StaffSearchQuery } from "~/types/requests"
-import type { ApiResponse, StaffsApi } from "~/types/responses"
+import type { ApiResponse } from "~/types/common"
+import type { StaffsApi, StaffSearchQuery } from "~/types/user"
 import { axiosClient } from "~/utils/axios"
 import { API_ADMIN_STAFF_CREATE, API_ADMIN_STAFF_LIST, API_ADMIN_STAFF_DELETE } from "~/utils/endpoints"
 
