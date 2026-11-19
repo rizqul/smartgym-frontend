@@ -5,6 +5,7 @@ import { memberServiceApi } from "~/services/member"
 import { staffServiceApi } from "~/services/staff"
 import { membershipPackageServiceApi } from "~/services/membershipPackage"
 import { userServiceApi } from "~/services/user"
+import { trainerServiceApi } from "~/services/trainer"
 
 export const store = configureStore({
   reducer: {
@@ -12,14 +13,16 @@ export const store = configureStore({
     [memberServiceApi.reducerPath]: memberServiceApi.reducer,
     [staffServiceApi.reducerPath]: staffServiceApi.reducer,
     [membershipPackageServiceApi.reducerPath]: membershipPackageServiceApi.reducer,
-    [userServiceApi.reducerPath]: userServiceApi.reducer
+    [userServiceApi.reducerPath]: userServiceApi.reducer,
+    [trainerServiceApi.reducerPath]: trainerServiceApi.reducer,
   },
   middleware: (getDefault) =>
     getDefault().concat(
       memberServiceApi.middleware,
       staffServiceApi.middleware,
       membershipPackageServiceApi.middleware,
-      userServiceApi.middleware
+      userServiceApi.middleware,
+      trainerServiceApi.middleware
     )
 })
 

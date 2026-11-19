@@ -12,6 +12,8 @@ import type { LoginApi } from "~/types/user"
 import { userServiceApi } from "~/services/user"
 import { memberServiceApi } from "~/services/member"
 import { staffServiceApi } from "~/services/staff"
+import { trainerServiceApi } from "~/services/trainer"
+import { membershipPackageServiceApi } from "~/services/membershipPackage"
 
 export default function useAuth() {
   const navigate = useNavigate()
@@ -105,6 +107,8 @@ export default function useAuth() {
       dispatch(userServiceApi.util.resetApiState())
       dispatch(memberServiceApi.util.resetApiState())
       dispatch(staffServiceApi.util.resetApiState())
+      dispatch(membershipPackageServiceApi.util.resetApiState())
+      dispatch(trainerServiceApi.util.resetApiState())
       localStorage.setItem("isAuthenticated", "false")
       navigate("/")
     }

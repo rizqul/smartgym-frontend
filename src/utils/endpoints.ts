@@ -11,12 +11,17 @@ export const API_USER_UPDATE_PASSWORD = "/user/password"
 export const API_ADMIN_MEMBERS_LIST = "/admin/dashboard/members"
 export const API_ADMIN_STAFF_LIST = "/admin/dashboard/staff"
 export const API_ADMIN_MEMBERSHIP_PACKAGE_LIST = "/admin/dashboard/memberships/packages"
+export const API_ADMIN_TRAINERS_LIST = "/admin/dashboard/trainers"
 
 export const API_ADMIN_MEMBERS_CREATE = "/admin/dashboard/members/create"
 export const API_ADMIN_MEMBERS_OTP = "/admin/dashboard/members/otp"
 export const API_ADMIN_STAFF_CREATE = "/admin/dashboard/staff/create"
 export const API_ADMIN_MEMBERSHIP_PACKAGE_CREATE = "/admin/dashboard/memberships/packages/create"
+export const API_ADMIN_TRAINERS_CREATE = "/admin/dashboard/trainers/create"
 
 export const API_ADMIN_STAFF_DELETE = "/admin/dashboard/staff"
 export const API_ADMIN_MEMBERS_DELETE = "/admin/dashboard/members"
 export const API_ADMIN_MEMBERSHIP_PACKAGE_DELETE = "/admin/dashboard/memberships/packages/delete"
+
+export const API_ADMIN_TRAINERS_SLOT_LIST = (id: string) => `/admin/dashboard/trainers/slot/${id}`
+export const API_ADMIN_TRAINERS_SLOT_CREATE = (id: string) => `/admin/dashboard/trainers/slot/create/${id}`
