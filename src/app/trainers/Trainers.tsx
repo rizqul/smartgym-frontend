@@ -67,28 +67,28 @@ export default function Trainers() {
         />
       </div>
 
-      <div className="grid w-full grid-cols-2 gap-1.5 rounded-xl border border-white/5 bg-[#1C1F26] p-1.5 sm:inline-flex sm:w-fit sm:items-center">
-        <button
+      <div className="grid w-full grid-cols-2 gap-1.5 rounded-xl border border-white/5 bg-[#1C1F26] p-3 sm:inline-flex sm:items-center justify-center">
+        <Button
           type="button"
           onClick={() => setActiveTab("trainers")}
-          className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-bold transition-all sm:px-4 sm:py-2 sm:text-[13px] ${
+          className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-bold transition-all sm:px-41 sm:py-2 sm:text-[13px] ${
             activeTab === "trainers" ? "bg-primary text-black shadow-md" : "text-text-muted hover:bg-white/5 hover:text-white"
           }`}
         >
           <Users className="h-4 w-4 shrink-0" />
           <span className="truncate">Daftar Trainer &amp; Komisi</span>
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
           onClick={() => setActiveTab("schedule")}
-          className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-bold transition-all sm:px-4 sm:py-2 sm:text-[13px] ${
+          className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-bold transition-all sm:px-41 sm:py-2 sm:text-[13px] ${
             activeTab === "schedule" ? "bg-primary text-black shadow-md" : "text-text-muted hover:bg-white/5 hover:text-white"
           }`}
         >
           <Calendar className="h-4 w-4 shrink-0" />
           <span className="truncate">Kalender &amp; Jadwal Sesi</span>
-        </button>
+        </Button>
       </div>
 
       {activeTab === "trainers" ? <TrainerListTab onViewSchedule={() => setActiveTab("schedule")} /> : <TrainerScheduleTab />}
