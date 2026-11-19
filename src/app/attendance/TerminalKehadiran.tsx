@@ -1,14 +1,14 @@
 import { Clock, Users, CheckCircle2, XCircle, ScanLine, QrCode } from "lucide-react"
 
 import { Card } from "~/components/ui/Card"
-import Table from "~/components/ui/Table"
-import TableHead from "~/components/ui/TableHead"
-import TableTR from "~/components/ui/TableTR"
-import TableTH from "~/components/ui/TableTH"
-import TableBody from "~/components/ui/TableBody"
-import TableTD from "~/components/ui/TableTD"
+import Table from "~/components/ui/table/Table"
+import TableHead from "~/components/ui/table/TableHead"
+import TableTR from "~/components/ui/table/TableTR"
+import TableTH from "~/components/ui/table/TableTH"
+import TableBody from "~/components/ui/table/TableBody"
+import TableTD from "~/components/ui/table/TableTD"
 import { mockGateStreams } from "~/data/mockGateStreams"
-import LiveTokenGenerator from "~/components/ui/LiveTokenGenerator"
+import LiveTokenGenerator from "~/components/attendance/LiveTokenGenerator"
 
 export default function TerminalKehadiran() {
   return (

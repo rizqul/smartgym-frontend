@@ -351,9 +351,13 @@ export default function Settings() {
             />
             <Input
               label="No. WhatsApp"
+              inputMode="numeric"
               type="tel"
               error={errors.phone?.message}
               {...register("phone")}
+              onInput={(e) => {
+                e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "")
+              }}
               rightElement={
                 <button
                   type="button"

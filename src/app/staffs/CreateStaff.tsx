@@ -95,11 +95,15 @@ export default function CreateStaff() {
 
               <Input
                 label="Nomor WhatsApp / Telepon"
+                inputMode="numeric"
                 type="tel"
                 placeholder="081234567890"
                 icon={Phone}
                 error={errors.phoneNumber?.message}
                 {...register("phoneNumber")}
+                onInput={(e) => {
+                  e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "")
+                }}
               />
 
               <Input
