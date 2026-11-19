@@ -17,11 +17,14 @@ export const userServiceApi = createApi({
       }),
       providesTags: ["User"]
     }),
-    updateProfile: build.mutation<ApiResponse, UpdateProfileRequest>({
+    updateProfile: build.mutation<ApiResponse, UpdateProfileRequest | FormData>({
       query: (data) => ({
         url: API_USER_UPDATE_PROFILE,
         data,
-        method: "PUT"
+        method: "PUT",
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
       }),
       invalidatesTags: ["User"]
     }),
