@@ -25,7 +25,8 @@ export const staffServiceApi = createApi({
           size,
           page
         }
-      })
+      }),
+      providesTags: ["Staffs"]
     }),
     createStaff: build.mutation<ApiResponse, CreateStaffData>({
       query: (data) => ({
