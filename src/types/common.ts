@@ -1,5 +1,3 @@
-import type { User } from "./schema"
-
 export type PaginationMeta = {
   paginate: {
     size: number
@@ -22,19 +20,3 @@ export type ApiResponse = {
 }
 
 export type ApiResponsePaginate = ApiResponse & PaginationMeta
-
-export type LoginApi = ApiResponse & {
-  data: User
-}
-
-export type UserApi = ApiResponse & {
-  data: User
-}
-
-export type MembersApi = ApiResponsePaginate & {
-  data: Array<User>
-}
-
-export type StaffsApi = ApiResponsePaginate & {
-  data: Array<User>
-}

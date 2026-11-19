@@ -1,7 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { type ReactNode } from "react"
-
-import type { PaginationMeta } from "~/types/responses"
+import type { PaginationMeta } from "~/types/common"
 
 export interface TableProps {
   children: ReactNode
@@ -15,7 +14,7 @@ export default function Table({ children, meta, onPageChange }: TableProps) {
 
   return (
     <div className="mx-auto w-full">
-      <div className="w-full overflow-x-auto rounded-md">
+      <div className="custom-scrollbar w-full overflow-x-auto rounded-md">
         <table className="w-full min-w-max">{children}</table>
       </div>
 

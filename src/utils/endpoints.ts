@@ -5,6 +5,8 @@ export const API_VERIFY_OTP = "/auth/reset-verify"
 export const API_RESET_PASSWORD = "/auth/reset-password"
 
 export const API_USER = "/user"
+export const API_USER_UPDATE_PROFILE = "/user/profile"
+export const API_USER_UPDATE_PASSWORD = "/user/password"
 
 export const API_ADMIN_MEMBERS_LIST = "/admin/dashboard/members"
 export const API_ADMIN_STAFF_LIST = "/admin/dashboard/staff"
