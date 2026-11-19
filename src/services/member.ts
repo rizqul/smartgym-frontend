@@ -26,7 +26,8 @@ export const memberServiceApi = createApi({
           size,
           page
         }
-      })
+      }),
+      providesTags: ["Members"]
     }),
     createMember: build.mutation<ApiResponse, CreateMemberData>({
       query: (data) => ({
