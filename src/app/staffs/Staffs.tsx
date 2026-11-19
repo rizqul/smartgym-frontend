@@ -17,19 +17,44 @@ import { Alert } from "~/utils/alert"
 
 import { useGetAllStaffQuery, useDeleteStaffMutation } from "../../services/staff"
 import { getAvatarUrl } from "../../utils/avatar"
+import { PageSkeleton } from "~/components/ui/PageSkeleton"
+import { useDebounce } from "~/hooks/useDebounce"
 
 export default function Staff() {
   const navigate = useNavigate()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const [deleteStaff] = useDeleteStaffMutation()
+  const debouncedSearch = useDebounce(searchQuery, 500)
 
-  const { data, isLoading, isFetching } = useGetAllStaffQuery({
-    name: searchQuery,
+  const { data, isLoading, isFetching, isError, refetch } = useGetAllStaffQuery({
+    name: debouncedSearch,
     page: currentPage
   })
 
-  const [deleteStaff] = useDeleteStaffMutation()
+  if (isLoading) {
+    return (
+      <PageSkeleton
+        statCount={2}
+        contentVariant="list"
+      />
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+        <p className="text-sm text-red-400">Gagal memuat data staf.</p>
+        <Button
+          variant="secondary"
+          onClick={() => refetch()}
+        >
+          Coba Lagi
+        </Button>
+      </div>
+    )
+  }
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
@@ -140,103 +165,103 @@ export default function Staff() {
           </div>
         </div>
 
-        <Table
-          meta={data?.paginate}
-          onPageChange={handlePageChange}
-        >
-          <TableHead>
-            <TableTR isHeader={true}>
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">DETAIL STAF</div>
-              </TableTH>
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>
-              </TableTH>
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">BERGABUNG</div>
-              </TableTH>
-              <TableTH>
-                <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
-              </TableTH>
-            </TableTR>
-          </TableHead>
-          <TableBody>
-            {isLoading || isFetching ? (
-              <TableTR>
-                <TableTD>
-                  <div className="text-text-muted flex w-full justify-center py-4">Memuat data staf...</div>
-                </TableTD>
+        <div className={`transition-opacity duration-200 ${isFetching ? "pointer-events-none opacity-60" : "opacity-100"}`}>
+          <Table
+            meta={data?.paginate}
+            onPageChange={handlePageChange}
+          >
+            <TableHead>
+              <TableTR isHeader={true}>
+                <TableTH>
+                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">DETAIL STAF</div>
+                </TableTH>
+                <TableTH>
+                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>
+                </TableTH>
+                <TableTH>
+                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">BERGABUNG</div>
+                </TableTH>
+                <TableTH>
+                  <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
+                </TableTH>
               </TableTR>
-            ) : data?.data?.length === 0 ? (
-              <TableTR>
-                <TableTD>
-                  <div className="text-text-muted flex w-full justify-center py-4">Tidak ada staf ditemukan</div>
-                </TableTD>
-              </TableTR>
-            ) : (
-              data?.data.map((staff, index) => (
-                <TableTR
-                  key={staff.id}
-                  isEven={index % 2 === 0}
-                >
-                  <TableTD>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={getAvatarUrl(staff.name, staff.profileUrl)}
-                        alt={staff.name}
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-[14px] font-bold text-white">{staff.name}</span>
-                      </div>
-                    </div>
-                  </TableTD>
+            </TableHead>
 
-                  <TableTD>
-                    <div className="flex flex-col">
-                      <span className="text-[13px] text-white">{staff.email}</span>
-                      <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{staff.phoneNumber}</span>
-                    </div>
-                  </TableTD>
-
-                  <TableTD>
-                    <LocalDate
-                      date={staff.createdAt}
-                      className="text-[13px] text-white"
-                    />
-                  </TableTD>
-
-                  <TableTD>
-                    <div className="text-text-muted flex items-center justify-end gap-4">
-                      <button
-                        className="transition-colors hover:text-white"
-                        title="Lihat Detail"
-                      >
-                        <Eye className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => navigate(`/dashboard/staffs/${staff.id}/edit`)}
-                        className="transition-colors hover:text-white"
-                        title="Edit Data"
-                      >
-                        <Pencil className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(staff.id, staff.name)}
-                        className="transition-colors hover:text-red-400"
-                        title="Hapus"
-                      >
-                        <Trash className="h-5 w-5" />
-                      </button>
+            <TableBody>
+              {!data?.data?.length ? (
+                <TableTR>
+                  <TableTD colSpan={4}>
+                    <div className="text-text-muted flex min-h-130 w-full flex-col items-center justify-center gap-2 text-center text-sm">
+                      <Users className="h-8 w-8 opacity-30" />
+                      <span>Tidak ada staf ditemukan</span>
                     </div>
                   </TableTD>
                 </TableTR>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                data.data.map((staff, index) => (
+                  <TableTR
+                    key={staff.id}
+                    isEven={index % 2 === 0}
+                  >
+                    <TableTD>
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={getAvatarUrl(staff.name, staff.profileUrl)}
+                          alt={staff.name}
+                          className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-sm"
+                        />
+                        <span className="text-[14px] font-bold text-white">{staff.name}</span>
+                      </div>
+                    </TableTD>
+
+                    <TableTD>
+                      <div className="flex flex-col">
+                        <span className="text-[13px] text-white">{staff.email}</span>
+                        <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{staff.phoneNumber}</span>
+                      </div>
+                    </TableTD>
+
+                    <TableTD>
+                      <LocalDate
+                        date={staff.createdAt}
+                        className="text-[13px] text-white"
+                      />
+                    </TableTD>
+
+                    <TableTD>
+                      <div className="text-text-muted flex items-center justify-end gap-4">
+                        <button
+                          type="button"
+                          className="transition-colors hover:text-white"
+                          title="Lihat Detail"
+                        >
+                          <Eye className="h-5 w-5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/dashboard/staffs/${staff.id}/edit`)}
+                          className="transition-colors hover:text-white"
+                          title="Edit Data"
+                        >
+                          <Pencil className="h-5 w-5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(staff.id, staff.name)}
+                          className="transition-colors hover:text-red-400"
+                          title="Hapus"
+                        >
+                          <Trash className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </TableTD>
+                  </TableTR>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   )
 }
-

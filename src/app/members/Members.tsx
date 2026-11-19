@@ -19,19 +19,44 @@ import { Alert } from "~/utils/alert"
 
 import { useGetAllMemberQuery, useDeleteMemberMutation } from "~/services/member"
 import { getAvatarUrl } from "~/utils/avatar"
+import { PageSkeleton } from "~/components/ui/PageSkeleton"
+import { useDebounce } from "~/hooks/useDebounce"
 
 export default function Member() {
   const navigate = useNavigate()
 
-  const [searchQuery, setSearchQuery] = useState<string>("")
-  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [deleteMember] = useDeleteMemberMutation()
+  const debouncedSearch = useDebounce(searchQuery, 500)
 
-  const { data } = useGetAllMemberQuery({
-    name: searchQuery,
+  const { data, isLoading, isFetching, isError, refetch } = useGetAllMemberQuery({
+    name: debouncedSearch,
     page: currentPage
   })
 
-  const [deleteMember] = useDeleteMemberMutation()
+  if (isLoading) {
+    return (
+      <PageSkeleton
+        statCount={4}
+        contentVariant="list"
+      />
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+        <p className="text-sm text-red-400">Gagal memuat data member.</p>
+        <Button
+          variant="secondary"
+          onClick={() => refetch()}
+        >
+          Coba Lagi
+        </Button>
+      </div>
+    )
+  }
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value)
@@ -62,7 +87,7 @@ export default function Member() {
       try {
         await deleteMember(id).unwrap()
         toast.success(`Member ${name} berhasil dihapus!`)
-      }catch (error: any) {
+      } catch (error: any) {
         toast.error(error?.data?.message || "Gagal menghapus member.")
       }
     }
@@ -160,62 +185,73 @@ export default function Member() {
           </div>
         </div>
 
-        <Table
-          meta={data?.paginate}
-          onPageChange={handlePageChange}
-        >
-          <TableHead>
-            <TableTR isHeader={true}>
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">MEMBER DETAILS</div>
-              </TableTH>
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>
-              </TableTH>
-              {/* <TableTH>
+        <div className={`transition-opacity duration-200 ${isFetching ? "pointer-events-none opacity-60" : "opacity-100"}`}>
+          <Table
+            meta={data?.paginate}
+            onPageChange={handlePageChange}
+          >
+            <TableHead>
+              <TableTR isHeader={true}>
+                <TableTH>
+                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">MEMBER DETAILS</div>
+                </TableTH>
+                <TableTH>
+                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>
+                </TableTH>
+                {/* <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS AKUN</div>
               </TableTH> */}
-              {/* <TableTH>
+                {/* <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS MEMBERSHIP</div>
               </TableTH>
               <TableTH>
                 <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">PAKET TERAKHIR</div>
               </TableTH> */}
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">BERGABUNG</div>
-              </TableTH>
-              <TableTH>
-                <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
-              </TableTH>
-            </TableTR>
-          </TableHead>
-          <TableBody>
-            {data?.data.map((member, index) => (
-              <TableTR
-                key={member.id}
-                isEven={index % 2 === 0}
-              >
-                <TableTD>
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={getAvatarUrl(member.name, member.profileUrl)}
-                      alt={member.name}
-                      className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-sm"
-                    />
-                    <div className="flex flex-col">
-                      <span className="text-[14px] font-bold text-white">{member.name}</span>
+                <TableTH>
+                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">BERGABUNG</div>
+                </TableTH>
+                <TableTH>
+                  <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
+                </TableTH>
+              </TableTR>
+            </TableHead>
+            <TableBody>
+              {!data?.data?.length ? (
+                <TableTR>
+                  <TableTD colSpan={4}>
+                    <div className="text-text-muted flex min-h-130 w-full flex-col items-center justify-center gap-2 text-center text-sm">
+                      <Users className="h-8 w-8 opacity-30" />
+                      <span>Tidak ada member ditemukan</span>
                     </div>
-                  </div>
-                </TableTD>
+                  </TableTD>
+                </TableTR>
+              ) : (
+                data.data.map((member, index) => (
+                  <TableTR
+                    key={member.id}
+                    isEven={index % 2 === 0}
+                  >
+                    <TableTD>
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={getAvatarUrl(member.name, member.profileUrl)}
+                          alt={member.name}
+                          className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-sm"
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-[14px] font-bold text-white">{member.name}</span>
+                        </div>
+                      </div>
+                    </TableTD>
 
-                <TableTD>
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-white">{member.email}</span>
-                    <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{member.phoneNumber}</span>
-                  </div>
-                </TableTD>
+                    <TableTD>
+                      <div className="flex flex-col">
+                        <span className="text-[13px] text-white">{member.email}</span>
+                        <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{member.phoneNumber}</span>
+                      </div>
+                    </TableTD>
 
-                {/* <TableTD>
+                    {/* <TableTD>
                   <Badge
                     variant={member.accountStatus === "Active" ? "yellow" : "plain"}
                     label={member.accountStatus}
@@ -224,7 +260,7 @@ export default function Member() {
                     }
                   />
                 </TableTD> */}
-                {/* 
+                    {/* 
                 <TableTD>
                   <Badge
                     variant={member.membershipStatus === "Active Pass" ? "orange" : "plain"}
@@ -239,48 +275,50 @@ export default function Member() {
                   />
                 </TableTD> */}
 
-                {/* <TableTD>
+                    {/* <TableTD>
                   <div className="flex flex-col">
                     <span className="text-[13px] font-medium text-white">{member.package}</span>
                     <span className="text-text-muted text-[12px]">{member.expDate}</span>
                   </div>
                 </TableTD>  */}
 
-                <TableTD>
-                  <LocalDate
-                    date={member.createdAt}
-                    className="text-[13px] text-white"
-                  />
-                </TableTD>
+                    <TableTD>
+                      <LocalDate
+                        date={member.createdAt}
+                        className="text-[13px] text-white"
+                      />
+                    </TableTD>
 
-                <TableTD>
-                  <div className="text-text-muted flex items-center justify-end gap-4">
-                    <button
-                      className="transition-colors hover:text-white"
-                      title="Lihat Detail"
-                    >
-                      <Eye className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => navigate(`/dashboard/members/${member.id.replace("#", "")}/edit`)}
-                      className="transition-colors hover:text-white"
-                      title="Edit Data"
-                    >
-                      <Pencil className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(member.id, member.name)}
-                      className="transition-colors hover:text-white"
-                      title="Hapus"
-                    >
-                      <Trash className="h-5 w-5" />
-                    </button>
-                  </div>
-                </TableTD>
-              </TableTR>
-            ))}
-          </TableBody>
-        </Table>
+                    <TableTD>
+                      <div className="text-text-muted flex items-center justify-end gap-4">
+                        <button
+                          className="transition-colors hover:text-white"
+                          title="Lihat Detail"
+                        >
+                          <Eye className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => navigate(`/dashboard/members/${member.id.replace("#", "")}/edit`)}
+                          className="transition-colors hover:text-white"
+                          title="Edit Data"
+                        >
+                          <Pencil className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(member.id, member.name)}
+                          className="transition-colors hover:text-white"
+                          title="Hapus"
+                        >
+                          <Trash className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </TableTD>
+                  </TableTR>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   )

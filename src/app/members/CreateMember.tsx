@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -10,13 +10,15 @@ import { Input } from "../../components/ui/Input"
 import { Button } from "../../components/ui/Button"
 import { CreateMemberValidation, type CreateMemberData } from "~/validation/member"
 import { memberService, useCreateMemberMutation } from "~/services/member"
+import { useLoader } from "~/hooks/useLoader"
 
 export default function CreateMember() {
   const [createMember, { error }] = useCreateMemberMutation()
 
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
-  const [isSendingOtp, setIsSendingOtp] = useState(false)
+  const { isLoading: isSendingOtp, executeWithLoader } = useLoader()
+  const [countdown, setCountdown] = useState(0)
 
   const {
     register,
@@ -34,8 +36,25 @@ export default function CreateMember() {
       password: ""
     }
   })
+  useEffect(() => {
+    if (countdown <= 0) return
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [countdown])
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+  }
 
   const handleSendOtp = async () => {
+    if (countdown > 0) return
+
     const isContactValid = await trigger(["email"])
 
     if (!isContactValid) {
@@ -43,17 +62,13 @@ export default function CreateMember() {
       return
     }
 
-    const { email } = getValues()
-
     try {
-      setIsSendingOtp(true)
-      await memberService.getOtpCode({ email })
+      await executeWithLoader(() => memberService.getOtpCode({ email: getValues("email") }))
 
+      setCountdown(300)
       toast.success("Kode OTP berhasil dikirim ke Email member!")
     } catch {
       toast.error("Gagal mengirim OTP. Silakan coba lagi.")
-    } finally {
-      setIsSendingOtp(false)
     }
   }
 
@@ -143,6 +158,8 @@ export default function CreateMember() {
                   >
                     {isSendingOtp ? (
                       "Mengirim..."
+                    ) : countdown > 0 ? (
+                      `Kirim ulang (${formatTime(countdown)})`
                     ) : (
                       <>
                         <Send className="h-3 w-3" />
