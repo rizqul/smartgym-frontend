@@ -27,6 +27,7 @@ import Transaction from "./app/transactions/Transaction"
 import TerminalKehadiran from "./app/attendance/TerminalKehadiran"
 import Trainers from "./app/trainers/Trainers"
 import NotFound from "./app/NotFound"
+import CreateTrainer from "./app/trainers/CreateTrainer"
 
 export const router = createBrowserRouter([
   {
@@ -112,7 +113,21 @@ export const router = createBrowserRouter([
           },
           {
             path: "trainers",
-            Component: Trainers
+            children: [
+              {
+                index: true,
+                Component: Trainers
+              },
+              {
+                element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
+                children: [
+                  {
+                    path: "create",
+                    Component: CreateTrainer
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
