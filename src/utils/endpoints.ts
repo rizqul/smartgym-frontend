@@ -16,4 +16,5 @@ export const API_ADMIN_STAFF_CREATE = "/admin/dashboard/staff/create"
 export const API_ADMIN_MEMBERSHIP_PACKAGE_CREATE = "/admin/dashboard/memberships/packages/create"
 
 export const API_ADMIN_STAFF_DELETE = "/admin/dashboard/staff"
+export const API_ADMIN_MEMBERS_DELETE = "/admin/dashboard/members"
 export const API_ADMIN_MEMBERSHIP_PACKAGE_DELETE = "/admin/dashboard/memberships/packages/delete"

@@ -3,7 +3,7 @@ import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { MemberSearchQuery } from "~/types/requests"
 import type { ApiResponse, MembersApi } from "~/types/responses"
 import { axiosClient } from "~/utils/axios"
-import { API_ADMIN_MEMBERS_CREATE, API_ADMIN_MEMBERS_LIST, API_ADMIN_MEMBERS_OTP } from "~/utils/endpoints"
+import { API_ADMIN_MEMBERS_CREATE, API_ADMIN_MEMBERS_DELETE, API_ADMIN_MEMBERS_LIST, API_ADMIN_MEMBERS_OTP } from "~/utils/endpoints"
 
 import type { CreateMemberData } from "~/validation/member"
 
@@ -26,7 +26,8 @@ export const memberServiceApi = createApi({
           size,
           page
         }
-      })
+      }),
+      providesTags: ["Members"]
     }),
     createMember: build.mutation<ApiResponse, CreateMemberData>({
       query: (data) => ({
@@ -35,8 +36,15 @@ export const memberServiceApi = createApi({
         method: "POST"
       }),
       invalidatesTags: ["Members"]
+    }),
+    deleteMember: build.mutation<ApiResponse, string>({
+      query:(id) => ({
+        url: `${API_ADMIN_MEMBERS_DELETE}/${id}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: ["Members"]
     })
   })
 })
 
-export const { useGetAllMemberQuery, useCreateMemberMutation } = memberServiceApi
+export const { useGetAllMemberQuery, useCreateMemberMutation, useDeleteMemberMutation } = memberServiceApi
