@@ -12,6 +12,12 @@ const email = z
   .min(1, "Alamat email wajib diisi.")
   .email("Format email tidak valid (contoh: user@gymmick.my.id).")
 
+const phoneNumber = z
+  .string()
+  .trim()
+  .min(10, "Nomor telepon minimal 10 digit.")
+  .max(15, "Nomor telepon maksimal 15 digit.")
+
 const password = z
   .string()
   .min(8, "Kata sandi minimal harus 8 karakter.")
@@ -61,4 +67,4 @@ const duration = z.coerce
   .number()
   .min(1, "Durasi masa aktif wajib diisi (minimal 1 hari).")
 
-export { avatar, code, email, name, password, passwordConfirmation, remember, packageName, description, price, duration }
+export { avatar, code, email, name, password, passwordConfirmation, phoneNumber, remember, packageName, description, price, duration }

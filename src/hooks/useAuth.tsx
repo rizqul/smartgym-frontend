@@ -8,7 +8,10 @@ import { axiosClient } from "~/utils/axios"
 import { API_AUTH_LOGIN, API_AUTH_LOGOUT, API_FORGOT_PASSWORD, API_RESET_PASSWORD, API_VERIFY_OTP } from "~/utils/endpoints"
 
 import type { LoginFormData, ForgotPasswordEmailFormData, ForgotPasswordResetFormData } from "~/validation/authentication"
-import type { LoginApi } from "~/types/responses"
+import type { LoginApi } from "~/types/user"
+import { userServiceApi } from "~/services/user"
+import { memberServiceApi } from "~/services/member"
+import { staffServiceApi } from "~/services/staff"
 
 export default function useAuth() {
   const navigate = useNavigate()
@@ -32,7 +35,7 @@ export default function useAuth() {
       localStorage.setItem("isAuthenticated", "true")
 
       if (userRole === "staff") {
-        navigate("/dashboard/attendance")
+        navigate("/dashboard/members")
       } else {
         navigate("/dashboard")
       }
@@ -99,6 +102,9 @@ export default function useAuth() {
       console.warn("Sesi di server mungkin sudah berakhir atau terjadi masalah jaringan.")
     } finally {
       dispatch(clearUser())
+      dispatch(userServiceApi.util.resetApiState())
+      dispatch(memberServiceApi.util.resetApiState())
+      dispatch(staffServiceApi.util.resetApiState())
       localStorage.setItem("isAuthenticated", "false")
       navigate("/")
     }
