@@ -18,6 +18,10 @@ export const profileSchema = z
     message: "Kata sandi baru wajib diisi.",
     path: ["newPassword"]
   })
+  .refine((data) => !(data.currentPassword && data.newPassword && data.currentPassword === data.newPassword), {
+    message: "Kata sandi baru tidak boleh sama dengan kata sandi saat ini.",
+    path: ["newPassword"]
+  })
   .refine((data) => !(data.newPassword && data.newPassword !== data.confirmPassword), {
     message: "Konfirmasi kata sandi tidak cocok.",
     path: ["confirmPassword"]
