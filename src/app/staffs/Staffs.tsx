@@ -234,7 +234,7 @@ export default function Staff() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => navigate(`/dashboard/staffs/${staff.id}/edit`)}
+                          onClick={() => navigate(`/dashboard/staffs/${staff.id}/edit`, { state: { staff } })}
                           className="transition-colors hover:text-white"
                           title="Edit Data"
                         >

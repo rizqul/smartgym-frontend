@@ -37,7 +37,17 @@ export type UpdatePasswordRequest = {
   newPassword: string
 }
 
+export interface UpdateStaffPayload {
+  id: string
+  name?: string
+  email?: string
+  phoneNumber?: string
+  password?: string
+  profileUrl?: string
+}
+
 export type LoginApi = ApiResponse & { data: User }
 export type UserApi = ApiResponse & { data: User }
 export type MembersApi = ApiResponsePaginate & { data: Array<User> }
 export type StaffsApi = ApiResponsePaginate & { data: Array<User> }
+

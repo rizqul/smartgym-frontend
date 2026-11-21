@@ -24,5 +24,7 @@ export const API_ADMIN_STAFF_DELETE = "/admin/dashboard/staff"
 export const API_ADMIN_MEMBERS_DELETE = "/admin/dashboard/members"
 export const API_ADMIN_MEMBERSHIP_PACKAGE_DELETE = "/admin/dashboard/memberships/packages/delete"
 
+export const API_ADMIN_STAFF_UPDATE = (id: string) => `/admin/dashboard/staff/update/${id}`
+
 export const API_ADMIN_TRAINERS_SLOT_LIST = (id: string) => `/admin/dashboard/trainers/slot/${id}`
 export const API_ADMIN_TRAINERS_SLOT_CREATE = (id: string) => `/admin/dashboard/trainers/slot/create/${id}`

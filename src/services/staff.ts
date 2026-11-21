@@ -1,9 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { ApiResponse } from "~/types/common"
-import type { StaffsApi, StaffSearchQuery } from "~/types/user"
+import type { StaffsApi, StaffSearchQuery, UpdateStaffPayload } from "~/types/user"
 import { axiosClient } from "~/utils/axios"
-import { API_ADMIN_STAFF_CREATE, API_ADMIN_STAFF_LIST, API_ADMIN_STAFF_DELETE } from "~/utils/endpoints"
+import { API_ADMIN_STAFF_CREATE, API_ADMIN_STAFF_LIST, API_ADMIN_STAFF_DELETE, API_ADMIN_STAFF_UPDATE } from "~/utils/endpoints"
 
 import type { CreateStaffData } from "~/validation/staff"
 
@@ -36,6 +36,14 @@ export const staffServiceApi = createApi({
       }),
       invalidatesTags: ["Staffs"]
     }),
+    updateStaff: build.mutation<ApiResponse, UpdateStaffPayload>({
+      query: ({ id, ...body }) => ({
+        url: API_ADMIN_STAFF_UPDATE(id),
+        method: "PUT",
+        data: body
+      }),
+      invalidatesTags: ["Staffs"]
+    }),
     deleteStaff: build.mutation<ApiResponse, string>({
       query: (id) => ({
         url: `${API_ADMIN_STAFF_DELETE}/${id}`,
@@ -46,4 +54,4 @@ export const staffServiceApi = createApi({
   })
 })
 
-export const { useGetAllStaffQuery, useCreateStaffMutation, useDeleteStaffMutation } = staffServiceApi
+export const { useGetAllStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useDeleteStaffMutation } = staffServiceApi

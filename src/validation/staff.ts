@@ -8,4 +8,18 @@ export const CreateStaffValidation = z.object({
   password: rules.password
 })
 
+export const UpdateStaffValidation = z.object({
+  name: rules.name,
+  email: rules.email,
+  phoneNumber: rules.phoneNumber,
+  password: z
+    .string()
+    .trim()
+    .refine((val) => val === "" || val.length >= 8, {
+      message: "Kata sandi minimal harus 8 karakter."
+    })
+    .optional()
+})
+
 export type CreateStaffData = z.infer<typeof CreateStaffValidation>
+export type UpdateStaffData = z.infer<typeof UpdateStaffValidation>
