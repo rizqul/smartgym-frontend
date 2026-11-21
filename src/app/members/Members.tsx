@@ -13,9 +13,9 @@ import toast from "react-hot-toast"
 import { Alert } from "~/utils/alert"
 
 import { useGetAllMemberQuery, useDeleteMemberMutation } from "~/services/member"
-import { getAvatarUrl } from "~/utils/avatar"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { useDebounce } from "~/hooks/useDebounce"
+import Avatar from "~/components/ui/Avatar"
 
 export default function Member() {
   const navigate = useNavigate()
@@ -228,10 +228,10 @@ export default function Member() {
                   >
                     <TableTD>
                       <div className="flex items-center gap-3">
-                        <img
-                          src={getAvatarUrl(member.name, member.profileUrl)}
-                          alt={member.name}
-                          className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-sm"
+                        <Avatar
+                          src={member.profileUrl}
+                          name={member.name}
+                          className="h-10 w-10 rounded-xl shadow-sm"
                         />
                         <div className="flex flex-col">
                           <span className="text-[14px] font-bold text-white">{member.name}</span>

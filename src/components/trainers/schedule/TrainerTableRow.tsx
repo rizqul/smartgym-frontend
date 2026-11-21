@@ -2,9 +2,9 @@ import { Award, Calendar, Pencil } from "lucide-react"
 
 import TableTR from "~/components/ui/table/TableTR"
 import TableTD from "~/components/ui/table/TableTD"
-import { getAvatarUrl } from "~/utils/avatar"
 import { formatRupiah } from "~/utils/format"
 import type { TrainerItem } from "~/types/trainer"
+import Avatar from "~/components/ui/Avatar"
 
 interface TrainerTableRowProps {
   trainer: TrainerItem
@@ -21,10 +21,10 @@ export default function TrainerTableRow({ trainer, isEven, isAdmin, onViewSchedu
     <TableTR isEven={isEven}>
       <TableTD>
         <div className="flex items-center gap-3">
-          <img
-            src={getAvatarUrl(trainer.name, trainer.profileUrl)}
-            alt={trainer.name}
-            className="h-10 w-10 shrink-0 rounded-xl border border-white/10 object-cover shadow-sm"
+          <Avatar
+            src={trainer.profileUrl}
+            name={trainer.name}
+            className="h-10 w-10 rounded-xl shadow-sm"
           />
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-[14px] font-bold text-white">{trainer.name}</span>

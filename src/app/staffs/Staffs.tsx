@@ -11,9 +11,9 @@ import toast from "react-hot-toast"
 import { Alert } from "~/utils/alert"
 
 import { useGetAllStaffQuery, useDeleteStaffMutation } from "../../services/staff"
-import { getAvatarUrl } from "../../utils/avatar"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { useDebounce } from "~/hooks/useDebounce"
+import Avatar from "~/components/ui/Avatar"
 
 export default function Staff() {
   const navigate = useNavigate()
@@ -200,10 +200,10 @@ export default function Staff() {
                   >
                     <TableTD>
                       <div className="flex items-center gap-3">
-                        <img
-                          src={getAvatarUrl(staff.name, staff.profileUrl)}
-                          alt={staff.name}
-                          className="h-10 w-10 rounded-full border border-white/10 object-cover shadow-sm"
+                        <Avatar
+                          src={staff.profileUrl}
+                          name={staff.name}
+                          className="h-10 w-10 rounded-xl shadow-sm"
                         />
                         <span className="text-[14px] font-bold text-white">{staff.name}</span>
                       </div>
