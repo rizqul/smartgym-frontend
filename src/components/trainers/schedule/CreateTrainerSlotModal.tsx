@@ -1,23 +1,13 @@
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { X, CalendarCheck, CheckCircle2, Info } from "lucide-react"
+import { X, CalendarCheck, CheckCircle2, Info, ChevronDown, UserCheck, Clock } from "lucide-react"
 
 import { Input } from "~/components/ui/Input"
 import { Select } from "~/components/ui/Select"
 import { Button } from "~/components/ui/Button"
-import type { TrainerItem } from "~/types/trainer"
-
+import type { CreateTrainerSlotRequest, TrainerItem } from "~/types/trainer"
 import { CreateTrainerSlotValidation, type CreateTrainerSlotData } from "~/validation/trainer"
-
-export interface CreateSlotFormPayload {
-  trainerId: string
-  slotDate: string 
-  startTime: string 
-  endTime: string 
-  quota: string
-  description: string
-}
 
 interface CreateTrainerSlotModalProps {
   isOpen: boolean
@@ -26,7 +16,15 @@ interface CreateTrainerSlotModalProps {
   defaultTrainerId?: string
   defaultDate: string
   isSubmitting?: boolean
-  onSubmit: (payload: CreateSlotFormPayload) => void
+  onSubmit: (payload: CreateTrainerSlotRequest) => void
+}
+
+const formatDuration = (minutes: number) => {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (h > 0 && m > 0) return `${h} jam ${m} menit`
+  if (h > 0) return `${h} jam`
+  return `${m} menit`
 }
 
 export default function CreateTrainerSlotModal({
@@ -42,6 +40,7 @@ export default function CreateTrainerSlotModal({
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors }
   } = useForm<CreateTrainerSlotData>({
     resolver: zodResolver(CreateTrainerSlotValidation),
@@ -50,14 +49,24 @@ export default function CreateTrainerSlotModal({
       slotDate: defaultDate,
       startHour: "16:00",
       endHour: "17:00",
-      quota: "1",
       description: ""
     }
   })
 
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        trainerId: defaultTrainerId || trainers[0]?.id || "",
+        slotDate: defaultDate,
+        startHour: "06:00",
+        endHour: "07:20",
+        description: ""
+      })
+    }
+  }, [isOpen, defaultTrainerId, defaultDate, trainers, reset])
+
   const startHour = watch("startHour")
   const endHour = watch("endHour")
-  const quota = watch("quota")
 
   const durationMinutes = useMemo(() => {
     if (!startHour || !endHour) return 0
@@ -74,29 +83,38 @@ export default function CreateTrainerSlotModal({
       slotDate: data.slotDate,
       startTime: `${data.slotDate}T${data.startHour}`,
       endTime: `${data.slotDate}T${data.endHour}`,
-      quota: data.quota,
-      description: data.description
+      description: data.description ?? ""
     })
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-[#16181D] shadow-2xl">
-        <div className="flex items-start justify-between border-b border-white/5 px-6 py-5">
+    <div
+      className="fixed inset-0 top-16 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm lg:left-64"
+      onClick={() => !isSubmitting && onClose()}
+    >
+      <div
+        className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#16181D] shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-white/5 px-6 py-5">
           <div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2.5">
               <h3 className="text-lg font-bold text-white">Tambah Slot Jadwal Trainer</h3>
               <span className="bg-primary/15 text-primary rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
-                TRAINER_SLOTS
+                Trainer Slot
               </span>
             </div>
-            <p className="text-text-muted mt-1 text-xs">Buka ketersediaan sesi baru untuk Personal Trainer di sistem reservasi member.</p>
+            <p className="text-text-muted mt-1 text-xs leading-relaxed">
+              Buka ketersediaan sesi baru untuk Personal Trainer di sistem reservasi member.
+            </p>
           </div>
+
           <button
             type="button"
             onClick={onClose}
+            disabled={isSubmitting}
             aria-label="Tutup modal"
-            className="text-text-muted cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-white/5 hover:text-white"
+            className="text-text-muted cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X className="h-5 w-5" />
           </button>
@@ -104,109 +122,108 @@ export default function CreateTrainerSlotModal({
 
         <form
           onSubmit={handleSubmit(handleValidSubmit)}
-          className="flex flex-col gap-5 p-6"
+          className="flex flex-1 flex-col overflow-y-auto"
         >
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-white">
-              Pilih Trainer / Instruktur <span className="text-primary">*</span>
-            </label>
+          <div className="flex flex-col gap-5 p-6">
             <Select
+              label="Pilih Trainer / Instruktur"
+              icon={UserCheck}
+              rightElement={<ChevronDown className="text-text-muted pointer-events-none h-4 w-4" />}
               error={errors.trainerId?.message}
               {...register("trainerId")}
-              className="focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] px-4 py-2.5 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
             >
-              <option value="">-- Pilih Trainer --</option>
+              <option
+                value=""
+                className="bg-[#16181D]"
+              >
+                -- Pilih Trainer --
+              </option>
               {trainers.map((t) => (
                 <option
                   key={t.id}
                   value={t.id}
+                  className="bg-[#16181D]"
                 >
                   {t.name} — {t.specialization.replace(/_/g, " ")}
                 </option>
               ))}
             </Select>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input
-              label="Tanggal Slot *"
-              type="date"
-              error={errors.slotDate?.message}
-              {...register("slotDate")}
-              className="w-full rounded-xl border border-white/10 bg-[#0B0C10] px-3.5 py-2.5 text-[13px] text-white"
-            />
-
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-white">
-                  Rentang Jam Sesi <span className="text-primary">*</span>
-                </label>
-                {durationMinutes > 0 && <span className="text-[11px] font-semibold text-sky-400">Durasi: {durationMinutes} Menit</span>}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
                 <Input
+                  label="Tanggal Slot"
+                  type="date"
+                  error={errors.slotDate?.message}
+                  {...register("slotDate")}
+                  className="scheme-dark"
+                />
+                <Input
+                  label="Jam Mulai"
                   type="time"
                   error={errors.startHour?.message}
                   {...register("startHour")}
-                  className="w-full rounded-xl border border-white/10 bg-[#0B0C10] px-3 py-2.5 text-[13px] text-white"
+                  className="scheme-dark"
                 />
                 <Input
+                  label="Jam Selesai"
                   type="time"
                   error={errors.endHour?.message}
                   {...register("endHour")}
-                  className="w-full rounded-xl border border-white/10 bg-[#0B0C10] px-3 py-2.5 text-[13px] text-white"
+                  className="scheme-dark"
                 />
+              </div>
+
+              <div className="flex items-center justify-between rounded-xl border border-white/5 bg-[#0B0C10]/60 px-3.5 py-2 text-xs">
+                <span className="text-text-muted inline-flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" />
+                  Estimasi Durasi Sesi
+                </span>
+                {durationMinutes > 0 ? (
+                  <span className="font-semibold text-sky-400">{formatDuration(durationMinutes)}</span>
+                ) : (
+                  <span className="font-semibold text-red-400">Rentang jam tidak valid</span>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-text-muted block text-[11px] font-bold tracking-wider uppercase">Catatan / Deskripsi Sesi</label>
+                <span className="text-text-muted text-[11px]">Opsional</span>
+              </div>
+              <textarea
+                rows={3}
+                {...register("description")}
+                placeholder="Contoh: Sesi spesialisasi squat form correction & hip mobility. Siapkan lifting belt member..."
+                className={`placeholder:text-text-muted focus:border-primary focus:ring-primary block w-full resize-none rounded-xl border bg-[#0B0C10] p-3.5 text-[14px] text-white transition-all focus:ring-1 focus:outline-none ${
+                  errors.description ? "border-danger focus:border-danger focus:ring-danger" : "border-white/4"
+                }`}
+              />
+              {errors.description && <p className="text-danger mt-1 text-xs font-medium">{errors.description.message}</p>}
+            </div>
+
+            <div className="flex items-start gap-3 rounded-xl border border-amber-500/15 bg-amber-500/5 p-3.5">
+              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
+                <CalendarCheck className="h-4 w-4" />
+              </div>
+              <div className="text-xs leading-relaxed">
+                <p className="font-bold text-amber-200">Validasi Jadwal Otomatis</p>
+                <p className="text-text-muted mt-0.5">
+                  Sistem akan mengecek bentrok jadwal trainer pada{" "}
+                  <strong className="text-white">
+                    {startHour || "--:--"} – {endHour || "--:--"} WIB
+                  </strong>{" "}
+                  untuk sesi privat (<strong className="text-white">1 member</strong>).
+                </p>
               </div>
             </div>
           </div>
 
-          <Input
-            label="Kuota Member *"
-            type="text"
-            inputMode="numeric"
-            placeholder="Contoh: 5"
-            error={errors.quota?.message}
-            {...register("quota")}
-            onInput={(e) => {
-              e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "")
-            }}
-          />
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-white">
-              Catatan / Deskripsi Sesi <span className="text-primary">*</span>
-            </label>
-            <textarea
-              rows={3}
-              {...register("description")}
-              placeholder="Contoh: Sesi spesialisasi squat form correction & hip mobility. Siapkan lifting belt member..."
-              className={`placeholder:text-text-muted focus:border-primary focus:ring-primary w-full resize-none rounded-xl border bg-[#0B0C10] p-3.5 text-[13px] text-white transition-all focus:ring-1 focus:outline-none ${
-                errors.description ? "border-red-500/60" : "border-white/10"
-              }`}
-            />
-            {errors.description && <p className="text-xs text-red-400">{errors.description.message}</p>}
-          </div>
-
-          <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/3 p-3.5">
-            <div className="bg-primary/15 text-primary mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
-              <CalendarCheck className="h-4 w-4" />
-            </div>
-            <div className="text-xs leading-relaxed">
-              <p className="font-bold text-amber-200">Validasi Jadwal Otomatis</p>
-              <p className="text-text-muted mt-0.5">
-                Sistem akan mengecek bentrok jadwal untuk trainer terpilih pada rentang{" "}
-                <strong className="text-white">
-                  {startHour || "--:--"} - {endHour || "--:--"} WIB
-                </strong>{" "}
-                dengan kapasitas <strong className="text-white">{quota || 0} member</strong>.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col-reverse items-center justify-between gap-3 border-t border-white/5 pt-4 sm:flex-row">
+          <div className="flex flex-col-reverse items-center justify-between gap-3 border-t border-white/5 bg-[#121419] px-6 py-4 sm:flex-row">
             <span className="text-text-muted inline-flex items-center gap-1.5 text-[11px]">
-              <Info className="h-3.5 w-3.5" />
-              Data slot langsung disinkronkan ke aplikasi member.
+              <Info className="h-3.5 w-3.5 shrink-0" />
+              Langsung disinkronkan ke aplikasi member.
             </span>
 
             <div className="flex w-full items-center justify-end gap-2.5 sm:w-auto">
@@ -224,7 +241,7 @@ export default function CreateTrainerSlotModal({
                 isLoading={isSubmitting}
                 leftIcon={!isSubmitting && <CheckCircle2 className="h-4 w-4" />}
               >
-                {isSubmitting ? "Menyimpan..." : "Simpan & Buka Slot"}
+                {isSubmitting ? "Menyimpan..." : "Simpan Slot"}
               </Button>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router"
+// import { useNavigate } from "react-router"
 import { Dumbbell, Search, X, Loader2 } from "lucide-react"
 
 import { Input } from "~/components/ui/Input"
@@ -23,7 +23,7 @@ interface TrainerListTabProps {
   isFetching: boolean
   isError: boolean
   onRefetch: () => void
-  onViewSchedule: (trainerId?: string) => void
+  onDelete: (trainer: TrainerItem) => void
   isAdmin?: boolean
 }
 
@@ -36,25 +36,25 @@ export default function TrainerListTab({
   isFetching,
   isError,
   onRefetch,
-  onViewSchedule,
+  // onDelete,
   isAdmin = true
 }: TrainerListTabProps) {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
   const hasSearch = searchQuery.trim().length > 0
+  const totalColumns = isAdmin ? 5 : 4
 
   return (
     <div className="flex flex-col gap-5">
-      <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full flex-1">
-          <Input
-            type="text"
-            placeholder="Cari nama trainer..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="placeholder:text-text-muted focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
-          />
-          <div className="absolute inset-y-0 right-0 flex items-center pr-3.5">
-            {hasSearch ? (
+      <Card className="p-4">
+        <Input
+          type="text"
+          icon={Search}
+          placeholder="Cari nama trainer atau spesialisasi..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="py-2.5 text-[13px]"
+          rightElement={
+            hasSearch ? (
               <button
                 type="button"
                 onClick={() => onSearchChange("")}
@@ -63,11 +63,9 @@ export default function TrainerListTab({
               >
                 <X className="h-4 w-4" />
               </button>
-            ) : (
-              <Search className="text-text-muted pointer-events-none h-4 w-4" />
-            )}
-          </div>
-        </div>
+            ) : undefined
+          }
+        />
       </Card>
 
       <Card className="flex flex-col">
@@ -86,10 +84,9 @@ export default function TrainerListTab({
               )}
             </div>
 
-            <div className="text-text-muted flex flex-wrap items-center gap-4 text-[12px]">
-              <span>
-                Total Trainer: <strong className="text-white">{pagination?.totalData ?? trainers.length}</strong>
-              </span>
+            <div className="text-text-muted flex items-center gap-2 text-[12px]">
+              <span>Total Trainer:</span>
+              <strong className="rounded-md bg-white/5 px-2 py-0.5 text-white">{pagination?.totalData ?? trainers.length}</strong>
             </div>
           </div>
         </CardHeader>
@@ -127,16 +124,18 @@ export default function TrainerListTab({
                     <TableTH>
                       <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">TARIF PER SESI</div>
                     </TableTH>
-                    <TableTH>
-                      <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
-                    </TableTH>
+                    {isAdmin && (
+                      <TableTH>
+                        <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
+                      </TableTH>
+                    )}
                   </TableTR>
                 </TableHead>
 
                 <TableBody>
                   {!trainers.length ? (
                     <TableTR>
-                      <TableTD colSpan={5}>
+                      <TableTD colSpan={totalColumns}>
                         <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
                           <Dumbbell className="h-8 w-8 opacity-30" />
                           <div className="flex flex-col gap-1">
@@ -165,8 +164,6 @@ export default function TrainerListTab({
                         trainer={trainer}
                         isEven={index % 2 === 0}
                         isAdmin={isAdmin}
-                        onViewSchedule={onViewSchedule}
-                        onEdit={(id) => navigate(`/dashboard/trainers/${id}/edit`)}
                       />
                     ))
                   )}
