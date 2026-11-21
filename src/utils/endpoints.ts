@@ -12,6 +12,7 @@ export const API_ADMIN_MEMBERS_LIST = "/admin/dashboard/members"
 export const API_ADMIN_STAFF_LIST = "/admin/dashboard/staff"
 export const API_ADMIN_MEMBERSHIP_PACKAGE_LIST = "/admin/dashboard/memberships/packages"
 export const API_ADMIN_TRAINERS_LIST = "/admin/dashboard/trainers"
+export const API_ADMIN_TRANSACTIONS_LIST = "/admin/dashboard/transactions"
 
 export const API_ADMIN_MEMBERS_CREATE = "/admin/dashboard/members/create"
 export const API_ADMIN_MEMBERS_OTP = "/admin/dashboard/members/otp"
