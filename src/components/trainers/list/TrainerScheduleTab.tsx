@@ -6,9 +6,9 @@ import { Input } from "~/components/ui/Input"
 import { Button } from "~/components/ui/Button"
 import { Card } from "~/components/ui/Card"
 import LocalDate from "~/components/ui/LocalDate"
-import type { TrainerItem, TrainerSlotItem } from "~/types/trainer"
+import type { CreateTrainerSlotRequest, TrainerItem, TrainerSlotItem } from "~/types/trainer"
 import { useCreateTrainerSlotMutation } from "~/services/trainer"
-import CreateTrainerSlotModal, { type CreateSlotFormPayload } from "../schedule/CreateTrainerSlotModal"
+import CreateTrainerSlotModal from "../schedule/CreateTrainerSlotModal"
 import TrainerScheduleCard from "../schedule/TrainerScheduleCard"
 import TrainerSlotDetailPanel from "../schedule/TrainerSlotDetailPanel"
 import { formatDateValue } from "../../../utils/scheduleHelpers"
@@ -20,7 +20,9 @@ interface TrainerScheduleTabProps {
 }
 
 export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin = true }: TrainerScheduleTabProps) {
-  const [selectedDate, setSelectedDate] = useState(() => formatDateValue(new Date()))
+  const todayStr = formatDateValue(new Date())
+
+  const [selectedDate, setSelectedDate] = useState(todayStr)
   const [searchTrainer, setSearchTrainer] = useState("")
   const [selectedTrainerId, setSelectedTrainerId] = useState<string>(initialTrainerId || "")
   const [selectedSlot, setSelectedSlot] = useState<TrainerSlotItem | null>(null)
@@ -38,6 +40,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
   const [createTrainerSlot, { isLoading: isCreatingSlot }] = useCreateTrainerSlotMutation()
 
   const hasSearch = searchTrainer.trim().length > 0
+  const isToday = selectedDate === todayStr
 
   const filteredTrainers = useMemo(() => {
     const keyword = searchTrainer.trim().toLowerCase()
@@ -49,7 +52,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
 
   const activeTrainer = useMemo(() => trainers.find((t) => t.id === selectedTrainerId), [trainers, selectedTrainerId])
 
-  const hasSelectedDetail = Boolean(activeTrainer && selectedSlot)
+  const hasSelectedDetail = Boolean(activeTrainer)
 
   const handleShiftDate = (days: number) => {
     const current = new Date(`${selectedDate}T00:00:00`)
@@ -57,14 +60,19 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
     setSelectedDate(formatDateValue(current))
   }
 
-  const handleToday = () => setSelectedDate(formatDateValue(new Date()))
+  const handleToday = () => setSelectedDate(todayStr)
+
+  const handleCloseDetail = () => {
+    setSelectedTrainerId("")
+    setSelectedSlot(null)
+  }
 
   const handleOpenCreateModal = (trainerId?: string) => {
     setModalTrainerId(trainerId || activeTrainer?.id || trainers[0]?.id)
     setIsModalOpen(true)
   }
 
-  const handleCreateSlot = async (payload: CreateSlotFormPayload) => {
+  const handleCreateSlot = async (payload: CreateTrainerSlotRequest) => {
     try {
       const res = await createTrainerSlot(payload).unwrap()
       setSelectedTrainerId(payload.trainerId)
@@ -79,7 +87,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
 
   return (
     <div className="flex flex-col gap-5">
-      <Card className="flex flex-col gap-3 p-4">
+      <Card className="flex flex-col gap-3.5 p-4">
         <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="flex items-center rounded-xl border border-white/10 bg-[#0B0C10] p-1">
@@ -94,7 +102,9 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
               <button
                 type="button"
                 onClick={handleToday}
-                className="cursor-pointer rounded-lg px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-white/5"
+                className={`cursor-pointer rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                  isToday ? "bg-primary/15 text-primary" : "text-white hover:bg-white/5"
+                }`}
               >
                 Hari Ini
               </button>
@@ -122,7 +132,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
               value={selectedDate}
               onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
               aria-label="Pilih tanggal"
-              className="focus:border-primary rounded-xl border border-white/10 bg-[#0B0C10] px-3 py-1.5 text-xs text-white focus:outline-none"
+              className="focus:border-primary rounded-xl border border-white/10 bg-[#0B0C10] px-3 py-1.5 text-xs text-white scheme-dark focus:outline-none"
             />
           </div>
 
@@ -139,29 +149,28 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
           )}
         </div>
 
-        <div className="flex flex-col justify-between gap-3 border-t border-white/5 pt-3 sm:flex-row sm:items-center">
-          <div className="relative w-full sm:max-w-xs">
+        <div className="flex flex-col justify-between gap-3 border-t border-white/5 pt-3.5 sm:flex-row sm:items-center">
+          <div className="w-full sm:max-w-xs">
             <Input
               type="text"
+              icon={Search}
               placeholder="Cari nama trainer atau spesialisasi..."
               value={searchTrainer}
               onChange={(e) => setSearchTrainer(e.target.value)}
-              className="placeholder:text-text-muted focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] py-2 pr-9 pl-3.5 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
+              className="py-2 text-[13px]"
+              rightElement={
+                hasSearch ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearchTrainer("")}
+                    aria-label="Hapus pencarian"
+                    className="text-text-muted cursor-pointer rounded-md p-0.5 hover:bg-white/10 hover:text-white"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : undefined
+              }
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              {hasSearch ? (
-                <button
-                  type="button"
-                  onClick={() => setSearchTrainer("")}
-                  aria-label="Hapus pencarian"
-                  className="text-text-muted cursor-pointer rounded-md p-0.5 hover:bg-white/10 hover:text-white"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              ) : (
-                <Search className="text-text-muted pointer-events-none h-4 w-4" />
-              )}
-            </div>
           </div>
 
           <div className="text-text-muted flex flex-wrap items-center gap-4 text-xs">
@@ -171,11 +180,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-amber-400" />
-              Full / Booked
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-red-400" />
-              Cancelled
+              Booked
             </span>
           </div>
         </div>
@@ -217,7 +222,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
                   key={trainer.id}
                   trainer={trainer}
                   selectedDate={selectedDate}
-                  isSelected={hasSelectedDetail && activeTrainer?.id === trainer.id}
+                  isSelected={activeTrainer?.id === trainer.id}
                   selectedSlotId={selectedSlot?.id}
                   isAdmin={isAdmin}
                   onSelectTrainer={(t, firstSlot) => {
@@ -235,27 +240,27 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
           )}
         </Card>
 
-        {hasSelectedDetail && activeTrainer && selectedSlot && (
+        {activeTrainer && (
           <TrainerSlotDetailPanel
             variant="sidebar"
             trainer={activeTrainer}
-            slot={selectedSlot}
+            selectedSlot={selectedSlot}
             selectedDate={selectedDate}
             isAdmin={isAdmin}
-            onClose={() => setSelectedSlot(null)}
+            onClose={handleCloseDetail}
             onOpenCreateModal={handleOpenCreateModal}
           />
         )}
       </div>
 
-      {hasSelectedDetail && activeTrainer && selectedSlot && (
+      {activeTrainer && (
         <TrainerSlotDetailPanel
           variant="bottom"
           trainer={activeTrainer}
-          slot={selectedSlot}
+          selectedSlot={selectedSlot}
           selectedDate={selectedDate}
           isAdmin={isAdmin}
-          onClose={() => setSelectedSlot(null)}
+          onClose={handleCloseDetail}
           onOpenCreateModal={handleOpenCreateModal}
         />
       )}
