@@ -8,6 +8,7 @@ export type User = {
   email: string
   profileUrl: string | null
   phoneNumber: string
+  membershipExpiredAt: string
   role: UserRole
   createdAt: string
   updatedAt: string

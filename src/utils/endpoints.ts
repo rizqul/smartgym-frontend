@@ -28,3 +28,7 @@ export const API_ADMIN_STAFF_UPDATE = (id: string) => `/admin/dashboard/staff/up
 
 export const API_ADMIN_TRAINERS_SLOT_LIST = (id: string) => `/admin/dashboard/trainers/slot/${id}`
 export const API_ADMIN_TRAINERS_SLOT_CREATE = (id: string) => `/admin/dashboard/trainers/slot/create/${id}`
+
+export const API_ADMIN_CHECKIN_LIST = "/admin/dashboard/checkins"
+export const API_ADMIN_CHECKIN_SUMMARY = "/admin/dashboard/checkins/summary"
+export const API_ADMIN_CHECKIN_QR_TOKEN = "/admin/dashboard/checkins/qr-token"

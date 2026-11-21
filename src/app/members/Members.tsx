@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, Award, MinusCircle, Trash } from "lucide-react"
+import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Award, MinusCircle, Trash } from "lucide-react"
 
 import { Button } from "../../components/ui/Button"
 import { CardStats } from "../../components/ui/CardStats"
@@ -8,7 +8,7 @@ import { Input } from "../../components/ui/Input"
 import { Select } from "../../components/ui/Select"
 import { Table, TableHead, TableBody, TableTR, TableTH, TableTD } from "~/components/ui/table"
 import LocalDate from "~/components/ui/LocalDate"
-// import Badge from "../../components/ui/Badge"
+import Badge from "../../components/ui/Badge"
 import toast from "react-hot-toast"
 import { Alert } from "~/utils/alert"
 
@@ -193,15 +193,9 @@ export default function Member() {
                 <TableTH>
                   <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>
                 </TableTH>
-                {/* <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS AKUN</div>
-              </TableTH> */}
-                {/* <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS MEMBERSHIP</div>
-              </TableTH>
-              <TableTH>
-                <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">PAKET TERAKHIR</div>
-              </TableTH> */}
+                <TableTH>
+                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS MEMBERSHIP</div>
+                </TableTH>
                 <TableTH>
                   <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">BERGABUNG</div>
                 </TableTH>
@@ -246,36 +240,28 @@ export default function Member() {
                       </div>
                     </TableTD>
 
-                    {/* <TableTD>
-                  <Badge
-                    variant={member.accountStatus === "Active" ? "yellow" : "plain"}
-                    label={member.accountStatus}
-                    icon={
-                      <div className={`h-1.5 w-1.5 rounded-full ${member.accountStatus === "Active" ? "bg-yellow-400" : "bg-gray-400"}`} />
-                    }
-                  />
-                </TableTD> */}
-                    {/* 
-                <TableTD>
-                  <Badge
-                    variant={member.membershipStatus === "Active Pass" ? "orange" : "plain"}
-                    label={member.membershipStatus}
-                    icon={
-                      member.membershipStatus === "Active Pass" ? (
-                        <Award className="h-3.5 w-3.5" />
-                      ) : (
-                        <MinusCircle className="h-3.5 w-3.5" />
-                      )
-                    }
-                  />
-                </TableTD> */}
+                    <TableTD>
+                      {(() => {
+                        const isActive = Boolean(member.membershipExpiredAt && new Date(member.membershipExpiredAt).getTime() > Date.now())
 
-                    {/* <TableTD>
-                  <div className="flex flex-col">
-                    <span className="text-[13px] font-medium text-white">{member.package}</span>
-                    <span className="text-text-muted text-[12px]">{member.expDate}</span>
-                  </div>
-                </TableTD>  */}
+                        return (
+                          <Badge
+                            variant={isActive ? "yellow" : "plain"}
+                            label={isActive ? "Aktif" : "Kadaluarsa"}
+                            icon={<div className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-yellow-400" : "bg-gray-400"}`} />}
+                          />
+                        )
+                      })()}
+                      <span className="text-text-muted text-[12px]">
+                        {member.membershipExpiredAt ? (
+                          <>
+                            s.d: <LocalDate date={member.membershipExpiredAt} />
+                          </>
+                        ) : (
+                          "Belum ada paket"
+                        )}
+                      </span>
+                    </TableTD>
 
                     <TableTD>
                       <LocalDate
@@ -292,13 +278,13 @@ export default function Member() {
                         >
                           <Eye className="h-5 w-5" />
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => navigate(`/dashboard/members/${member.id.replace("#", "")}/edit`)}
                           className="transition-colors hover:text-white"
                           title="Edit Data"
                         >
                           <Pencil className="h-5 w-5" />
-                        </button>
+                        </button> */}
                         <button
                           onClick={() => handleDelete(member.id, member.name)}
                           className="transition-colors hover:text-white"
