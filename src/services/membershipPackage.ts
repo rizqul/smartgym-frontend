@@ -2,9 +2,12 @@ import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { ApiResponse } from "~/types/common"
 import type { MembershipPackagesApi } from "~/types/membership"
-
-
-import { API_ADMIN_MEMBERSHIP_PACKAGE_CREATE, API_ADMIN_MEMBERSHIP_PACKAGE_DELETE, API_ADMIN_MEMBERSHIP_PACKAGE_LIST } from "~/utils/endpoints"
+import {
+  API_ADMIN_MEMBERSHIP_PACKAGE_CREATE,
+  API_ADMIN_MEMBERSHIP_PACKAGE_DELETE,
+  API_ADMIN_MEMBERSHIP_PACKAGE_LIST,
+  API_STAFF_MEMBERSHIP_PACKAGE_LIST
+} from "~/utils/endpoints"
 import type { CreateMembershipPackageData } from "~/validation/membership"
 
 export const membershipPackageServiceApi = createApi({
@@ -14,7 +17,7 @@ export const membershipPackageServiceApi = createApi({
   endpoints: (build) => ({
     getAllMembershipPackages: build.query<MembershipPackagesApi, void>({
       query: () => ({
-        url: API_ADMIN_MEMBERSHIP_PACKAGE_LIST,
+        url: (isStaff) => (isStaff ? API_STAFF_MEMBERSHIP_PACKAGE_LIST : API_ADMIN_MEMBERSHIP_PACKAGE_LIST),
         method: "GET"
       }),
       providesTags: ["MembershipPackages"]
@@ -22,7 +25,7 @@ export const membershipPackageServiceApi = createApi({
     createMembershipPackage: build.mutation<ApiResponse, CreateMembershipPackageData>({
       query: (data) => ({
         url: API_ADMIN_MEMBERSHIP_PACKAGE_CREATE,
-        data: data,
+        data,
         method: "POST"
       }),
       invalidatesTags: ["MembershipPackages"]
@@ -37,4 +40,5 @@ export const membershipPackageServiceApi = createApi({
   })
 })
 
-export const { useGetAllMembershipPackagesQuery, useCreateMembershipPackageMutation, useDeleteMembershipPackageMutation } = membershipPackageServiceApi
+export const { useGetAllMembershipPackagesQuery, useCreateMembershipPackageMutation, useDeleteMembershipPackageMutation } =
+  membershipPackageServiceApi

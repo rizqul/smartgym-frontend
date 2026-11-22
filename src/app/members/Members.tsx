@@ -1,41 +1,82 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useNavigate } from "react-router"
-import { ChevronDown, Download, Search, TrendingUp, UserPlus, Users, Eye, Award, MinusCircle, Trash } from "lucide-react"
+import { Award, ChevronDown, Loader2, MinusCircle, Search, Trash2, TrendingUp, UserPlus, Users, X } from "lucide-react"
+import toast from "react-hot-toast"
 
-import { Button } from "../../components/ui/Button"
-import { CardStats } from "../../components/ui/CardStats"
-import { Input } from "../../components/ui/Input"
-import { Select } from "../../components/ui/Select"
+import { Button } from "~/components/ui/Button"
+import { CardStats } from "~/components/ui/CardStats"
+import { Input } from "~/components/ui/Input"
+import { Select } from "~/components/ui/Select"
 import { Table, TableHead, TableBody, TableTR, TableTH, TableTD } from "~/components/ui/table"
 import LocalDate from "~/components/ui/LocalDate"
-import Badge from "../../components/ui/Badge"
-import toast from "react-hot-toast"
-import { Alert } from "~/utils/alert"
-
-import { useGetAllMemberQuery, useDeleteMemberMutation } from "~/services/member"
-import { PageSkeleton } from "~/components/ui/PageSkeleton"
-import { useDebounce } from "~/hooks/useDebounce"
+import Badge from "~/components/ui/Badge"
 import Avatar from "~/components/ui/Avatar"
+import { PageSkeleton } from "~/components/ui/PageSkeleton"
+import { Alert } from "~/utils/alert"
+import { useDebounce } from "~/hooks/useDebounce"
+import { useGetAllMemberQuery, useDeleteMemberMutation } from "~/services/member"
+
+type StatusFilter = "all" | "active" | "expired"
+
+const isMembershipActive = (expiredAt?: string | null) => Boolean(expiredAt && new Date(expiredAt).getTime() > Date.now())
 
 export default function Member() {
   const navigate = useNavigate()
 
   const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [currentPage, setCurrentPage] = useState(1)
-  const [deleteMember] = useDeleteMemberMutation()
+
   const debouncedSearch = useDebounce(searchQuery, 500)
+  const [deleteMember] = useDeleteMemberMutation()
 
   const { data, isLoading, isFetching, isError, refetch } = useGetAllMemberQuery({
     name: debouncedSearch,
     page: currentPage
   })
 
+  const members = data?.data ?? []
+  const totalMembers = data?.paginate?.totalData ?? members.length
+  const hasSearch = searchQuery.trim().length > 0
+
+  const stats = useMemo(() => {
+    const now = Date.now()
+    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000
+
+    let activeCount = 0
+    let expiredCount = 0
+    let newThisWeek = 0
+
+    for (const m of members) {
+      if (isMembershipActive(m.membershipExpiredAt)) {
+        activeCount++
+      } else {
+        expiredCount++
+      }
+      if (m.createdAt && new Date(m.createdAt).getTime() >= sevenDaysAgo) {
+        newThisWeek++
+      }
+    }
+
+    return { activeCount, expiredCount, newThisWeek }
+  }, [members])
+
+  const filteredMembers = useMemo(() => {
+    if (statusFilter === "all") return members
+    return members.filter((m) => {
+      const active = isMembershipActive(m.membershipExpiredAt)
+      return statusFilter === "active" ? active : !active
+    })
+  }, [members, statusFilter])
+
   if (isLoading) {
     return (
-      <PageSkeleton
-        statCount={4}
-        contentVariant="list"
-      />
+      <div className="w-full p-4 lg:p-6">
+        <PageSkeleton
+          statCount={4}
+          contentVariant="list"
+        />
+      </div>
     )
   }
 
@@ -60,10 +101,10 @@ export default function Member() {
 
   const handlePageChange = (url: string) => {
     try {
-      const urlObj = new URL(url)
-      const pageParam = urlObj.searchParams.get("page")
-      if (pageParam) {
-        setCurrentPage(Number(pageParam))
+      const urlObj = new URL(url, window.location.origin)
+      const pageParam = Number(urlObj.searchParams.get("page"))
+      if (pageParam && pageParam !== currentPage) {
+        setCurrentPage(pageParam)
       }
     } catch (e) {
       console.error("Gagal membaca URL paginasi", e)
@@ -82,102 +123,130 @@ export default function Member() {
       try {
         await deleteMember(id).unwrap()
         toast.success(`Member ${name} berhasil dihapus!`)
-      } catch (error: any) {
-        toast.error(error?.data?.message || "Gagal menghapus member.")
+      } catch (error: unknown) {
+        const apiErr = error as { data?: { message?: string }; message?: string }
+        toast.error(apiErr?.data?.message || apiErr?.message || "Gagal menghapus member.")
       }
     }
   }
 
   return (
-    <div className="border-primary/20 flex w-full flex-col gap-6 rounded-2xl p-4">
+    <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full max-w-150 flex-col gap-1.5">
-          <h2 className="text-2xl font-bold text-white">Manajemen Member</h2>
-          <p className="text-text-muted text-[14px]">
-            Kelola data master member, status membership, riwayat dan pendaftaran akun dalam ekosistem SmartGym.
+        <div className="flex w-full max-w-2xl flex-col gap-1.5">
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Manajemen Member</h2>
+          <p className="text-text-muted text-[13px] sm:text-[14px]">
+            Kelola data master member, status membership, dan pendaftaran akun dalam ekosistem SmartGym.
           </p>
         </div>
 
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-          <Button
-            variant="secondary"
-            leftIcon={<Download className="h-4 w-4" />}
-            className="w-full whitespace-nowrap sm:w-auto"
-          >
-            Export Data
-          </Button>
-          <Button
-            variant="primary"
-            leftIcon={<UserPlus className="h-4 w-4" />}
-            onClick={() => navigate("/dashboard/members/create")}
-            className="w-full whitespace-nowrap sm:w-auto"
-          >
-            Tambah Member
-          </Button>
-        </div>
+        <Button
+          variant="primary"
+          leftIcon={<UserPlus className="h-4 w-4" />}
+          onClick={() => navigate("/dashboard/members/create")}
+          className="w-full shrink-0 whitespace-nowrap sm:w-auto"
+        >
+          Tambah Member
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Ringkasan Statistik */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <CardStats
           topIcon={<Users className="text-blue-400" />}
           bottomIcon={<TrendingUp className="text-blue-400" />}
           label="Total Terdaftar"
           subLabel="All-Time"
-          value={2845}
+          value={totalMembers}
         />
         <CardStats
           topIcon={<Award className="text-green-400" />}
           bottomIcon={<TrendingUp className="text-green-400" />}
           label="Membership Aktif"
-          subLabel="Bulan Ini"
-          value={1204}
+          subLabel="Pada halaman ini"
+          value={stats.activeCount}
         />
         <CardStats
           topIcon={<MinusCircle className="text-red-400" />}
           bottomIcon={<TrendingUp className="text-red-400" />}
-          label="Akun Suspended"
-          subLabel="Needs Action"
-          value={42}
+          label="Kadaluarsa / Nonaktif"
+          subLabel="Pada halaman ini"
+          value={stats.expiredCount}
         />
         <CardStats
           topIcon={<Users className="text-yellow-400" />}
           bottomIcon={<TrendingUp className="text-yellow-400" />}
           label="Member Baru"
-          subLabel="Minggu Ini"
-          value={156}
+          subLabel="7 Hari Terakhir"
+          value={stats.newThisWeek}
         />
       </div>
 
+      {/* Filter & Tabel */}
       <div className="flex flex-col gap-5 rounded-xl border border-white/5 bg-[#1C1F26] p-5 shadow-lg">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative w-full sm:w-[320px]">
+            <div className="w-full sm:w-80">
               <Input
                 type="text"
-                placeholder="Cari nama member"
-                className="placeholder:text-text-muted focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
+                icon={Search}
+                placeholder="Cari nama member..."
                 value={searchQuery}
                 onChange={handleSearch}
+                className="py-2.5 text-[13px]"
+                rightElement={
+                  hasSearch ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("")
+                        setCurrentPage(1)
+                      }}
+                      aria-label="Hapus pencarian"
+                      className="text-text-muted cursor-pointer rounded-md p-0.5 hover:bg-white/10 hover:text-white"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  ) : undefined
+                }
               />
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
-                <Search className="text-text-muted h-4 w-4" />
-              </div>
             </div>
 
-            <div className="relative w-full sm:w-45">
+            <div className="w-full sm:w-48">
               <Select
-                defaultValue=""
-                className="focus:border-primary focus:ring-primary w-full appearance-none rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                rightElement={<ChevronDown className="text-text-muted pointer-events-none h-4 w-4" />}
               >
-                <option value="">Semua Tier</option>
-                <option value="active">Active Pass</option>
-                <option value="suspended">Suspended</option>
+                <option
+                  value="all"
+                  className="bg-[#16181D]"
+                >
+                  Semua Status
+                </option>
+                <option
+                  value="active"
+                  className="bg-[#16181D]"
+                >
+                  Membership Aktif
+                </option>
+                <option
+                  value="expired"
+                  className="bg-[#16181D]"
+                >
+                  Kadaluarsa / Nonaktif
+                </option>
               </Select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
-                <ChevronDown className="text-text-muted h-4 w-4" />
-              </div>
             </div>
           </div>
+
+          {isFetching && (
+            <span className="text-text-muted inline-flex shrink-0 items-center gap-1.5 text-xs">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Memperbarui...
+            </span>
+          )}
         </div>
 
         <div className={`transition-opacity duration-200 ${isFetching ? "pointer-events-none opacity-60" : "opacity-100"}`}>
@@ -204,98 +273,103 @@ export default function Member() {
                 </TableTH>
               </TableTR>
             </TableHead>
+
             <TableBody>
-              {!data?.data?.length ? (
+              {!filteredMembers.length ? (
                 <TableTR>
-                  <TableTD colSpan={4}>
-                    <div className="text-text-muted flex min-h-130 w-full flex-col items-center justify-center gap-2 text-center text-sm">
+                  <TableTD colSpan={5}>
+                    <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
                       <Users className="h-8 w-8 opacity-30" />
                       <span>Tidak ada member ditemukan</span>
+                      {(hasSearch || statusFilter !== "all") && (
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            setSearchQuery("")
+                            setStatusFilter("all")
+                            setCurrentPage(1)
+                          }}
+                        >
+                          Reset Filter
+                        </Button>
+                      )}
                     </div>
                   </TableTD>
                 </TableTR>
               ) : (
-                data.data.map((member, index) => (
-                  <TableTR
-                    key={member.id}
-                    isEven={index % 2 === 0}
-                  >
-                    <TableTD>
-                      <div className="flex items-center gap-3">
-                        <Avatar
-                          src={member.profileUrl}
-                          name={member.name}
-                          className="h-10 w-10 rounded-xl shadow-sm"
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-[14px] font-bold text-white">{member.name}</span>
+                filteredMembers.map((member, index) => {
+                  const isActive = isMembershipActive(member.membershipExpiredAt)
+
+                  return (
+                    <TableTR
+                      key={member.id}
+                      isEven={index % 2 === 0}
+                    >
+                      <TableTD>
+                        <div className="flex items-center gap-3">
+                          <Avatar
+                            src={member.profileUrl}
+                            name={member.name}
+                            className="h-10 w-10 shrink-0 rounded-xl border border-white/10 shadow-sm"
+                          />
+                          <span className="truncate text-[14px] font-bold text-white">{member.name}</span>
                         </div>
-                      </div>
-                    </TableTD>
+                      </TableTD>
 
-                    <TableTD>
-                      <div className="flex flex-col">
-                        <span className="text-[13px] text-white">{member.email}</span>
-                        <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{member.phoneNumber}</span>
-                      </div>
-                    </TableTD>
+                      <TableTD>
+                        <div className="flex flex-col">
+                          <span className="text-[13px] text-white">{member.email}</span>
+                          <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{member.phoneNumber || "-"}</span>
+                        </div>
+                      </TableTD>
 
-                    <TableTD>
-                      {(() => {
-                        const isActive = Boolean(member.membershipExpiredAt && new Date(member.membershipExpiredAt).getTime() > Date.now())
-
-                        return (
+                      <TableTD>
+                        <div className="flex flex-col items-start gap-1">
                           <Badge
                             variant={isActive ? "yellow" : "plain"}
                             label={isActive ? "Aktif" : "Kadaluarsa"}
                             icon={<div className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-yellow-400" : "bg-gray-400"}`} />}
                           />
-                        )
-                      })()}
-                      <span className="text-text-muted text-[12px]">
-                        {member.membershipExpiredAt ? (
-                          <>
-                            s.d: <LocalDate date={member.membershipExpiredAt} />
-                          </>
-                        ) : (
-                          "Belum ada paket"
-                        )}
-                      </span>
-                    </TableTD>
+                          <span className="text-text-muted text-[11px]">
+                            {member.membershipExpiredAt ? (
+                              <>
+                                s.d{" "}
+                                <LocalDate
+                                  date={member.membershipExpiredAt}
+                                  variant="short"
+                                />
+                              </>
+                            ) : (
+                              "Belum ada paket"
+                            )}
+                          </span>
+                        </div>
+                      </TableTD>
 
-                    <TableTD>
-                      <LocalDate
-                        date={member.createdAt}
-                        className="text-[13px] text-white"
-                      />
-                    </TableTD>
+                      <TableTD>
+                        <LocalDate
+                          date={member.createdAt}
+                          variant="short"
+                          className="text-[13px] text-white"
+                        />
+                      </TableTD>
 
-                    <TableTD>
-                      <div className="text-text-muted flex items-center justify-end gap-4">
-                        <button
-                          className="transition-colors hover:text-white"
-                          title="Lihat Detail"
-                        >
-                          <Eye className="h-5 w-5" />
-                        </button>
-                        {/* <button
-                          onClick={() => navigate(`/dashboard/members/${member.id.replace("#", "")}/edit`)}
-                          className="transition-colors hover:text-white"
-                          title="Edit Data"
-                        >
-                          <Pencil className="h-5 w-5" />
-                        </button> */}
-                        <button
-                          onClick={() => handleDelete(member.id, member.name)}
-                          className="transition-colors hover:text-white"
-                          title="Hapus"
-                        >
-                          <Trash className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </TableTD>
-                  </TableTR>
-                ))
+                      <TableTD>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(member.id, member.name)}
+                            title="Hapus Member"
+                            aria-label={`Hapus ${member.name}`}
+                            className="text-text-muted cursor-pointer rounded-lg p-2 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </TableTD>
+                    </TableTR>
+                  )
+                })
               )}
             </TableBody>
           </Table>

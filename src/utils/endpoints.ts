@@ -32,3 +32,16 @@ export const API_ADMIN_TRAINERS_SLOT_CREATE = (id: string) => `/admin/dashboard/
 export const API_ADMIN_CHECKIN_LIST = "/admin/dashboard/checkins"
 export const API_ADMIN_CHECKIN_SUMMARY = "/admin/dashboard/checkins/summary"
 export const API_ADMIN_CHECKIN_QR_TOKEN = "/admin/dashboard/checkins/qr-token"
+
+export const API_STAFF_MEMBERS_LIST = "/staff/dashboard/member"
+export const API_STAFF_MEMBERS_OTP = "/staff/dashboard/member/otp"
+export const API_STAFF_MEMBERS_CREATE = "/staff/dashboard/member/create"
+export const API_STAFF_MEMBERS_DELETE = (id: string) => `/staff/dashboard/member/delete/${id}`
+
+export const API_STAFF_MEMBERSHIP_PACKAGE_LIST = "/staff/dashboard/memberships/packages"
+
+export const API_STAFF_TRAINERS_LIST = "/staff/dashboard/trainers"
+export const API_STAFF_TRAINERS_SLOT_LIST = (id: string) => `/staff/dashboard/trainers/slot/${id}`
+
+export const API_STAFF_CHECKIN_QR_TOKEN = "/staff/dashboard/checkins/qr-token"
+export const API_STAFF_CHECKIN_CHECKOUT = (memberId: string) => `/staff/dashboard/checkins/${memberId}/checkout`

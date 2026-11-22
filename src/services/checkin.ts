@@ -1,7 +1,15 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
+// import type { ApiResponse } from "~/types/common"
 import type { CheckinListApi, CheckinSummaryApi, CheckinTokenApi } from "~/types/checkin"
-import { API_ADMIN_CHECKIN_LIST, API_ADMIN_CHECKIN_QR_TOKEN, API_ADMIN_CHECKIN_SUMMARY } from "~/utils/endpoints"
+import {
+  // API_ADMIN_CHECKIN_CHECKOUT,
+  API_ADMIN_CHECKIN_LIST,
+  API_ADMIN_CHECKIN_QR_TOKEN,
+  API_ADMIN_CHECKIN_SUMMARY,
+  // API_STAFF_CHECKIN_CHECKOUT,
+  API_STAFF_CHECKIN_QR_TOKEN
+} from "~/utils/endpoints"
 
 export const checkinServiceApi = createApi({
   reducerPath: "checkinApi",
@@ -25,11 +33,19 @@ export const checkinServiceApi = createApi({
     }),
     generateQrToken: build.mutation<CheckinTokenApi, void>({
       query: () => ({
-        url: API_ADMIN_CHECKIN_QR_TOKEN,
+        url: (isStaff) => (isStaff ? API_STAFF_CHECKIN_QR_TOKEN : API_ADMIN_CHECKIN_QR_TOKEN),
         method: "POST"
       })
-    })
+    }),
+    // checkOutMember: build.mutation<ApiResponse, string>({
+    //   query: (memberId) => ({
+    //     url: (isStaff) => (isStaff ? API_STAFF_CHECKIN_CHECKOUT(memberId) : API_ADMIN_CHECKIN_CHECKOUT(memberId)),
+    //     method: "POST"
+    //   }),
+    //   invalidatesTags: ["Checkins", "CheckinSummary"]
+    // })
   })
 })
 
-export const { useGetRecentCheckinsQuery, useGetCheckinSummaryQuery, useGenerateQrTokenMutation } = checkinServiceApi
+export const { useGetRecentCheckinsQuery, useGetCheckinSummaryQuery, useGenerateQrTokenMutation } =
+  checkinServiceApi
