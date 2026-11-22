@@ -14,7 +14,7 @@ import Avatar from "~/components/ui/Avatar"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Alert } from "~/utils/alert"
 import { useDebounce } from "~/hooks/useDebounce"
-import { useGetAllMemberQuery, useDeleteMemberMutation } from "~/services/member"
+import { useGetAllMemberQuery, useDeleteMemberMutation, useGetMemberCountQuery } from "~/services/member"
 
 type StatusFilter = "all" | "active" | "expired"
 
@@ -26,40 +26,21 @@ export default function Member() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [currentPage, setCurrentPage] = useState(1)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const debouncedSearch = useDebounce(searchQuery, 500)
   const [deleteMember] = useDeleteMemberMutation()
+
+  const { data: countRes, isLoading: isLoadingCount, refetch: refetchCount } = useGetMemberCountQuery()
 
   const { data, isLoading, isFetching, isError, refetch } = useGetAllMemberQuery({
     name: debouncedSearch,
     page: currentPage
   })
 
-  const members = data?.data ?? []
-  const totalMembers = data?.paginate?.totalData ?? members.length
+  const members = useMemo(() => data?.data ?? [], [data?.data])
+  const memberStats = countRes?.data
   const hasSearch = searchQuery.trim().length > 0
-
-  const stats = useMemo(() => {
-    const now = Date.now()
-    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000
-
-    let activeCount = 0
-    let expiredCount = 0
-    let newThisWeek = 0
-
-    for (const m of members) {
-      if (isMembershipActive(m.membershipExpiredAt)) {
-        activeCount++
-      } else {
-        expiredCount++
-      }
-      if (m.createdAt && new Date(m.createdAt).getTime() >= sevenDaysAgo) {
-        newThisWeek++
-      }
-    }
-
-    return { activeCount, expiredCount, newThisWeek }
-  }, [members])
 
   const filteredMembers = useMemo(() => {
     if (statusFilter === "all") return members
@@ -69,7 +50,7 @@ export default function Member() {
     })
   }, [members, statusFilter])
 
-  if (isLoading) {
+  if (isLoading || isLoadingCount) {
     return (
       <div className="w-full p-4 lg:p-6">
         <PageSkeleton
@@ -86,7 +67,10 @@ export default function Member() {
         <p className="text-sm text-red-400">Gagal memuat data member.</p>
         <Button
           variant="secondary"
-          onClick={() => refetch()}
+          onClick={() => {
+            refetch()
+            refetchCount()
+          }}
         >
           Coba Lagi
         </Button>
@@ -119,20 +103,22 @@ export default function Member() {
       isDanger: true
     })
 
-    if (result.isConfirmed) {
-      try {
-        await deleteMember(id).unwrap()
-        toast.success(`Member ${name} berhasil dihapus!`)
-      } catch (error: unknown) {
-        const apiErr = error as { data?: { message?: string }; message?: string }
-        toast.error(apiErr?.data?.message || apiErr?.message || "Gagal menghapus member.")
-      }
+    if (!result.isConfirmed) return
+
+    setDeletingId(id)
+    try {
+      await deleteMember(id).unwrap()
+      toast.success(`Member ${name} berhasil dihapus!`)
+    } catch (error: unknown) {
+      const apiErr = error as { data?: { message?: string }; message?: string }
+      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal menghapus member.")
+    } finally {
+      setDeletingId(null)
     }
   }
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full max-w-2xl flex-col gap-1.5">
           <h2 className="text-xl font-bold text-white sm:text-2xl">Manajemen Member</h2>
@@ -151,39 +137,37 @@ export default function Member() {
         </Button>
       </div>
 
-      {/* Ringkasan Statistik */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <CardStats
           topIcon={<Users className="text-blue-400" />}
           bottomIcon={<TrendingUp className="text-blue-400" />}
           label="Total Terdaftar"
           subLabel="All-Time"
-          value={totalMembers}
+          value={memberStats?.memberCount ?? 0}
         />
         <CardStats
           topIcon={<Award className="text-green-400" />}
           bottomIcon={<TrendingUp className="text-green-400" />}
           label="Membership Aktif"
-          subLabel="Pada halaman ini"
-          value={stats.activeCount}
+          subLabel="Total Aktif"
+          value={memberStats?.memberActiveCount ?? 0}
         />
         <CardStats
           topIcon={<MinusCircle className="text-red-400" />}
           bottomIcon={<TrendingUp className="text-red-400" />}
           label="Kadaluarsa / Nonaktif"
-          subLabel="Pada halaman ini"
-          value={stats.expiredCount}
+          subLabel="Total Nonaktif"
+          value={memberStats?.memberInactiveCount ?? 0}
         />
         <CardStats
           topIcon={<Users className="text-yellow-400" />}
           bottomIcon={<TrendingUp className="text-yellow-400" />}
           label="Member Baru"
-          subLabel="7 Hari Terakhir"
-          value={stats.newThisWeek}
+          subLabel="30 Hari Terakhir"
+          value={memberStats?.newMemberCount ?? 0}
         />
       </div>
 
-      {/* Filter & Tabel */}
       <div className="flex flex-col gap-5 rounded-xl border border-white/5 bg-[#1C1F26] p-5 shadow-lg">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
@@ -299,6 +283,8 @@ export default function Member() {
               ) : (
                 filteredMembers.map((member, index) => {
                   const isActive = isMembershipActive(member.membershipExpiredAt)
+                  const hasPackage = Boolean(member.membershipExpiredAt)
+                  const isDeleting = deletingId === member.id
 
                   return (
                     <TableTR
@@ -319,7 +305,9 @@ export default function Member() {
                       <TableTD>
                         <div className="flex flex-col">
                           <span className="text-[13px] text-white">{member.email}</span>
-                          <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{member.phoneNumber || "-"}</span>
+                          <span className="text-[12px] font-medium tracking-wide whitespace-nowrap text-[#A28F79]">
+                            {member.phoneNumber || "-"}
+                          </span>
                         </div>
                       </TableTD>
 
@@ -327,11 +315,11 @@ export default function Member() {
                         <div className="flex flex-col items-start gap-1">
                           <Badge
                             variant={isActive ? "yellow" : "plain"}
-                            label={isActive ? "Aktif" : "Kadaluarsa"}
+                            label={isActive ? "Aktif" : hasPackage ? "Kadaluarsa" : "Belum Aktif"}
                             icon={<div className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-yellow-400" : "bg-gray-400"}`} />}
                           />
-                          <span className="text-text-muted text-[11px]">
-                            {member.membershipExpiredAt ? (
+                          <span className="text-text-muted text-[11px] whitespace-nowrap">
+                            {hasPackage ? (
                               <>
                                 s.d{" "}
                                 <LocalDate
@@ -350,7 +338,7 @@ export default function Member() {
                         <LocalDate
                           date={member.createdAt}
                           variant="default"
-                          className="text-[13px] text-white"
+                          className="text-[13px] whitespace-nowrap text-white"
                         />
                       </TableTD>
 
@@ -359,11 +347,12 @@ export default function Member() {
                           <button
                             type="button"
                             onClick={() => handleDelete(member.id, member.name)}
+                            disabled={isDeleting}
                             title="Hapus Member"
                             aria-label={`Hapus ${member.name}`}
-                            className="text-text-muted cursor-pointer rounded-lg p-2 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                            className="text-text-muted cursor-pointer rounded-lg p-2 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                           </button>
                         </div>
                       </TableTD>

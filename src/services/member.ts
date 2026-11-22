@@ -1,12 +1,14 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { ApiResponse } from "~/types/common"
-import type { MembersApi, MemberSearchQuery } from "~/types/user"
+import type { MemberCountApi, MembersApi, MemberSearchQuery } from "~/types/user"
 import {
+  API_ADMIN_MEMBERS_COUNT,
   API_ADMIN_MEMBERS_CREATE,
   API_ADMIN_MEMBERS_DELETE,
   API_ADMIN_MEMBERS_LIST,
   API_ADMIN_MEMBERS_OTP,
+  API_STAFF_MEMBERS_COUNT,
   API_STAFF_MEMBERS_CREATE,
   API_STAFF_MEMBERS_DELETE,
   API_STAFF_MEMBERS_LIST,
@@ -55,8 +57,16 @@ export const memberServiceApi = createApi({
         method: "DELETE"
       }),
       invalidatesTags: ["Members"]
+    }),
+
+    getMemberCount: build.query<MemberCountApi, void>({
+      query: () => ({
+        url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_COUNT : API_ADMIN_MEMBERS_COUNT),
+        method: "GET"
+      }),
+      providesTags: ["Members"]
     })
   })
 })
 
-export const { useGetAllMemberQuery, useRequestMemberOtpMutation, useCreateMemberMutation, useDeleteMemberMutation } = memberServiceApi
+export const { useGetAllMemberQuery, useRequestMemberOtpMutation, useCreateMemberMutation, useDeleteMemberMutation, useGetMemberCountQuery } = memberServiceApi

@@ -17,8 +17,13 @@ export type CreateMembershipPackageRequest = {
   price: number
 }
 
-export type MembershipPackagesData = Record<string, Array<MembershipPackage>>
+export interface MembershipCount {
+  countMembershipPackage: number
+  totalMembershipIncome: number
+}
 
+export type MembershipPackagesData = Record<string, Array<MembershipPackage>>
 export type MembershipPackagesApi = ApiResponse & {
   data: MembershipPackagesData
 }
+export type MembershipCountApi = ApiResponse & {data: MembershipCount }
