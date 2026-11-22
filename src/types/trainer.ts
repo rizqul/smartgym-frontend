@@ -38,7 +38,6 @@ export type TrainersApi = ApiResponsePaginate & {
 export interface TrainerSlotItem {
   id: string
   description: string
-  quota: number
   startTime: string
   endTime: string
   status: string
@@ -53,11 +52,10 @@ export interface GetTrainerSlotsParams {
 
 export interface CreateTrainerSlotRequest {
   trainerId: string
-  description: string
   slotDate: string
   startTime: string
   endTime: string
-  quota: string
+  description?: string
 }
 
 export type TrainerSlotsApi = ApiResponse & {

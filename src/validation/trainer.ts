@@ -18,8 +18,7 @@ export const CreateTrainerSlotValidation = z
     slotDate: rules.slotDate,
     startHour: rules.startHour,
     endHour: rules.endHour,
-    quota: rules.quota,
-    description: rules.description
+    description: z.string().trim().optional()
   })
   .refine(
     (data) => {
