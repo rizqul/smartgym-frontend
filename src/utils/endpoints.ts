@@ -45,3 +45,4 @@ export const API_STAFF_TRAINERS_SLOT_LIST = (id: string) => `/staff/dashboard/tr
 
 export const API_STAFF_CHECKIN_QR_TOKEN = "/staff/dashboard/checkins/qr-token"
 export const API_STAFF_CHECKIN_CHECKOUT = (memberId: string) => `/staff/dashboard/checkins/${memberId}/checkout`
+export const API_ADMIN_CHECKIN_CHECKOUT = (memberId: string) => `/admin/dashboard/checkins/${memberId}/checkout`
