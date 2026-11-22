@@ -2,17 +2,17 @@ import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { ApiResponse } from "~/types/common"
 import type { MembersApi, MemberSearchQuery } from "~/types/user"
-
-
-import { axiosClient } from "~/utils/axios"
-import { API_ADMIN_MEMBERS_CREATE, API_ADMIN_MEMBERS_DELETE, API_ADMIN_MEMBERS_LIST, API_ADMIN_MEMBERS_OTP } from "~/utils/endpoints"
-
+import {
+  API_ADMIN_MEMBERS_CREATE,
+  API_ADMIN_MEMBERS_DELETE,
+  API_ADMIN_MEMBERS_LIST,
+  API_ADMIN_MEMBERS_OTP,
+  API_STAFF_MEMBERS_CREATE,
+  API_STAFF_MEMBERS_DELETE,
+  API_STAFF_MEMBERS_LIST,
+  API_STAFF_MEMBERS_OTP
+} from "~/utils/endpoints"
 import type { CreateMemberData } from "~/validation/member"
-
-export const memberService = {
-  createMember: async (data: CreateMemberData) => await axiosClient.post(API_ADMIN_MEMBERS_CREATE, data),
-  getOtpCode: async (data: { email: string }) => await axiosClient.post(API_ADMIN_MEMBERS_OTP, data)
-}
 
 export const memberServiceApi = createApi({
   reducerPath: "memberApi",
@@ -21,7 +21,7 @@ export const memberServiceApi = createApi({
   endpoints: (build) => ({
     getAllMember: build.query<MembersApi, MemberSearchQuery>({
       query: ({ name = "", size = 10, page = 1 }) => ({
-        url: API_ADMIN_MEMBERS_LIST,
+        url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_LIST : API_ADMIN_MEMBERS_LIST),
         method: "GET",
         params: {
           name,
@@ -31,17 +31,27 @@ export const memberServiceApi = createApi({
       }),
       providesTags: ["Members"]
     }),
+
+    requestMemberOtp: build.mutation<ApiResponse, { email: string }>({
+      query: (data) => ({
+        url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_OTP : API_ADMIN_MEMBERS_OTP),
+        method: "POST",
+        data
+      })
+    }),
+
     createMember: build.mutation<ApiResponse, CreateMemberData>({
       query: (data) => ({
-        url: API_ADMIN_MEMBERS_CREATE,
-        data: data,
-        method: "POST"
+        url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_CREATE : API_ADMIN_MEMBERS_CREATE),
+        method: "POST",
+        data
       }),
       invalidatesTags: ["Members"]
     }),
+
     deleteMember: build.mutation<ApiResponse, string>({
-      query:(id) => ({
-        url: `${API_ADMIN_MEMBERS_DELETE}/${id}`,
+      query: (id) => ({
+        url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_DELETE(id) : API_ADMIN_MEMBERS_DELETE(id)),
         method: "DELETE"
       }),
       invalidatesTags: ["Members"]
@@ -49,4 +59,4 @@ export const memberServiceApi = createApi({
   })
 })
 
-export const { useGetAllMemberQuery, useCreateMemberMutation, useDeleteMemberMutation } = memberServiceApi
+export const { useGetAllMemberQuery, useRequestMemberOtpMutation, useCreateMemberMutation, useDeleteMemberMutation } = memberServiceApi

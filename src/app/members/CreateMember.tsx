@@ -5,19 +5,18 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import toast from "react-hot-toast"
 import { ArrowLeft, User, Mail, Phone, Hash, Lock, Eye, EyeOff, Save, Info, Send } from "lucide-react"
 
-import { Card, CardHeader, CardContent } from "../../components/ui/Card"
-import { Input } from "../../components/ui/Input"
-import { Button } from "../../components/ui/Button"
+import { Card, CardHeader, CardContent } from "~/components/ui/Card"
+import { Input } from "~/components/ui/Input"
+import { Button } from "~/components/ui/Button"
 import { CreateMemberValidation, type CreateMemberData } from "~/validation/member"
-import { memberService, useCreateMemberMutation } from "~/services/member"
-import { useLoader } from "~/hooks/useLoader"
+import { useCreateMemberMutation, useRequestMemberOtpMutation } from "~/services/member"
 
 export default function CreateMember() {
-  const [createMember, { error }] = useCreateMemberMutation()
-
   const navigate = useNavigate()
+  const [requestMemberOtp, { isLoading: isSendingOtp }] = useRequestMemberOtpMutation()
+  const [createMember, { isLoading: isCreating }] = useCreateMemberMutation()
+
   const [showPassword, setShowPassword] = useState(false)
-  const { isLoading: isSendingOtp, executeWithLoader } = useLoader()
   const [countdown, setCountdown] = useState(0)
 
   const {
@@ -36,6 +35,7 @@ export default function CreateMember() {
       password: ""
     }
   })
+
   useEffect(() => {
     if (countdown <= 0) return
 
@@ -53,18 +53,16 @@ export default function CreateMember() {
   }
 
   const handleSendOtp = async () => {
-    if (countdown > 0) return
+    if (countdown > 0 || isSendingOtp) return
 
-    const isContactValid = await trigger(["email"])
-
-    if (!isContactValid) {
+    const isEmailValid = await trigger(["email"])
+    if (!isEmailValid) {
       toast.error("Isi Email dengan benar sebelum meminta OTP.")
       return
     }
 
     try {
-      await executeWithLoader(() => memberService.getOtpCode({ email: getValues("email") }))
-
+      await requestMemberOtp({ email: getValues("email") }).unwrap()
       setCountdown(300)
       toast.success("Kode OTP berhasil dikirim ke Email member!")
     } catch {
@@ -74,25 +72,24 @@ export default function CreateMember() {
 
   const onSubmit = async (data: CreateMemberData) => {
     try {
-      console.log("Payload ke Backend (DTO):", data)
-
-      await createMember(data)
-      if (error) throw Error
-
+      await createMember(data).unwrap()
       toast.success("Member baru berhasil didaftarkan!")
-
       navigate("/dashboard/members")
     } catch {
-      toast.error("Gagal mendaftarkan member. Silakan periksa kembali OTP atau data Anda.")
+      toast.error("Gagal mendaftarkan member. Periksa kembali OTP atau data Anda.")
     }
   }
+
+  const isBusy = isSubmitting || isCreating
 
   return (
     <div className="mx-auto mt-4 w-full max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="flex items-center gap-4">
         <button
+          type="button"
           onClick={() => navigate("/dashboard/members")}
-          className="text-text-muted flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
+          aria-label="Kembali ke daftar member"
+          className="text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -105,7 +102,7 @@ export default function CreateMember() {
       <Card className="shadow-2xl">
         <CardHeader className="border-b border-white/5 pb-4">
           <h2 className="text-[16px] font-bold text-white">Informasi Dasar Member</h2>
-          <p className="text-text-secondary text-[12px]">Pastikan nomor WhatsApp aktif untuk menerima kode OTP.</p>
+          <p className="text-text-secondary text-[12px]">Pastikan alamat Email aktif untuk menerima kode OTP.</p>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -151,14 +148,18 @@ export default function CreateMember() {
                 placeholder="6 Digit OTP"
                 icon={Hash}
                 maxLength={6}
+                inputMode="numeric"
                 error={errors.code?.message}
                 {...register("code")}
+                onInput={(e) => {
+                  e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "")
+                }}
                 rightElement={
                   <button
                     type="button"
                     onClick={handleSendOtp}
-                    disabled={isSendingOtp}
-                    className="bg-primary/10 text-primary hover:bg-primary/20 flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={isSendingOtp || countdown > 0}
+                    className="bg-primary/10 text-primary hover:bg-primary/20 flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-[11px] font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSendingOtp ? (
                       "Mengirim..."
@@ -185,7 +186,7 @@ export default function CreateMember() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-text-muted transition-colors hover:text-white"
+                    className="text-text-muted cursor-pointer transition-colors hover:text-white"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -199,8 +200,8 @@ export default function CreateMember() {
               <div className="flex flex-col">
                 <span className="text-primary text-[13px] font-semibold">Alur Pendaftaran (OTP)</span>
                 <span className="text-primary/80 mt-1 text-[12px]">
-                  Isi Email dan No. WhatsApp terlebih dahulu, lalu klik <strong>"Minta OTP"</strong>. Sistem akan mengirimkan kode 6 digit
-                  ke kontak calon member untuk dimasukkan ke dalam form sebelum disimpan.
+                  Isi alamat Email terlebih dahulu, lalu klik <strong>&quot;Minta OTP&quot;</strong>. Sistem akan mengirimkan kode 6 digit
+                  ke email calon member untuk dimasukkan ke dalam form sebelum disimpan.
                 </span>
               </div>
             </div>
@@ -210,18 +211,18 @@ export default function CreateMember() {
                 type="button"
                 variant="secondary"
                 onClick={() => navigate("/dashboard/members")}
-                disabled={isSubmitting}
+                disabled={isBusy}
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 variant="primary"
-                isLoading={isSubmitting}
-                leftIcon={!isSubmitting && <Save className="h-4 w-4" />}
+                isLoading={isBusy}
+                leftIcon={!isBusy && <Save className="h-4 w-4" />}
                 className="font-bold"
               >
-                {isSubmitting ? "Menyimpan..." : "Simpan Data Member"}
+                {isBusy ? "Menyimpan..." : "Simpan Data Member"}
               </Button>
             </div>
           </form>

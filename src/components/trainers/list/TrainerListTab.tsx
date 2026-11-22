@@ -69,7 +69,7 @@ export default function TrainerListTab({
       </Card>
 
       <Card className="flex flex-col">
-        <CardHeader className="border-b border-white/5 p-5 pb-4 sm:p-5 sm:pb-4">
+        <CardHeader className="p-5 pb-4 sm:p-5 sm:pb-4">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">

@@ -11,7 +11,7 @@ import { useGetCheckinSummaryQuery, useGetRecentCheckinsQuery } from "~/services
 
 const CHECKIN_LIMIT = 5
 const POLLING_OPTIONS = {
-  pollingInterval: 10000,
+  pollingInterval: 100000,
   skipPollingIfUnfocused: true
 }
 
