@@ -62,23 +62,21 @@ export default function CreateMember() {
     }
 
     try {
-      const res = await requestMemberOtp({ email: getValues("email") }).unwrap()
+      await requestMemberOtp({ email: getValues("email") }).unwrap()
       setCountdown(300)
-      toast.success(res?.message || "Kode OTP berhasil dikirim ke Email member!")
-    } catch (err: unknown) {
-      const apiErr = err as { data?: { message?: string }; message?: string }
-      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal mengirim OTP. Silakan coba lagi.")
+      toast.success("Kode OTP berhasil dikirim ke Email member!")
+    } catch {
+      toast.error("Gagal mengirim OTP. Silakan coba lagi.")
     }
   }
 
   const onSubmit = async (data: CreateMemberData) => {
     try {
-      const res = await createMember(data).unwrap()
-      toast.success(res?.message || "Member baru berhasil didaftarkan!")
+      await createMember(data).unwrap()
+      toast.success("Member baru berhasil didaftarkan!")
       navigate("/dashboard/members")
-    } catch (err: unknown) {
-      const apiErr = err as { data?: { message?: string }; message?: string }
-      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal mendaftarkan member. Periksa kembali OTP atau data Anda.")
+    } catch {
+      toast.error("Gagal mendaftarkan member. Periksa kembali OTP atau data Anda.")
     }
   }
 
@@ -108,7 +106,10 @@ export default function CreateMember() {
         </CardHeader>
 
         <CardContent className="pt-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input

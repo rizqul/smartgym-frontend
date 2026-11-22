@@ -51,7 +51,7 @@ export const memberServiceApi = createApi({
 
     deleteMember: build.mutation<ApiResponse, string>({
       query: (id) => ({
-        url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_DELETE(id) : `${API_ADMIN_MEMBERS_DELETE}/${id}`),
+        url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_DELETE(id) : API_ADMIN_MEMBERS_DELETE(id)),
         method: "DELETE"
       }),
       invalidatesTags: ["Members"]
