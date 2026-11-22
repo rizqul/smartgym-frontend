@@ -67,36 +67,7 @@ export const router = createBrowserRouter([
               {
                 index: true,
                 Component: Dashboard
-              }
-            ]
-          },
-          {
-            path: "membership",
-            children: [
-              { index: true, Component: MembershipPage },
-              { path: "create", Component: CreateMembership },
-              { path: ":id/edit", Component: EditMembership }
-            ]
-          },
-          {
-            path: "settings",
-            Component: Settings
-          },
-          {
-            path: "members",
-            children: [
-              { index: true, Component: ManageMembers },
-              { path: "create", Component: CreateMember },
-              { path: ":id/edit", Component: EditMember }
-            ]
-          },
-          {
-            path: "attendance",
-            Component: TerminalKehadiran
-          },
-          {
-            element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
-            children: [
+              },
               {
                 path: "staffs",
                 children: [
@@ -112,20 +83,44 @@ export const router = createBrowserRouter([
             ]
           },
           {
-            path: "trainers",
+            path: "membership",
             children: [
-              {
-                index: true,
-                Component: Trainers
-              },
+              { index: true, Component: MembershipPage },
               {
                 element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
                 children: [
-                  {
-                    path: "create",
-                    Component: CreateTrainer
-                  }
+                  { path: "create", Component: CreateMembership },
+                  { path: ":id/edit", Component: EditMembership }
                 ]
+              }
+            ]
+          },
+          {
+            path: "settings",
+            Component: Settings
+          },
+          {
+            path: "members",
+            children: [
+              { index: true, Component: ManageMembers },
+              { path: "create", Component: CreateMember },
+              {
+                element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
+                children: [{ path: ":id/edit", Component: EditMember }]
+              }
+            ]
+          },
+          {
+            path: "attendance",
+            Component: TerminalKehadiran
+          },
+          {
+            path: "trainers",
+            children: [
+              { index: true, Component: Trainers },
+              {
+                element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
+                children: [{ path: "create", Component: CreateTrainer }]
               }
             ]
           }
@@ -137,7 +132,12 @@ export const router = createBrowserRouter([
       },
       {
         path: "*",
-        element: <Navigate to="/404" replace />
+        element: (
+          <Navigate
+            to="/404"
+            replace
+          />
+        )
       }
     ]
   }

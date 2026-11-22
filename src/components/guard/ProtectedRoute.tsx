@@ -3,11 +3,11 @@ import { useAppSelector } from "~/store/hooks"
 
 interface ProtectedRouteProps {
   allowedRoles?: string[]
+  redirectTo?: string
 }
 
-export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+export default function ProtectedRoute({ allowedRoles, redirectTo = "/404" }: ProtectedRouteProps) {
   const location = useLocation()
-
   const { data: user, status } = useAppSelector((state) => state.user)
 
   if (status === "loading") {
@@ -24,11 +24,13 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     )
   }
 
-  if (allowedRoles && !allowedRoles.map((r) => r.toLowerCase()).includes(user.role.toLowerCase())) {
-    const fallbackPath = user.role.toLowerCase() === "staff" ? "/dashboard/attendance" : "/dashboard"
+  const userRole = user.role?.toLowerCase()
+  const isAllowed = !allowedRoles || (userRole && allowedRoles.map((r) => r.toLowerCase()).includes(userRole))
+
+  if (!isAllowed) {
     return (
       <Navigate
-        to={fallbackPath}
+        to={redirectTo}
         replace
       />
     )

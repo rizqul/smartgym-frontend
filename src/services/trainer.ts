@@ -6,7 +6,9 @@ import {
   API_ADMIN_TRAINERS_CREATE,
   API_ADMIN_TRAINERS_LIST,
   API_ADMIN_TRAINERS_SLOT_CREATE,
-  API_ADMIN_TRAINERS_SLOT_LIST
+  API_ADMIN_TRAINERS_SLOT_LIST,
+  API_STAFF_TRAINERS_LIST,
+  API_STAFF_TRAINERS_SLOT_LIST
 } from "~/utils/endpoints"
 import type { CreateTrainerData } from "~/validation/trainer"
 
@@ -17,7 +19,7 @@ export const trainerServiceApi = createApi({
   endpoints: (build) => ({
     getAllTrainer: build.query<TrainersApi, TrainerSearchQuery>({
       query: ({ name = "", size = 10, page = 1 }) => ({
-        url: API_ADMIN_TRAINERS_LIST,
+        url: (isStaff) => (isStaff ? API_STAFF_TRAINERS_LIST : API_ADMIN_TRAINERS_LIST),
         method: "GET",
         params: {
           name,
@@ -37,7 +39,7 @@ export const trainerServiceApi = createApi({
     }),
     getTrainerSlots: build.query<TrainerSlotsApi, GetTrainerSlotsParams>({
       query: ({ trainerId, date }) => ({
-        url: API_ADMIN_TRAINERS_SLOT_LIST(trainerId),
+        url: (isStaff) => (isStaff ? API_STAFF_TRAINERS_SLOT_LIST(trainerId) : API_ADMIN_TRAINERS_SLOT_LIST(trainerId)),
         method: "GET",
         params: date ? { date } : undefined
       }),

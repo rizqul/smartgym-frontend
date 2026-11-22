@@ -9,10 +9,12 @@ import { useGetAllMembershipPackagesQuery, useDeleteMembershipPackageMutation } 
 import { formatRupiah } from "../../utils/format"
 import { Alert } from "~/utils/alert"
 import toast from "react-hot-toast"
+import { useAppSelector } from "~/store/hooks"
 
 export default function MembershipPage() {
   const navigate = useNavigate()
-
+  const user = useAppSelector((state) => state.user.data)
+  const isAdmin = user?.role?.toUpperCase() === "ADMIN"
   const { data, isLoading } = useGetAllMembershipPackagesQuery()
 
   const packagesList = data?.data ? Object.values(data.data).flat() : []
@@ -47,14 +49,16 @@ export default function MembershipPage() {
         </div>
 
         <div className="flex shrink-0 gap-3">
-          <Button
-            variant="primary"
-            leftIcon={<Plus className="h-4 w-4" />}
-            onClick={() => navigate("/dashboard/membership/create")}
-            className="w-full whitespace-nowrap sm:w-auto"
-          >
-            Tambah Paket
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="primary"
+              leftIcon={<Plus className="h-4 w-4" />}
+              onClick={() => navigate("/dashboard/membership/create")}
+              className="w-full whitespace-nowrap sm:w-auto"
+            >
+              Tambah Paket
+            </Button>
+          )}
         </div>
       </div>
 
