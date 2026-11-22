@@ -1,39 +1,50 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useNavigate } from "react-router"
-import { Download, Search, TrendingUp, UserPlus, Users, Eye, Pencil, Trash, ShieldCheck } from "lucide-react"
-
-import { Button } from "../../components/ui/Button"
-import { CardStats } from "../../components/ui/CardStats"
-import { Input } from "../../components/ui/Input"
-import { Table, TableHead, TableBody, TableTR, TableTH, TableTD } from "~/components/ui/table"
-import LocalDate from "../../components/ui/LocalDate"
+import { Loader2, Pencil, Search, ShieldCheck, Trash2, TrendingUp, UserPlus, Users, X } from "lucide-react"
 import toast from "react-hot-toast"
-import { Alert } from "~/utils/alert"
 
-import { useGetAllStaffQuery, useDeleteStaffMutation } from "../../services/staff"
-import { PageSkeleton } from "~/components/ui/PageSkeleton"
-import { useDebounce } from "~/hooks/useDebounce"
+import { Button } from "~/components/ui/Button"
+import { CardStats } from "~/components/ui/CardStats"
+import { Input } from "~/components/ui/Input"
+import { Table, TableHead, TableBody, TableTR, TableTH, TableTD } from "~/components/ui/table"
+import LocalDate from "~/components/ui/LocalDate"
 import Avatar from "~/components/ui/Avatar"
+import { PageSkeleton } from "~/components/ui/PageSkeleton"
+import { Alert } from "~/utils/alert"
+import { useDebounce } from "~/hooks/useDebounce"
+import { useGetAllStaffQuery, useDeleteStaffMutation } from "~/services/staff"
 
 export default function Staff() {
   const navigate = useNavigate()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const [deleteStaff] = useDeleteStaffMutation()
+
   const debouncedSearch = useDebounce(searchQuery, 500)
+  const [deleteStaff] = useDeleteStaffMutation()
 
   const { data, isLoading, isFetching, isError, refetch } = useGetAllStaffQuery({
     name: debouncedSearch,
     page: currentPage
   })
 
+  const staffs = data?.data ?? []
+  const totalStaffs = data?.paginate?.totalData ?? staffs.length
+  const hasSearch = searchQuery.trim().length > 0
+
+  const newThisMonth = useMemo(() => {
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+    return staffs.filter((s) => s.createdAt && new Date(s.createdAt).getTime() >= thirtyDaysAgo).length
+  }, [staffs])
+
   if (isLoading) {
     return (
-      <PageSkeleton
-        statCount={2}
-        contentVariant="list"
-      />
+      <div className="w-full p-4 lg:p-6">
+        <PageSkeleton
+          statCount={2}
+          contentVariant="list"
+        />
+      </div>
     )
   }
 
@@ -58,11 +69,13 @@ export default function Staff() {
 
   const handlePageChange = (url: string) => {
     try {
-      const urlObj = new URL(url)
-      const pageParam = urlObj.searchParams.get("page")
-      if (pageParam) setCurrentPage(Number(pageParam))
+      const urlObj = new URL(url, window.location.origin)
+      const pageParam = Number(urlObj.searchParams.get("page"))
+      if (pageParam && pageParam !== currentPage) {
+        setCurrentPage(pageParam)
+      }
     } catch (e) {
-      console.error("Gagal parse URL", e)
+      console.error("Gagal parse URL paginasi", e)
     }
   }
 
@@ -85,30 +98,23 @@ export default function Staff() {
   }
 
   return (
-    <div className="border-primary/20 flex w-full flex-col gap-6 rounded-2xl p-4">
+    <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full max-w-150 flex-col gap-1.5">
-          <h2 className="text-2xl font-bold text-white">Manajemen Staf</h2>
-          <p className="text-text-muted text-[14px]">Kelola data staf, admin, dan hak akses dalam sistem operasional SmartGym.</p>
+        <div className="flex w-full max-w-2xl flex-col gap-1.5">
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Manajemen Staf</h2>
+          <p className="text-text-muted text-[13px] sm:text-[14px]">
+            Kelola data staf, admin, dan hak akses dalam sistem operasional SmartGym.
+          </p>
         </div>
 
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-          <Button
-            variant="secondary"
-            leftIcon={<Download className="h-4 w-4" />}
-            className="w-full whitespace-nowrap sm:w-auto"
-          >
-            Export Data
-          </Button>
-          <Button
-            variant="primary"
-            leftIcon={<UserPlus className="h-4 w-4" />}
-            onClick={() => navigate("/dashboard/staffs/create")}
-            className="w-full whitespace-nowrap sm:w-auto"
-          >
-            Tambah Staff
-          </Button>
-        </div>
+        <Button
+          variant="primary"
+          leftIcon={<UserPlus className="h-4 w-4" />}
+          onClick={() => navigate("/dashboard/staffs/create")}
+          className="w-full shrink-0 whitespace-nowrap sm:w-auto"
+        >
+          Tambah Staf
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -117,47 +123,51 @@ export default function Staff() {
           bottomIcon={<TrendingUp className="text-blue-400" />}
           label="Staf Terdaftar"
           subLabel="Total Keseluruhan"
-          value={0}
+          value={totalStaffs}
         />
         <CardStats
           topIcon={<ShieldCheck className="text-green-400" />}
           bottomIcon={<TrendingUp className="text-green-400" />}
-          label="Staf Aktif"
-          subLabel="Bulan Ini"
-          value={0}
+          label="Staf Baru"
+          subLabel="30 Hari Terakhir (Halaman Ini)"
+          value={newThisMonth}
         />
       </div>
 
       <div className="flex flex-col gap-5 rounded-xl border border-white/5 bg-[#1C1F26] p-5 shadow-lg">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative w-full sm:w-[320px]">
-              <Input
-                type="text"
-                placeholder="Cari nama staf..."
-                value={searchQuery}
-                onChange={handleSearch}
-                className="placeholder:text-text-muted focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
-              />
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
-                <Search className="text-text-muted h-4 w-4" />
-              </div>
-            </div>
-
-            {/* <div className="relative w-full sm:w-45">
-              <Select
-                defaultValue=""
-                className="focus:border-primary focus:ring-primary w-full appearance-none rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
-              >
-                <option value="">Semua Peran</option>
-                <option value="ADMIN">Admin</option>
-                <option value="STAFF">Staff</option>
-              </Select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
-                <ChevronDown className="text-text-muted h-4 w-4" />
-              </div>
-            </div> */}
+          <div className="w-full sm:w-80">
+            <Input
+              type="text"
+              icon={Search}
+              placeholder="Cari nama staf..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="py-2.5 text-[13px]"
+              rightElement={
+                hasSearch ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("")
+                      setCurrentPage(1)
+                    }}
+                    aria-label="Hapus pencarian"
+                    className="text-text-muted cursor-pointer rounded-md p-0.5 hover:bg-white/10 hover:text-white"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : undefined
+              }
+            />
           </div>
+
+          {isFetching && (
+            <span className="text-text-muted inline-flex shrink-0 items-center gap-1.5 text-xs">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Memperbarui...
+            </span>
+          )}
         </div>
 
         <div className={`transition-opacity duration-200 ${isFetching ? "pointer-events-none opacity-60" : "opacity-100"}`}>
@@ -183,17 +193,28 @@ export default function Staff() {
             </TableHead>
 
             <TableBody>
-              {!data?.data?.length ? (
+              {!staffs.length ? (
                 <TableTR>
                   <TableTD colSpan={4}>
-                    <div className="text-text-muted flex min-h-130 w-full flex-col items-center justify-center gap-2 text-center text-sm">
+                    <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
                       <Users className="h-8 w-8 opacity-30" />
                       <span>Tidak ada staf ditemukan</span>
+                      {hasSearch && (
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            setSearchQuery("")
+                            setCurrentPage(1)
+                          }}
+                        >
+                          Reset Pencarian
+                        </Button>
+                      )}
                     </div>
                   </TableTD>
                 </TableTR>
               ) : (
-                data.data.map((staff, index) => (
+                staffs.map((staff, index) => (
                   <TableTR
                     key={staff.id}
                     isEven={index % 2 === 0}
@@ -203,50 +224,46 @@ export default function Staff() {
                         <Avatar
                           src={staff.profileUrl}
                           name={staff.name}
-                          className="h-10 w-10 rounded-xl shadow-sm"
+                          className="h-10 w-10 shrink-0 rounded-xl border border-white/10 shadow-sm"
                         />
-                        <span className="text-[14px] font-bold text-white">{staff.name}</span>
+                        <span className="truncate text-[14px] font-bold text-white">{staff.name}</span>
                       </div>
                     </TableTD>
 
                     <TableTD>
                       <div className="flex flex-col">
                         <span className="text-[13px] text-white">{staff.email}</span>
-                        <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{staff.phoneNumber}</span>
+                        <span className="text-[12px] font-medium tracking-wide text-[#A28F79]">{staff.phoneNumber || "-"}</span>
                       </div>
                     </TableTD>
 
                     <TableTD>
                       <LocalDate
                         date={staff.createdAt}
+                        variant="default"
                         className="text-[13px] text-white"
                       />
                     </TableTD>
 
                     <TableTD>
-                      <div className="text-text-muted flex items-center justify-end gap-4">
-                        <button
-                          type="button"
-                          className="transition-colors hover:text-white"
-                          title="Lihat Detail"
-                        >
-                          <Eye className="h-5 w-5" />
-                        </button>
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           type="button"
                           onClick={() => navigate(`/dashboard/staffs/${staff.id}/edit`, { state: { staff } })}
-                          className="transition-colors hover:text-white"
                           title="Edit Data"
+                          aria-label={`Edit ${staff.name}`}
+                          className="text-text-muted cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/10 hover:text-white"
                         >
-                          <Pencil className="h-5 w-5" />
+                          <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(staff.id, staff.name)}
-                          className="transition-colors hover:text-red-400"
-                          title="Hapus"
+                          title="Hapus Staf"
+                          aria-label={`Hapus ${staff.name}`}
+                          className="text-text-muted cursor-pointer rounded-lg p-2 transition-colors hover:bg-red-500/10 hover:text-red-400"
                         >
-                          <Trash className="h-5 w-5" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </TableTD>

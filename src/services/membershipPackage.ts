@@ -32,7 +32,7 @@ export const membershipPackageServiceApi = createApi({
     }),
     deleteMembershipPackage: build.mutation<ApiResponse, string>({
       query: (id) => ({
-        url: `${API_ADMIN_MEMBERSHIP_PACKAGE_DELETE}/${id}`,
+        url: API_ADMIN_MEMBERSHIP_PACKAGE_DELETE(id),
         method: "DELETE"
       }),
       invalidatesTags: ["MembershipPackages"]

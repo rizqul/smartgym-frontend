@@ -336,7 +336,7 @@ export default function Member() {
                                 s.d{" "}
                                 <LocalDate
                                   date={member.membershipExpiredAt}
-                                  variant="short"
+                                  variant="default"
                                 />
                               </>
                             ) : (
@@ -349,7 +349,7 @@ export default function Member() {
                       <TableTD>
                         <LocalDate
                           date={member.createdAt}
-                          variant="short"
+                          variant="default"
                           className="text-[13px] text-white"
                         />
                       </TableTD>

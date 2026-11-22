@@ -20,9 +20,9 @@ export const API_ADMIN_STAFF_CREATE = "/admin/dashboard/staff/create"
 export const API_ADMIN_MEMBERSHIP_PACKAGE_CREATE = "/admin/dashboard/memberships/packages/create"
 export const API_ADMIN_TRAINERS_CREATE = "/admin/dashboard/trainers/create"
 
-export const API_ADMIN_STAFF_DELETE = "/admin/dashboard/staff"
-export const API_ADMIN_MEMBERS_DELETE = "/admin/dashboard/members"
-export const API_ADMIN_MEMBERSHIP_PACKAGE_DELETE = "/admin/dashboard/memberships/packages/delete"
+export const API_ADMIN_STAFF_DELETE = (id: string) => `/admin/dashboard/staff/delete/${id}`
+export const API_ADMIN_MEMBERS_DELETE =  (id: string) =>  `/admin/dashboard/members/delete/${id}`
+export const API_ADMIN_MEMBERSHIP_PACKAGE_DELETE = (id: string) => `/admin/dashboard/memberships/packages/delete/${id}`
 
 export const API_ADMIN_STAFF_UPDATE = (id: string) => `/admin/dashboard/staff/update/${id}`
 
