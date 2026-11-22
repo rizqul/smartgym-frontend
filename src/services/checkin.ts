@@ -1,13 +1,13 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-// import type { ApiResponse } from "~/types/common"
-import type { CheckinListApi, CheckinSummaryApi, CheckinTokenApi } from "~/types/checkin"
+
+import type { CheckinDetailApi, CheckinListApi, CheckinSummaryApi, CheckinTokenApi } from "~/types/checkin"
 import {
-  // API_ADMIN_CHECKIN_CHECKOUT,
+  API_ADMIN_CHECKIN_CHECKOUT,
   API_ADMIN_CHECKIN_LIST,
   API_ADMIN_CHECKIN_QR_TOKEN,
   API_ADMIN_CHECKIN_SUMMARY,
-  // API_STAFF_CHECKIN_CHECKOUT,
+  API_STAFF_CHECKIN_CHECKOUT,
   API_STAFF_CHECKIN_QR_TOKEN
 } from "~/utils/endpoints"
 
@@ -37,15 +37,15 @@ export const checkinServiceApi = createApi({
         method: "POST"
       })
     }),
-    // checkOutMember: build.mutation<ApiResponse, string>({
-    //   query: (memberId) => ({
-    //     url: (isStaff) => (isStaff ? API_STAFF_CHECKIN_CHECKOUT(memberId) : API_ADMIN_CHECKIN_CHECKOUT(memberId)),
-    //     method: "POST"
-    //   }),
-    //   invalidatesTags: ["Checkins", "CheckinSummary"]
-    // })
+    checkOutMember: build.mutation<CheckinDetailApi, string>({
+      query: (memberId) => ({
+        url: (isStaff) => (isStaff ? API_STAFF_CHECKIN_CHECKOUT(memberId) : API_ADMIN_CHECKIN_CHECKOUT(memberId)),
+        method: "POST"
+      }),
+      invalidatesTags: ["Checkins", "CheckinSummary"]
+    })
   })
 })
 
-export const { useGetRecentCheckinsQuery, useGetCheckinSummaryQuery, useGenerateQrTokenMutation } =
+export const { useGetRecentCheckinsQuery, useGetCheckinSummaryQuery, useGenerateQrTokenMutation, useCheckOutMemberMutation } =
   checkinServiceApi
