@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { formatWIB, type DateFormatVariant } from "~/utils/date"
 
 interface LocalDateProps {
-  date: string | null | undefined
+  date: string | Date | null | undefined
   variant?: DateFormatVariant
   className?: string
 }
