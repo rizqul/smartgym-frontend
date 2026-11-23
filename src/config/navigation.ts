@@ -1,7 +1,7 @@
 import { LayoutDashboard, Users, CreditCard, ClipboardList, UserCheck, UserCircle, Settings, type LucideIcon } from "lucide-react"
 
 export type UserRole = "admin" | "staff"
-export type MenuCategory = "Overview" | "Management" | "System"
+export type MenuCategory = "Ringkasan" | "Manajemen" | "Sistem"
 
 export interface NavItem {
   title: string
@@ -25,64 +25,64 @@ export interface FooterNavItem {
 
 export const navigationMenu: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "Dasbor",
     path: "/dashboard",
     icon: LayoutDashboard,
     roles: ["admin"],
-    category: "Overview"
+    category: "Ringkasan"
   },
   {
-    title: "Manajemen User",
+    title: "Manajemen Pengguna",
     icon: Users,
     roles: ["admin", "staff"],
-    category: "Management",
+    category: "Manajemen",
     children: [
       {
-        title: "Manajemen Member",
+        title: "Data Anggota",
         path: "/dashboard/members",
         roles: ["admin", "staff"]
       },
       {
-        title: "Manajemen Staff",
+        title: "Data Staf",
         path: "/dashboard/staffs",
         roles: ["admin"]
       }
     ]
   },
   {
-    title: "Membership",
+    title: "Keanggotaan",
     path: "/dashboard/membership",
     icon: CreditCard,
     roles: ["admin", "staff"],
-    category: "Management"
+    category: "Manajemen"
   },
   {
     title: "Transaksi",
     path: "/dashboard/transactions",
     icon: ClipboardList,
     roles: ["admin"],
-    category: "Management"
+    category: "Manajemen"
   },
   {
     title: "Kehadiran",
     path: "/dashboard/attendance",
     icon: UserCheck,
     roles: ["admin", "staff"],
-    category: "Management"
+    category: "Manajemen"
   },
   {
-    title: "Data Trainer",
+    title: "Data Pelatih",
     path: "/dashboard/trainers",
     icon: UserCircle,
     roles: ["admin", "staff"],
-    category: "Management"
+    category: "Manajemen"
   },
   {
     title: "Pengaturan Akun",
     path: "/dashboard/settings",
     icon: Settings,
     roles: ["admin", "staff"],
-    category: "System"
+    category: "Sistem"
   }
 ]
 
@@ -100,11 +100,11 @@ export const landingNavigationMenu: LandingNavItem[] = [
     href: "#alur-pendaftaran"
   },
   {
-    title: "Membership",
+    title: "Keanggotaan",
     href: "#paket"
   },
   {
-    title: "Trainer",
+    title: "Pelatih",
     href: "#trainer"
   },
   {
@@ -114,9 +114,9 @@ export const landingNavigationMenu: LandingNavItem[] = [
 ]
 
 export const footerEcosystemMenu: FooterNavItem[] = [
-  { title: "Aplikasi Member", href: "#alur-pendaftaran" },
+  { title: "Aplikasi Anggota", href: "#alur-pendaftaran" },
   { title: "Portal Staf & Admin", to: "/auth/login" },
-  { title: "Paket Membership", href: "#paket" },
-  { title: "Trainer Profesional", href: "#trainer" },
+  { title: "Paket Keanggotaan", href: "#paket" },
+  { title: "Pelatih Profesional", href: "#trainer" },
   { title: "FAQ & Bantuan", href: "#faq" }
 ]

@@ -241,8 +241,8 @@ export default function Transaction() {
 
                 <TableBody>
                   {!filteredTransactions.length ? (
-                    <TableTR>
-                      <TableTD colSpan={5}>
+                    <TableTR hideRowNumber>
+                      <TableTD colSpan={6}>
                         <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
                           <Receipt className="h-8 w-8 opacity-30" />
                           <div className="flex flex-col gap-1">

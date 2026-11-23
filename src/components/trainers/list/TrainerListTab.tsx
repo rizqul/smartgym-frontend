@@ -41,7 +41,7 @@ export default function TrainerListTab({
 }: TrainerListTabProps) {
   // const navigate = useNavigate()
   const hasSearch = searchQuery.trim().length > 0
-  const totalColumns = isAdmin ? 5 : 4
+  const totalColumns = isAdmin ? 6 : 5
 
   return (
     <div className="flex flex-col gap-5">
@@ -136,7 +136,7 @@ export default function TrainerListTab({
 
                 <TableBody>
                   {!trainers.length ? (
-                    <TableTR>
+                    <TableTR hideRowNumber>
                       <TableTD colSpan={totalColumns}>
                         <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
                           <Dumbbell className="h-8 w-8 opacity-30" />

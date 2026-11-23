@@ -191,8 +191,8 @@ export default function Staff() {
 
             <TableBody>
               {!staffs.length ? (
-                <TableTR>
-                  <TableTD colSpan={4}>
+                <TableTR hideRowNumber>
+                  <TableTD colSpan={5}>
                     <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
                       <Users className="h-8 w-8 opacity-30" />
                       <span>Tidak ada staf ditemukan</span>

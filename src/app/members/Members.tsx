@@ -1,6 +1,19 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router"
-import { Award, CalendarClock, ChevronDown, Loader2, MinusCircle, Search, ShieldExclamationPoint, Trash2, UserGroup, UserPlus, Users, X } from "lucide-react"
+import {
+  Award,
+  CalendarClock,
+  ChevronDown,
+  Loader2,
+  MinusCircle,
+  Search,
+  ShieldExclamationPoint,
+  Trash2,
+  UserGroup,
+  UserPlus,
+  Users,
+  X
+} from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Button } from "~/components/ui/Button"
@@ -260,8 +273,8 @@ export default function Member() {
 
             <TableBody>
               {!filteredMembers.length ? (
-                <TableTR>
-                  <TableTD colSpan={5}>
+                <TableTR hideRowNumber>
+                  <TableTD colSpan={6}>
                     <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
                       <Users className="h-8 w-8 opacity-30" />
                       <span>Tidak ada member ditemukan</span>
