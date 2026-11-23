@@ -71,7 +71,7 @@ export default function TrainerTableRow({ trainer, isEven, isAdmin }: TrainerTab
               <span className="text-[13px] font-bold text-white">{formatRupiah(trainer.rate ?? 0)}</span>
               <span className="text-text-muted text-[11px]">/ sesi</span>
             </div>
-          </TableTD>{" "}
+          </TableTD>
           <TableTD>
             <div className="flex items-center justify-end gap-1">
               <button

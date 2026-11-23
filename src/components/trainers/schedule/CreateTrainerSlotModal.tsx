@@ -99,13 +99,13 @@ export default function CreateTrainerSlotModal({
         <div className="flex items-start justify-between gap-4 border-b border-white/5 px-6 py-5">
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <h3 className="text-lg font-bold text-white">Tambah Slot Jadwal Trainer</h3>
+              <h3 className="text-lg font-bold text-white">Tambah Slot Jadwal Pelatih</h3>
               <span className="bg-primary/15 text-primary rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
-                Trainer Slot
+                Pelatih Slot
               </span>
             </div>
             <p className="text-text-muted mt-1 text-xs leading-relaxed">
-              Buka ketersediaan sesi baru untuk Personal Trainer di sistem reservasi member.
+              Buka ketersediaan sesi baru untuk Personal Pelatih di sistem reservasi anggota.
             </p>
           </div>
 
@@ -126,7 +126,7 @@ export default function CreateTrainerSlotModal({
         >
           <div className="flex flex-col gap-5 p-6">
             <Select
-              label="Pilih Trainer / Instruktur"
+              label="Pilih Pelatih / Instruktur"
               icon={UserCheck}
               rightElement={<ChevronDown className="text-text-muted pointer-events-none h-4 w-4" />}
               error={errors.trainerId?.message}
@@ -136,7 +136,7 @@ export default function CreateTrainerSlotModal({
                 value=""
                 className="bg-[#16181D]"
               >
-                -- Pilih Trainer --
+                -- Pilih Pelatih --
               </option>
               {trainers.map((t) => (
                 <option
@@ -210,11 +210,11 @@ export default function CreateTrainerSlotModal({
               <div className="text-xs leading-relaxed">
                 <p className="font-bold text-amber-200">Validasi Jadwal Otomatis</p>
                 <p className="text-text-muted mt-0.5">
-                  Sistem akan mengecek bentrok jadwal trainer pada{" "}
+                  Sistem akan mengecek bentrok jadwal pelatih pada{" "}
                   <strong className="text-white">
                     {startHour || "--:--"} – {endHour || "--:--"} WIB
                   </strong>{" "}
-                  untuk sesi privat (<strong className="text-white">1 member</strong>).
+                  untuk sesi privat <strong className="text-white">( 1 member )</strong>.
                 </p>
               </div>
             </div>

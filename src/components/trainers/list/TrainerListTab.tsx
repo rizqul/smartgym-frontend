@@ -49,7 +49,7 @@ export default function TrainerListTab({
         <Input
           type="text"
           icon={Search}
-          placeholder="Cari nama trainer atau spesialisasi..."
+          placeholder="Cari nama pelatih atau spesialisasi..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="py-2.5 text-[13px]"
@@ -74,7 +74,7 @@ export default function TrainerListTab({
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <span className="bg-primary h-2.5 w-2.5 rounded-full" />
-                <h3 className="text-[15px] font-bold text-white">Daftar Trainer Sesi PT</h3>
+                <h3 className="text-[15px] font-bold text-white">Daftar Pelatih</h3>
               </div>
               {isFetching && (
                 <span className="text-text-muted inline-flex items-center gap-1.5 text-xs">
@@ -83,18 +83,13 @@ export default function TrainerListTab({
                 </span>
               )}
             </div>
-
-            <div className="text-text-muted flex items-center gap-2 text-[12px]">
-              <span>Total Trainer:</span>
-              <strong className="rounded-md bg-white/5 px-2 py-0.5 text-white">{pagination?.totalData ?? trainers.length}</strong>
-            </div>
           </div>
         </CardHeader>
 
         <CardContent className="p-5 sm:p-5">
           {isError ? (
             <div className="flex min-h-60 flex-col items-center justify-center gap-3 text-center">
-              <p className="text-sm text-red-400">Gagal memuat data trainer.</p>
+              <p className="text-sm text-red-400">Gagal memuat data pelatih.</p>
               <Button
                 variant="secondary"
                 onClick={onRefetch}
@@ -111,7 +106,7 @@ export default function TrainerListTab({
                 <TableHead>
                   <TableTR isHeader={true}>
                     <TableTH>
-                      <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">INFO TRAINER</div>
+                      <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">INFO PELATIH</div>
                     </TableTH>
                     <TableTH>
                       <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>

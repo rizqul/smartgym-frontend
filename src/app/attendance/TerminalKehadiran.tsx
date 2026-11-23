@@ -44,9 +44,9 @@ export default function TerminalKehadiran() {
 
   const handleCheckOut = async (memberId: string, memberName: string) => {
     const result = await Alert.confirm({
-      title: "Check-out Member?",
-      text: `Konfirmasi check-out untuk member "${memberName}" dari area gym?`,
-      confirmText: "Ya, Check-out"
+      title: "Konfirmasi Keluar Anggota?",
+      text: `Konfirmasi keluar untuk member "${memberName}" dari area gym?`,
+      confirmText: "Ya"
     })
 
     if (!result.isConfirmed) return
@@ -78,9 +78,9 @@ export default function TerminalKehadiran() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-2xl font-bold text-white">Terminal Kehadiran & QR Station</h2>
+          <h2 className="text-2xl font-bold text-white">Terminal Kehadiran & Pindai QR</h2>
           <p className="text-text-muted max-w-2xl text-[14px]">
-            Terminal pemantauan akses masuk dan keluar member secara real-time menggunakan validasi QR dinamis.
+            Terminal pemantauan akses masuk dan keluar member secara langsung menggunakan validasi QR dinamis.
           </p>
         </div>
 
@@ -94,7 +94,7 @@ export default function TerminalKehadiran() {
                 <span className="text-text-muted text-[10px] font-medium uppercase sm:text-[11px] sm:whitespace-nowrap">
                   Status Terminal
                 </span>
-                <span className="truncate text-[13px] font-bold text-white sm:text-[14px]">Live QR Station</span>
+                <span className="truncate text-[13px] font-bold text-white sm:text-[14px]">Pusat Kode QR Langsung</span>
               </div>
             </div>
 
@@ -124,7 +124,7 @@ export default function TerminalKehadiran() {
                   <strong className="text-base leading-tight text-yellow-400 sm:text-lg">
                     {(summary?.onFloor ?? 0).toLocaleString("id-ID")}
                   </strong>
-                  <span className="text-text-muted text-[10px] sm:text-[11px]">member</span>
+                  <span className="text-text-muted text-[10px] sm:text-[11px]">anggota</span>
                 </div>
               </div>
             </div>
@@ -173,14 +173,14 @@ export default function TerminalKehadiran() {
                   className="text-text-muted inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3 w-3 ${isFetchingCheckins ? "animate-spin" : ""}`} />
-                  Refresh
+                  Segarkan
                 </button>
               </div>
             </div>
 
             {!latestValidations.length ? (
               <Card className="flex min-h-28 items-center justify-center p-4 text-center">
-                <span className="text-text-muted text-[13px]">Belum ada aktivitas check-in terbaru.</span>
+                <span className="text-text-muted text-[13px]">Belum ada aktivitas masuk terbaru.</span>
               </Card>
             ) : (
               latestValidations.map((item) => {
@@ -242,7 +242,7 @@ export default function TerminalKehadiran() {
                               <>
                                 <span className="hidden xl:inline">•</span>
                                 <span className="whitespace-nowrap">
-                                  Exp:{" "}
+                                  s.d:{" "}
                                   <LocalDate
                                     date={item.membershipExpiresAt}
                                     variant="short"
@@ -272,7 +272,7 @@ export default function TerminalKehadiran() {
                         ) : (
                           <LogOut className="h-3.5 w-3.5 shrink-0" />
                         )}
-                        {isDenied ? "ACCESS DENIED" : isOnFloor ? "ON FLOOR" : "CHECKED OUT"}
+                        {isDenied ? "AKSES DITOLAK" : isOnFloor ? "DI LOKASI" : "KELUAR"}
                       </div>
 
                       <div
@@ -281,7 +281,7 @@ export default function TerminalKehadiran() {
                         }`}
                       >
                         <span>
-                          In:{" "}
+                          Masuk:{" "}
                           <LocalDate
                             date={item.checkInAt}
                             variant="hour"
@@ -291,7 +291,7 @@ export default function TerminalKehadiran() {
                           <>
                             <span>•</span>
                             <span className="text-emerald-400/90">
-                              Out:{" "}
+                              Keluar:{" "}
                               <LocalDate
                                 date={item.checkOutAt}
                                 variant="hour"
@@ -309,15 +309,15 @@ export default function TerminalKehadiran() {
 
           <Card className="flex min-w-0 flex-col gap-4 p-4 sm:p-5">
             <div className="flex flex-col gap-0.5">
-              <h3 className="text-[16px] font-bold text-white sm:text-[17px]">Live Gate Validation Stream</h3>
+              <h3 className="text-[16px] font-bold text-white sm:text-[17px]">Pantauan Validasi Gerbang Langsung</h3>
               <p className="text-text-muted text-[12px] sm:text-[13px]">
-                Menampilkan {CHECKIN_LIMIT} transaksi otentikasi gerbang teranyar secara real-time
+                Menampilkan {CHECKIN_LIMIT} transaksi otentikasi gerbang terbaru secara lansung
               </p>
             </div>
 
             {isError ? (
               <div className="flex min-h-48 flex-col items-center justify-center gap-3 text-center">
-                <p className="text-sm text-red-400">Gagal memuat riwayat check-in.</p>
+                <p className="text-sm text-red-400">Gagal memuat riwayat masuk.</p>
                 <Button
                   variant="secondary"
                   onClick={refetchCheckins}
@@ -350,7 +350,7 @@ export default function TerminalKehadiran() {
                   {!checkins.length ? (
                     <TableTR>
                       <TableTD colSpan={5}>
-                        <div className="text-text-muted flex min-h-48 items-center justify-center text-sm">Belum ada riwayat check-in.</div>
+                        <div className="text-text-muted flex min-h-48 items-center justify-center text-sm">Belum ada riwayat masuk.</div>
                       </TableTD>
                     </TableTR>
                   ) : (
@@ -409,7 +409,7 @@ export default function TerminalKehadiran() {
                                   isDenied ? "bg-[#E58383]" : isOnFloor ? "bg-[#D4B34A]" : "bg-emerald-400"
                                 }`}
                               />
-                              {isDenied ? "DENIED" : isOnFloor ? "ON FLOOR" : "SELESAI"}
+                              {isDenied ? "DENIED" : isOnFloor ? "DI LOKASI" : "SELESAI"}
                             </div>
                           </TableTD>
 
@@ -432,7 +432,7 @@ export default function TerminalKehadiran() {
                                 className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[12px] font-semibold whitespace-nowrap text-white transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 {isProcessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
-                                Check-out
+                                Keluar
                               </button>
                             )}
                           </TableTD>

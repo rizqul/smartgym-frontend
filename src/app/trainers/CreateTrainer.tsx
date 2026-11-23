@@ -2,7 +2,7 @@ import { useNavigate } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import toast from "react-hot-toast"
-import { ArrowLeft, CheckCircle, Dumbbell, UserCircle } from "lucide-react"
+import { ArrowLeft, Dumbbell, Save, UserCircle } from "lucide-react"
 
 import { Card, CardHeader, CardContent } from "~/components/ui/Card"
 import { Input } from "~/components/ui/Input"
@@ -65,21 +65,10 @@ export default function CreateTrainer() {
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-white lg:text-2xl">Tambah Trainer Baru</h1>
+            <h1 className="text-xl font-bold text-white lg:text-2xl">Tambah Pelatih Baru</h1>
             <p className="text-text-secondary mt-0.5 text-[13px]">Daftarkan instruktur baru beserta spesialisasi dan tarif per sesi.</p>
           </div>
         </div>
-
-        <Button
-          type="button"
-          variant="primary"
-          onClick={handleSubmit(onSubmit)}
-          isLoading={isLoading}
-          className="w-full font-bold sm:w-auto"
-          leftIcon={!isLoading && <CheckCircle className="h-4 w-4" />}
-        >
-          {isLoading ? "Menyimpan..." : "Simpan Trainer"}
-        </Button>
       </div>
 
       <form
@@ -92,7 +81,7 @@ export default function CreateTrainer() {
               <UserCircle className="text-text-secondary h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-[15px] font-bold text-white">Informasi Trainer</h3>
+              <h3 className="text-[15px] font-bold text-white">Informasi Pelatih</h3>
               <p className="text-text-secondary text-[12px]">Data dasar dan kontak instruktur.</p>
             </div>
           </CardHeader>
@@ -175,6 +164,26 @@ export default function CreateTrainer() {
               error={errors.rate?.message}
               {...register("rate")}
             />
+
+            <div className="col-span-full mt-2 flex items-center justify-end gap-3 border-t border-white/5 pt-4">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate("/dashboard/trainers")}
+              >
+                Batal
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleSubmit(onSubmit)}
+                isLoading={isLoading}
+                className="w-full font-bold sm:w-auto"
+                leftIcon={!isLoading && <Save className="h-4 w-4" />}
+              >
+                {isLoading ? "Menyimpan..." : "Simpan Pelatih"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </form>

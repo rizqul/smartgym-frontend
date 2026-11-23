@@ -150,7 +150,7 @@ export default function TrainerScheduleCard({
 
       <CardFooter className="justify-between border-t border-white/5 p-4 pt-3 text-[11px] sm:p-4 sm:pt-3">
         <span className="font-medium text-sky-400">{slots.length > 0 ? `${slots.length} Slot Terjadwal` : "Slot Kosong"}</span>
-        <span className="text-text-muted text-[10px]">Klik untuk lihat detail</span>
+        <span className="text-text-muted text-[10px]">Tekan untuk lihat detail</span>
       </CardFooter>
     </Card>
   )

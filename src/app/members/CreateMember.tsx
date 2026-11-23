@@ -178,6 +178,7 @@ export default function CreateMember() {
               <Input
                 label="Kata Sandi Awal"
                 type={showPassword ? "text" : "password"}
+                autoComplete="password"
                 placeholder="Min. 8 karakter"
                 icon={Lock}
                 error={errors.password?.message}

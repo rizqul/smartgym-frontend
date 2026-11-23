@@ -71,9 +71,9 @@ export default function Trainers() {
     <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full max-w-2xl flex-col gap-1.5">
-          <h2 className="text-xl font-bold text-white sm:text-2xl">Data Trainer &amp; Manajemen Sesi PT</h2>
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Data Pelatih &amp; Manajemen Sesi</h2>
           <p className="text-text-muted text-[13px] sm:text-[14px]">
-            Kelola direktori Personal Trainer, spesialisasi keahlian, tarif per sesi, serta jadwal ketersediaan slot reservasi member.
+            Kelola direktori Personal Pelatih, spesialisasi keahlian, tarif per sesi, serta jadwal ketersediaan slot reservasi anggota.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function Trainers() {
               onClick={() => navigate("/dashboard/trainers/create")}
               className="w-full whitespace-nowrap sm:w-auto"
             >
-              Tambah Trainer
+              Tambah Pelatih
             </Button>
           </div>
         )}
@@ -95,30 +95,30 @@ export default function Trainers() {
         <CardStats
           topIcon={<Dumbbell className="text-primary" />}
           bottomIcon={<Whistle className="text-primary" />}
-          label="Total Trainer"
-          subLabel="Terdaftar di SmartGym"
+          label="Total Pelatih"
+          subLabel="Terdaftar"
           value={trainerStats?.countTrainer ?? 0}
         />
         <CardStats
           topIcon={<CalendarCheck className="text-amber-400" />}
           bottomIcon={<LayoutGrid className="text-amber-400" />}
-          label="Trainer Bertugas"
-          subLabel="Memiliki slot hari ini"
+          label="Pelatih Bertugas"
+          subLabel="Hari ini"
           value={trainerStats?.countTrainerWithSlot ?? 0}
         />
         <CardStats
           topIcon={<CalendarClock className="text-blue-400" />}
           bottomIcon={<ListChecks className="text-blue-400" />}
           label="Total Slot Hari Ini"
-          subLabel="Jadwal sesi tersedia"
+          subLabel="Sesi tersedia"
           value={trainerStats?.countSlot ?? 0}
         />
         {isAdmin && (
           <CardStats
             topIcon={<Wallet className="text-emerald-400" />}
             bottomIcon={<Banknote className="text-emerald-400" />}
-            label="Pendapatan Sesi PT"
-            subLabel="Akumulasi booking trainer"
+            label="Pendapatan Pelatih"
+            subLabel="Akumulasi"
             value={`Rp ${formatRupiah(trainerStats?.sumTransactionBookedTrainer ?? 0)}`}
           />
         )}
@@ -140,7 +140,7 @@ export default function Trainers() {
             activeTab === "trainers" ? "shadow-md" : "text-text-muted hover:bg-white/5 hover:text-white"
           }`}
         >
-          <span className="truncate">Daftar Trainer</span>
+          <span className="truncate">Daftar Pelatih</span>
         </Button>
 
         <Button

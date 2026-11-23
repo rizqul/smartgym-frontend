@@ -36,13 +36,13 @@ const loadStoredQr = (): StoredQrToken | null => {
 function MemberAccessGuide() {
   return (
     <>
-      <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">PANDUAN AKSES MEMBER</span>
+      <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">PANDUAN AKSES ANGGOTA</span>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <div className="bg-primary flex flex-col gap-1.5 rounded-xl p-3">
           <span className="flex items-center gap-1.5 border-b border-white/40 pb-1.5 text-[12px] font-bold text-white">
             <Smartphone className="h-4 w-4 shrink-0 text-white" /> Langkah 1 & 2
           </span>
-          <span className="text-[12px] leading-snug text-white">Buka aplikasi SmartGym, lalu masuk menu Scan Gate.</span>
+          <span className="text-[12px] leading-snug text-white">Buka aplikasi SmartGym, lalu masuk menu Pemindai Akses.</span>
         </div>
         <div className="bg-primary flex flex-col gap-1.5 rounded-xl p-3">
           <span className="flex items-center gap-1.5 border-b border-white/40 pb-1.5 text-[12px] font-bold text-white">
@@ -127,7 +127,7 @@ export default function LiveTokenGenerator() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={`h-2 w-2 rounded-full ${isExpired ? "bg-red-500" : "bg-primary/85 animate-pulse"}`} />
-          <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">LIVE TOKEN GENERATOR</span>
+          <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">Pembuat Token Langsung</span>
         </div>
 
         <div className="group relative hidden xl:block">
@@ -170,7 +170,7 @@ export default function LiveTokenGenerator() {
               {isExpired && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 p-4 text-center backdrop-blur-[2px]">
                   <span className="text-sm font-bold text-white">QR Kedaluwarsa</span>
-                  <span className="text-[11px] text-white/80">Klik tombol refresh untuk membuat QR baru.</span>
+                  <span className="text-[11px] text-white/80">Klik tombol segarkan untuk membuat QR baru.</span>
                 </div>
               )}
             </>
@@ -196,7 +196,7 @@ export default function LiveTokenGenerator() {
             }`}
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            {isLoading ? "Memperbarui Token..." : "Refresh Token Sekarang"}
+            {isLoading ? "Memperbarui Token..." : "segarkan Token Sekarang"}
           </button>
 
           <div className="mt-2 border-t border-white/5 pt-4 xl:hidden">
