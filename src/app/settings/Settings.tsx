@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import Cropper, { type Area } from "react-easy-crop"
 import toast from "react-hot-toast"
 import {
   CheckCircle,
@@ -25,10 +26,12 @@ import { Button } from "~/components/ui/Button"
 import LocalDate from "~/components/ui/LocalDate"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { getAvatarUrl } from "~/utils/avatar"
+import { getCroppedImageFile } from "~/utils/cropImage"
 import { useGetProfileQuery, useUpdateProfileMutation, useUpdatePasswordMutation } from "~/services/user"
 import { profileSchema, type ProfileFormValues } from "~/validation/profile"
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
+const ALLOWED_TYPES = ["image/png", "image/jpeg"]
 
 export default function Settings() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -39,6 +42,10 @@ export default function Settings() {
   const [isDragging, setIsDragging] = useState(false)
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
+  const [isProcessingCrop, setIsProcessingCrop] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { data: profileRes, isLoading, isError, refetch } = useGetProfileQuery()
@@ -47,6 +54,7 @@ export default function Settings() {
 
   const profile = profileRes?.data
   const isSaving = isUpdatingProfile || isUpdatingPassword
+  const isPhotoSubmitting = isUpdatingProfile || isProcessingCrop
 
   const {
     register,
@@ -84,11 +92,15 @@ export default function Settings() {
     }
   }, [previewUrl])
 
+  const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
+    setCroppedAreaPixels(croppedPixels)
+  }, [])
+
   const processSelectedFile = (file?: File) => {
     if (!file) return
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("File harus berupa gambar (JPG, PNG, atau WebP).")
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast.error("File photo harus berupa PNG, JPG, atau JPEG.")
       return
     }
 
@@ -100,6 +112,9 @@ export default function Settings() {
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setSelectedPhoto(file)
     setPreviewUrl(URL.createObjectURL(file))
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+    setCroppedAreaPixels(null)
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,27 +139,40 @@ export default function Settings() {
   }
 
   const handleClosePhotoModal = () => {
-    if (isUpdatingProfile) return
+    if (isPhotoSubmitting) return
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setSelectedPhoto(null)
     setPreviewUrl(null)
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+    setCroppedAreaPixels(null)
     setIsDragging(false)
     setIsPhotoModalOpen(false)
   }
 
   const handleSavePhoto = async () => {
-    if (!profile || !selectedPhoto) return
+    if (!profile || !selectedPhoto || !previewUrl || !croppedAreaPixels) return
 
     try {
+      setIsProcessingCrop(true)
+
+      const isPng = selectedPhoto.type === "image/png"
+      const mimeType = isPng ? "image/png" : "image/jpeg"
+      const ext = isPng ? ".png" : ".jpg"
+
+      const croppedFile = await getCroppedImageFile(previewUrl, croppedAreaPixels, selectedPhoto.name.replace(/\.[^/.]+$/, ext), mimeType)
+
       const formData = new FormData()
       formData.append("name", profile.name)
       formData.append("phoneNumber", profile.phoneNumber)
-      formData.append("photo", selectedPhoto)
+      formData.append("photo", croppedFile)
 
       await updateProfile(formData).unwrap()
       toast.success("Foto profil berhasil diperbarui!")
+      setIsProcessingCrop(false)
       handleClosePhotoModal()
     } catch (error: any) {
+      setIsProcessingCrop(false)
       toast.error(error?.data?.message || "Gagal memperbarui foto profil.")
     }
   }
@@ -327,6 +355,7 @@ export default function Settings() {
             <div className="xl:col-span-2">
               <Input
                 label="Nama Lengkap"
+                autoComplete="name"
                 placeholder="Masukkan nama lengkap"
                 error={errors.fullName?.message}
                 {...register("fullName")}
@@ -335,6 +364,7 @@ export default function Settings() {
             <Input
               label="Email"
               type="email"
+              autoComplete="email"
               disabled
               className="cursor-not-allowed opacity-60"
               error={errors.email?.message}
@@ -351,6 +381,7 @@ export default function Settings() {
             />
             <Input
               label="No. WhatsApp"
+              autoComplete="tel"
               inputMode="numeric"
               type="tel"
               error={errors.phone?.message}
@@ -387,6 +418,7 @@ export default function Settings() {
               <Input
                 label="Kata Sandi Saat Ini"
                 type={showCurrentPassword ? "text" : "password"}
+                autoComplete="current-password"
                 placeholder="••••••••••••"
                 error={errors.currentPassword?.message}
                 {...register("currentPassword")}
@@ -403,6 +435,7 @@ export default function Settings() {
               <Input
                 label="Kata Sandi Baru"
                 type={showNewPassword ? "text" : "password"}
+                autoComplete="new-password"
                 placeholder="Min. 8 karakter"
                 error={errors.newPassword?.message}
                 {...register("newPassword")}
@@ -419,6 +452,7 @@ export default function Settings() {
               <Input
                 label="Konfirmasi Kata Sandi"
                 type={showConfirmPassword ? "text" : "password"}
+                autoComplete="new-password"
                 placeholder="Ulangi Kata sandi"
                 error={errors.confirmPassword?.message}
                 {...register("confirmPassword")}
@@ -456,69 +490,123 @@ export default function Settings() {
 
       {isPhotoModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-          onClick={handleClosePhotoModal}
+          className="fixed inset-0 top-16 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm lg:left-64"
+          onClick={() => !isPhotoSubmitting && handleClosePhotoModal()}
         >
           <div
-            className="w-full max-w-md rounded-2xl border border-white/10 bg-[#1C1F26] p-5 shadow-2xl"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#1C1F26] p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-4">
+            <div className="flex items-start justify-between gap-3 pb-4">
               <div>
                 <h3 className="text-base font-bold text-white">Ubah Foto Profil</h3>
-                <p className="text-text-secondary text-xs">Unggah foto baru dengan format JPG, PNG, atau WebP (maks. 2MB).</p>
+                <p className="text-text-secondary text-xs">
+                  {previewUrl
+                    ? "Geser dan atur zoom untuk menyesuaikan area foto."
+                    : "Unggah foto baru dengan format JPG, PNG, atau WebP (maks. 2MB)."}
+                </p>
               </div>
               <button
                 type="button"
                 onClick={handleClosePhotoModal}
-                className="text-text-muted cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-white/5 hover:text-white"
+                disabled={isPhotoSubmitting}
+                aria-label="Tutup modal"
+                className="text-text-muted cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="mb-4 flex flex-col items-center">
-              <img
-                src={previewUrl || getAvatarUrl(profile.name, profile.profileUrl)}
-                alt="Preview Foto Profil"
-                className="h-32 w-32 rounded-2xl border border-white/10 object-cover shadow-md"
-              />
-              {selectedPhoto && (
-                <span className="text-text-secondary mt-2 max-w-full truncate text-xs">
-                  {selectedPhoto.name} ({(selectedPhoto.size / 1024 / 1024).toFixed(2)} MB)
-                </span>
-              )}
-            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png, image/jpeg"
+              onChange={handleFileChange}
+              disabled={isPhotoSubmitting}
+              className="hidden"
+            />
 
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
-                isDragging ? "border-primary bg-primary/10" : "border-white/10 bg-[#0B0C10]/60 hover:border-white/25"
-              }`}
-            >
-              <UploadCloud className={`mb-2 h-8 w-8 ${isDragging ? "text-primary" : "text-text-muted"}`} />
-              <p className="text-sm font-medium text-white">
-                Tarik &amp; lepas foto di sini, atau <span className="text-primary underline">pilih file</span>
-              </p>
-              <p className="text-text-muted mt-1 text-[11px]">JPG, PNG, WebP • Maksimal 2MB</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png, image/jpeg, image/webp"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </div>
+            {previewUrl ? (
+              <div className="flex flex-col gap-3">
+                <div className="relative h-64 w-full overflow-hidden rounded-xl border border-white/10 bg-[#0B0C10]">
+                  <Cropper
+                    image={previewUrl}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={1}
+                    cropShape="rect"
+                    showGrid={false}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={onCropComplete}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-1 items-center gap-2.5">
+                    <span className="text-text-muted text-xs font-medium">Zoom</span>
+                    <input
+                      type="range"
+                      min={1}
+                      max={3}
+                      step={0.05}
+                      value={zoom}
+                      onChange={(e) => setZoom(Number(e.target.value))}
+                      disabled={isPhotoSubmitting}
+                      className="accent-primary h-1.5 w-full cursor-pointer rounded-lg bg-white/10"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isPhotoSubmitting}
+                    className="text-primary hover:text-primary-hover cursor-pointer text-xs font-semibold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Ganti Foto
+                  </button>
+                </div>
+
+                {selectedPhoto && (
+                  <span className="text-text-secondary truncate text-center text-xs">
+                    {selectedPhoto.name} ({(selectedPhoto.size / 1024 / 1024).toFixed(2)} MB)
+                  </span>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 flex flex-col items-center">
+                  <img
+                    src={getAvatarUrl(profile.name, profile.profileUrl)}
+                    alt="Preview Foto Profil"
+                    className="h-32 w-32 rounded-2xl border border-white/10 object-cover shadow-md"
+                  />
+                </div>
+
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => !isPhotoSubmitting && fileInputRef.current?.click()}
+                  className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${
+                    isDragging ? "border-primary bg-primary/10" : "border-white/10 bg-[#0B0C10]/60 hover:border-white/25"
+                  }`}
+                >
+                  <UploadCloud className={`mb-2 h-8 w-8 ${isDragging ? "text-primary" : "text-text-muted"}`} />
+                  <p className="text-sm font-medium text-white">
+                    Tarik &amp; lepas foto di sini, atau <span className="text-primary underline">pilih file</span>
+                  </p>
+                  <p className="text-text-muted mt-1 text-[11px]">JPG, PNG, WebP • Maksimal 2MB</p>
+                </div>
+              </>
+            )}
 
             <div className="mt-5 flex items-center justify-end gap-2.5">
               <Button
                 type="button"
                 variant="secondary"
                 onClick={handleClosePhotoModal}
-                disabled={isUpdatingProfile}
+                disabled={isPhotoSubmitting}
               >
                 Batal
               </Button>
@@ -526,10 +614,10 @@ export default function Settings() {
                 type="button"
                 variant="primary"
                 onClick={handleSavePhoto}
-                disabled={!selectedPhoto}
-                isLoading={isUpdatingProfile}
+                disabled={!selectedPhoto || !croppedAreaPixels || isPhotoSubmitting}
+                isLoading={isPhotoSubmitting}
               >
-                {isUpdatingProfile ? "Mengunggah..." : "Simpan Foto"}
+                {isPhotoSubmitting ? "Mengunggah..." : "Simpan Foto"}
               </Button>
             </div>
           </div>
