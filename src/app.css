@@ -31,7 +31,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-text-primary);
-    font-family: var(--font-sans);
+    font-family: var(--font-inter);
     -webkit-font-smoothing: antialiased;
   }
 }

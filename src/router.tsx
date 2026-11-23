@@ -8,7 +8,6 @@ import ProtectedRoute from "./components/guard/ProtectedRoute"
 import AuthLayout from "./layouts/AuthLayout"
 import AppLayout from "./layouts/AppLayout"
 
-import Home from "./app/Home"
 import Login from "./app/auth/Login"
 import ForgotPassword from "./app/auth/ForgotPassword"
 
@@ -28,6 +27,8 @@ import TerminalKehadiran from "./app/attendance/TerminalKehadiran"
 import Trainers from "./app/trainers/Trainers"
 import NotFound from "./app/NotFound"
 import CreateTrainer from "./app/trainers/CreateTrainer"
+import LandingPage from "./app/LandingPage"
+import LandingLayout from "./layouts/LandingLayout"
 
 export const router = createBrowserRouter([
   {
@@ -38,8 +39,13 @@ export const router = createBrowserRouter([
     middleware: [userGlobalMiddleware],
     children: [
       {
-        index: true,
-        Component: Home
+        Component: LandingLayout,
+        children: [
+          {
+            index: true,
+            Component: LandingPage
+          }
+        ]
       },
       {
         path: "auth",

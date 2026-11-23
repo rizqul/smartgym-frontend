@@ -12,6 +12,17 @@ export interface NavItem {
   category?: MenuCategory
 }
 
+export interface LandingNavItem {
+  title: string
+  href: string
+}
+
+export interface FooterNavItem {
+  title: string
+  href?: string
+  to?: string
+}
+
 export const navigationMenu: NavItem[] = [
   {
     title: "Dashboard",
@@ -73,4 +84,39 @@ export const navigationMenu: NavItem[] = [
     roles: ["admin", "staff"],
     category: "System"
   }
+]
+
+export const landingNavigationMenu: LandingNavItem[] = [
+  {
+    title: "Beranda",
+    href: "#beranda"
+  },
+  {
+    title: "Tentang Kami",
+    href: "#fitur"
+  },
+  {
+    title: "Alur Daftar",
+    href: "#alur-pendaftaran"
+  },
+  {
+    title: "Membership",
+    href: "#paket"
+  },
+  {
+    title: "Trainer",
+    href: "#trainer"
+  },
+  {
+    title: "FAQ",
+    href: "#faq"
+  }
+]
+
+export const footerEcosystemMenu: FooterNavItem[] = [
+  { title: "Aplikasi Member", href: "#alur-pendaftaran" },
+  { title: "Portal Staf & Admin", to: "/auth/login" },
+  { title: "Paket Membership", href: "#paket" },
+  { title: "Trainer Profesional", href: "#trainer" },
+  { title: "FAQ & Bantuan", href: "#faq" }
 ]
