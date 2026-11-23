@@ -1,4 +1,4 @@
-import { ArrowRight, BadgeCheck, Dumbbell, Info, QrCode, Radio, ShieldCheck, UserPlus, Zap } from "lucide-react"
+import { ArrowRight, BadgeCheck, Dumbbell, Info, QrCode, ShieldCheck, UserPlus, Zap } from "lucide-react"
 
 const HERO_HIGHLIGHTS = [
   {
@@ -94,39 +94,6 @@ export default function HeroSection() {
                   </div>
                 )
               })}
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="bg-surface border-border/70 relative aspect-4/3 w-full overflow-hidden rounded-2xl border shadow-2xl">
-              <img
-                src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80"
-                alt="Interior SmartGym"
-                className="h-full w-full object-cover"
-              />
-
-              <div className="from-background/90 via-background/20 to-background/40 absolute inset-0 bg-linear-to-t" />
-
-              <div className="bg-background/80 border-border/60 absolute top-4 left-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 backdrop-blur-md">
-                <span className="bg-success h-2 w-2 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-                <span className="text-text-primary text-xs font-semibold">Kapasitas: 42% Nyaman</span>
-              </div>
-
-              <div className="bg-surface/85 border-border/70 absolute right-4 bottom-4 left-4 flex items-center justify-between gap-3 rounded-xl border p-3.5 backdrop-blur-md">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/15 border-primary/30 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
-                    <Radio className="h-5 w-5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">GATE STATUS</span>
-                    <span className="text-text-primary text-xs font-bold sm:text-sm">Auto Turnstile Online</span>
-                  </div>
-                </div>
-
-                <span className="bg-success/15 border-success/30 text-success shrink-0 rounded-lg border px-3 py-1.5 text-[11px] font-bold">
-                  Scan QR Gate
-                </span>
-              </div>
             </div>
           </div>
         </div>

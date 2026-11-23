@@ -121,13 +121,15 @@ export default function TrainerListTab({
                         SPESIALISASI &amp; PENGALAMAN
                       </div>
                     </TableTH>
-                    <TableTH>
-                      <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">TARIF PER SESI</div>
-                    </TableTH>
                     {isAdmin && (
-                      <TableTH>
-                        <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
-                      </TableTH>
+                      <>
+                        <TableTH>
+                          <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">TARIF PER SESI</div>
+                        </TableTH>
+                        <TableTH>
+                          <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
+                        </TableTH>
+                      </>
                     )}
                   </TableTR>
                 </TableHead>
