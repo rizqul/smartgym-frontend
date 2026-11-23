@@ -9,9 +9,8 @@ import { Select } from "~/components/ui/Select"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Table, TableHead, TableBody, TableTR, TableTH, TableTD } from "~/components/ui/table"
 import TransactionTableRow from "~/components/transactions/TransactionTableRow"
-import { useGetAllTransactionsQuery } from "~/services/transaction"
+import { useGetAllTransactionsQuery, useGetTransactionCountQuery } from "~/services/transaction"
 import { formatRupiah } from "~/utils/format"
-
 
 export default function Transaction() {
   const [page, setPage] = useState(1)
@@ -19,6 +18,9 @@ export default function Transaction() {
   const [typeFilter, setTypeFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
 
+  const currentYear = new Date().getFullYear()
+
+  const { data: countRes, isLoading: isLoadingCount } = useGetTransactionCountQuery(currentYear)
   const {
     data: transactionsRes,
     isLoading,
@@ -26,10 +28,11 @@ export default function Transaction() {
     isError,
     refetch
   } = useGetAllTransactionsQuery({
-    page,
+    page
   })
 
-  const transactions = transactionsRes?.data ?? []
+  const txStats = countRes?.data
+  const transactions = useMemo(() => transactionsRes?.data ?? [], [transactionsRes?.data])
   const pagination = transactionsRes?.paginate
 
   const filteredTransactions = useMemo(() => {
@@ -48,27 +51,17 @@ export default function Transaction() {
     })
   }, [transactions, searchQuery, typeFilter, statusFilter])
 
-  const stats = useMemo(() => {
-    const totalAmount = transactions
-      .filter((t) => ["SUCCESS", "PAID", "SETTLEMENT", "PROCESS"].includes(t.status?.toUpperCase()))
-      .reduce((acc, t) => acc + (t.amount ?? 0), 0)
-
-    const successCount = transactions.filter((t) => ["SUCCESS", "PAID", "SETTLEMENT", "PROCESS"].includes(t.status?.toUpperCase())).length
-
-    const pendingCount = transactions.filter((t) => t.status?.toUpperCase() === "PENDING").length
-
-    const failedCount = transactions.filter((t) => ["EXPIRED", "CANCELLED", "FAILED"].includes(t.status?.toUpperCase())).length
-
-    return { totalAmount, successCount, pendingCount, failedCount }
-  }, [transactions])
-
   const hasActiveFilter = Boolean(searchQuery.trim() || typeFilter || statusFilter)
 
   const handlePageChange = (url: string) => {
-    const parsedUrl = new URL(url, window.location.origin)
-    const nextPage = Number(parsedUrl.searchParams.get("page"))
-    if (nextPage && nextPage !== page) {
-      setPage(nextPage)
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+      const nextPage = Number(parsedUrl.searchParams.get("page"))
+      if (nextPage && nextPage !== page) {
+        setPage(nextPage)
+      }
+    } catch (e) {
+      console.error("Gagal membaca URL paginasi", e)
     }
   }
 
@@ -78,7 +71,7 @@ export default function Transaction() {
     setStatusFilter("")
   }
 
-  if (isLoading) {
+  if (isLoading || isLoadingCount) {
     return (
       <div className="w-full p-4 lg:p-6">
         <PageSkeleton
@@ -103,27 +96,27 @@ export default function Transaction() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <CardStats
           topIcon={<Receipt className="text-gray-300" />}
-          label="OMSET (HALAMAN INI)"
-          subLabel="Transaksi terbayar"
-          value={formatRupiah(stats.totalAmount) as unknown as number}
+          label={`OMSET (${currentYear})`}
+          subLabel="Total transaksi terbayar"
+          value={`Rp ${formatRupiah(txStats?.sumTransactionYearly ?? 0)}`}
         />
         <CardStats
           topIcon={<CheckCircle2 className="text-emerald-400" />}
           label="TRANSAKSI BERHASIL"
-          subLabel="Paid / Process"
-          value={stats.successCount}
+          subLabel="Status Success"
+          value={txStats?.transactionSuccess ?? 0}
         />
         <CardStats
           topIcon={<Hourglass className="text-amber-400" />}
           label="MENUNGGU PEMBAYARAN"
-          subLabel="Pending Gateway"
-          value={stats.pendingCount}
+          subLabel="Status Process"
+          value={txStats?.transactionProcess ?? 0}
         />
         <CardStats
           topIcon={<XCircle className="text-red-400" />}
-          label="GAGAL / KEDALUWARSA"
-          subLabel="Expired / Cancelled"
-          value={stats.failedCount}
+          label="GAGAL / DIBATALKAN"
+          subLabel="Failure / Cancelled"
+          value={txStats?.transactionFailed ?? 0}
         />
       </div>
 

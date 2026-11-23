@@ -31,10 +31,6 @@ export type TrainerSearchQuery = {
   page?: number
 }
 
-export type TrainersApi = ApiResponsePaginate & {
-  data: TrainerItem[]
-}
-
 export interface TrainerSlotItem {
   id: string
   description: string
@@ -58,6 +54,17 @@ export interface CreateTrainerSlotRequest {
   description?: string
 }
 
+export interface TrainerCount {
+  countTrainer: number
+  countTrainerWithSlot: number
+  countSlot: number
+  sumTransactionBookedTrainer: number
+}
+
+export type TrainersApi = ApiResponsePaginate & {
+  data: TrainerItem[]
+}
 export type TrainerSlotsApi = ApiResponse & {
   data: TrainerSlotItem[]
 }
+export type TrainerCountApi = ApiResponse & { data: TrainerCount }

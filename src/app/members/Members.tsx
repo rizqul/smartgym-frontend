@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router"
-import { Award, ChevronDown, Loader2, MinusCircle, Search, Trash2, TrendingUp, UserPlus, Users, X } from "lucide-react"
+import { Award, CalendarClock, ChevronDown, Loader2, MinusCircle, Search, ShieldExclamationPoint, Trash2, UserGroup, UserPlus, Users, X } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Button } from "~/components/ui/Button"
@@ -140,28 +140,28 @@ export default function Member() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <CardStats
           topIcon={<Users className="text-blue-400" />}
-          bottomIcon={<TrendingUp className="text-blue-400" />}
+          bottomIcon={<CalendarClock className="text-blue-400" />}
           label="Total Terdaftar"
           subLabel="All-Time"
           value={memberStats?.memberCount ?? 0}
         />
         <CardStats
           topIcon={<Award className="text-green-400" />}
-          bottomIcon={<TrendingUp className="text-green-400" />}
+          bottomIcon={<UserGroup className="text-green-400" />}
           label="Membership Aktif"
           subLabel="Total Aktif"
           value={memberStats?.memberActiveCount ?? 0}
         />
         <CardStats
           topIcon={<MinusCircle className="text-red-400" />}
-          bottomIcon={<TrendingUp className="text-red-400" />}
+          bottomIcon={<ShieldExclamationPoint className="text-red-400" />}
           label="Kadaluarsa / Nonaktif"
           subLabel="Total Nonaktif"
           value={memberStats?.memberInactiveCount ?? 0}
         />
         <CardStats
           topIcon={<Users className="text-yellow-400" />}
-          bottomIcon={<TrendingUp className="text-yellow-400" />}
+          bottomIcon={<UserPlus className="text-yellow-400" />}
           label="Member Baru"
           subLabel="30 Hari Terakhir"
           value={memberStats?.newMemberCount ?? 0}

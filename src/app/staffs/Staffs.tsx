@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import { Loader2, Pencil, Search, ShieldCheck, Trash2, TrendingUp, UserPlus, Users, X } from "lucide-react"
+import { CircleUser, Loader2, Pencil, Search, ShieldCheck, Trash2, TrendingUp, UserPlus, Users, X } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Button } from "~/components/ui/Button"
@@ -117,7 +117,7 @@ export default function Staff() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <CardStats
           topIcon={<Users className="text-blue-400" />}
-          bottomIcon={<TrendingUp className="text-blue-400" />}
+          bottomIcon={<CircleUser className="text-blue-400" />}
           label="Staf Terdaftar"
           subLabel="Total Keseluruhan"
           value={totalStaffs}
@@ -126,7 +126,7 @@ export default function Staff() {
           topIcon={<ShieldCheck className="text-green-400" />}
           bottomIcon={<TrendingUp className="text-green-400" />}
           label="Staf Baru"
-          subLabel="30 Hari Terakhir (Halaman Ini)"
+          subLabel="30 Hari Terakhir"
           value={2}
         />
       </div>

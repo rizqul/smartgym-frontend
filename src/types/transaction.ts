@@ -1,4 +1,4 @@
-import type { ApiResponsePaginate } from "~/types/common"
+import type { ApiResponse, ApiResponsePaginate } from "~/types/common"
 
 export interface UserTransactionResponse {
   id?: string
@@ -26,6 +26,14 @@ export interface TransactionSearchQuery {
   size?: number
 }
 
+export interface TransactionCount {
+  sumTransactionYearly: number
+  transactionSuccess: number
+  transactionFailed: number
+  transactionProcess: number
+}
+
 export type TransactionsApi = ApiResponsePaginate & {
   data: TransactionItem[]
 }
+export type TransactionCountApi = ApiResponse & {data: TransactionCount}

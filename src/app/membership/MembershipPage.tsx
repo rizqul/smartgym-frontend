@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import { Layers, Wallet, TrendingUp, Plus, CheckCircle2, Edit, Trash2, Loader2 } from "lucide-react"
+import { Layers, Wallet, Plus, CheckCircle2, Edit, Trash2, Loader2, SquareLibrary, Banknote } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Button } from "~/components/ui/Button"
@@ -109,7 +109,7 @@ export default function MembershipPage() {
       <div className={`grid grid-cols-1 gap-3 ${isAdmin ? "sm:grid-cols-2" : "sm:max-w-sm"}`}>
         <CardStats
           topIcon={<Layers className="text-blue-400" />}
-          bottomIcon={<TrendingUp className="text-blue-400" />}
+          bottomIcon={<SquareLibrary className="text-blue-400" />}
           label="Katalog Aktif"
           subLabel="Total Paket Tersedia"
           value={totalPackages}
@@ -118,7 +118,7 @@ export default function MembershipPage() {
         {isAdmin && (
           <CardStats
             topIcon={<Wallet className="text-emerald-400" />}
-            bottomIcon={<TrendingUp className="text-emerald-400" />}
+            bottomIcon={<Banknote className="text-emerald-400" />}
             label="Total Pendapatan Membership"
             subLabel="Akumulasi Transaksi"
             value={`Rp ${formatRupiah(membershipStats?.totalMembershipIncome ?? 0)}`}

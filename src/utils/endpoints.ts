@@ -53,3 +53,8 @@ export const API_STAFF_MEMBERS_COUNT = "/staff/dashboard/member/count"
 export const API_ADMIN_STAFF_COUNT = "/admin/dashboard/staff/count"
 
 export const API_ADMIN_MEMBERSHIP_COUNT = "/admin/dashboard/memberships/count"
+
+export const API_ADMIN_TRAINERS_COUNT = "/admin/dashboard/trainers/count"
+export const API_STAFF_TRAINERS_COUNT = "/staff/dashboard/trainers/count"
+
+export const API_ADMIN_TRANSACTIONS_COUNT = "/admin/dashboard/transactions/count"
