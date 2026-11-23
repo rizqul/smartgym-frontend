@@ -47,8 +47,20 @@ export interface UpdateStaffPayload {
   profileUrl?: string
 }
 
+export interface MemberCount {
+  memberCount: number
+  memberActiveCount: number
+  memberInactiveCount: number
+  newMemberCount: number
+}
+
+export interface StaffCount {
+  staffCount: number
+}
+
 export type LoginApi = ApiResponse & { data: User }
 export type UserApi = ApiResponse & { data: User }
 export type MembersApi = ApiResponsePaginate & { data: Array<User> }
 export type StaffsApi = ApiResponsePaginate & { data: Array<User> }
-
+export type MemberCountApi = ApiResponse & { data: MemberCount }
+export type StaffCountApi = ApiResponse & { data: StaffCount }

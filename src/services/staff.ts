@@ -1,8 +1,14 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { ApiResponse } from "~/types/common"
-import type { StaffsApi, StaffSearchQuery, UpdateStaffPayload } from "~/types/user"
-import { API_ADMIN_STAFF_CREATE, API_ADMIN_STAFF_DELETE, API_ADMIN_STAFF_LIST, API_ADMIN_STAFF_UPDATE } from "~/utils/endpoints"
+import type { StaffCountApi, StaffsApi, StaffSearchQuery, UpdateStaffPayload } from "~/types/user"
+import {
+  API_ADMIN_STAFF_COUNT,
+  API_ADMIN_STAFF_CREATE,
+  API_ADMIN_STAFF_DELETE,
+  API_ADMIN_STAFF_LIST,
+  API_ADMIN_STAFF_UPDATE
+} from "~/utils/endpoints"
 import type { CreateStaffData } from "~/validation/staff"
 
 export const staffServiceApi = createApi({
@@ -44,8 +50,16 @@ export const staffServiceApi = createApi({
         method: "DELETE"
       }),
       invalidatesTags: ["Staffs"]
+    }),
+    getStaffCount: build.query<StaffCountApi, void>({
+      query: () => ({
+        url: API_ADMIN_STAFF_COUNT,
+        method: "GET"
+      }),
+      providesTags: ["Staffs"]
     })
   })
 })
 
-export const { useGetAllStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useDeleteStaffMutation } = staffServiceApi
+export const { useGetAllStaffQuery, useCreateStaffMutation, useUpdateStaffMutation, useDeleteStaffMutation, useGetStaffCountQuery } =
+  staffServiceApi

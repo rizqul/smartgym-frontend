@@ -1,8 +1,9 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { ApiResponse } from "~/types/common"
-import type { MembershipPackagesApi } from "~/types/membership"
+import type { MembershipCountApi, MembershipPackagesApi } from "~/types/membership"
 import {
+  API_ADMIN_MEMBERSHIP_COUNT,
   API_ADMIN_MEMBERSHIP_PACKAGE_CREATE,
   API_ADMIN_MEMBERSHIP_PACKAGE_DELETE,
   API_ADMIN_MEMBERSHIP_PACKAGE_LIST,
@@ -36,9 +37,16 @@ export const membershipPackageServiceApi = createApi({
         method: "DELETE"
       }),
       invalidatesTags: ["MembershipPackages"]
+    }),
+    getMembershipCount: build.query<MembershipCountApi, void>({
+      query: () => ({
+        url: API_ADMIN_MEMBERSHIP_COUNT,
+        method: "GET"
+      }),
+      providesTags: ["MembershipPackages"]
     })
   })
 })
 
-export const { useGetAllMembershipPackagesQuery, useCreateMembershipPackageMutation, useDeleteMembershipPackageMutation } =
+export const { useGetAllMembershipPackagesQuery, useCreateMembershipPackageMutation, useDeleteMembershipPackageMutation, useGetMembershipCountQuery } =
   membershipPackageServiceApi

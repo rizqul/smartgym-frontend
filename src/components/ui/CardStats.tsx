@@ -4,7 +4,7 @@ export interface CardStatsProps {
   topIcon?: ReactNode
   bottomIcon?: ReactNode
   label: string
-  value: number
+  value: number | ReactNode
   subLabel?: string
 }
 
@@ -17,7 +17,9 @@ export function CardStats({ topIcon, bottomIcon, label, value, subLabel }: CardS
       </div>
 
       <div className="mt-1 flex flex-wrap items-end justify-between gap-x-2 gap-y-2">
-        <p className="text-2xl leading-none font-extrabold text-white xl:text-[26px]">{value.toLocaleString("en-US")}</p>
+        <p className="text-2xl leading-none font-extrabold text-white xl:text-[26px]">
+          {typeof value === "number" ? value.toLocaleString("en-US") : value}
+        </p>
 
         <div className="flex items-center gap-1.5 rounded-full bg-white/5 px-2 py-1">
           <span className="shrink-0 scale-90">{bottomIcon}</span>

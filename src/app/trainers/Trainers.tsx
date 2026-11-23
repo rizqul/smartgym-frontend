@@ -1,14 +1,13 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import { UserPlus, Dumbbell, Briefcase, Wallet, Award, TrendingUp, Calendar, Users, Trash2, X } from "lucide-react"
-// import toast from "react-hot-toast"
+import { UserPlus, Dumbbell, Wallet, Calendar, CalendarCheck, CalendarClock, Users, Trash2, X, Whistle, LayoutGrid, ListChecks, Banknote } from "lucide-react"
 
 import { Button } from "~/components/ui/Button"
 import { CardStats } from "~/components/ui/CardStats"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import TrainerListTab from "~/components/trainers/list/TrainerListTab"
 import TrainerScheduleTab from "~/components/trainers/list/TrainerScheduleTab"
-import { useGetAllTrainerQuery } from "~/services/trainer"
+import { useGetAllTrainerQuery, useGetTrainerCountQuery } from "~/services/trainer"
 import { useAppSelector } from "~/store/hooks"
 import { formatRupiah } from "~/utils/format"
 import type { TrainerItem } from "~/types/trainer"
@@ -34,6 +33,7 @@ export default function Trainers() {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
+  const { data: countRes, isLoading: isLoadingCount } = useGetTrainerCountQuery()
   const {
     data: trainersRes,
     isLoading,
@@ -45,25 +45,8 @@ export default function Trainers() {
     page
   })
 
-  // const [deleteTrainer, { isLoading: isDeleting }] = useDeleteTrainerMutation()
-
   const trainers = trainersRes?.data ?? []
-  const totalTrainers = trainersRes?.paginate?.totalData ?? trainers.length
-
-  const stats = useMemo(() => {
-    if (!trainers.length) {
-      return { avgExperience: 0, avgRate: 0, totalSpecializations: 0 }
-    }
-    const totalExp = trainers.reduce((acc, t) => acc + (t.experience ?? 0), 0)
-    const totalRate = trainers.reduce((acc, t) => acc + (t.rate ?? 0), 0)
-    const uniqueSpecs = new Set(trainers.map((t) => t.specialization).filter(Boolean))
-
-    return {
-      avgExperience: Math.round((totalExp / trainers.length) * 10) / 10,
-      avgRate: Math.round(totalRate / trainers.length),
-      totalSpecializations: uniqueSpecs.size
-    }
-  }, [trainers])
+  const trainerStats = countRes?.data
 
   const handlePageChange = (url: string) => {
     const parsedUrl = new URL(url, window.location.origin)
@@ -73,23 +56,11 @@ export default function Trainers() {
     }
   }
 
-  // const handleConfirmDelete = async () => {
-  //   if (!trainerToDelete) return
-  //   try {
-  //     const res = await deleteTrainer(trainerToDelete.id).unwrap()
-  //     toast.success(res?.message || `Trainer ${trainerToDelete.name} berhasil dihapus.`)
-  //     setTrainerToDelete(null)
-  //   } catch (err: unknown) {
-  //     const apiErr = err as { data?: { message?: string }; message?: string }
-  //     toast.error(apiErr?.data?.message || apiErr?.message || "Gagal menghapus trainer.")
-  //   }
-  // }
-
-  if (isLoading) {
+  if (isLoading || isLoadingCount) {
     return (
       <div className="w-full p-4 lg:p-6">
         <PageSkeleton
-          statCount={4}
+          statCount={isAdmin ? 4 : 3}
           contentVariant="list"
         />
       </div>
@@ -120,35 +91,37 @@ export default function Trainers() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${isAdmin ? "xl:grid-cols-4" : "xl:grid-cols-3"}`}>
         <CardStats
           topIcon={<Dumbbell className="text-primary" />}
-          bottomIcon={<TrendingUp className="text-primary" />}
-          label="Total Trainer Terdaftar"
-          subLabel="Aktif di sistem SmartGym"
-          value={totalTrainers}
+          bottomIcon={<Whistle className="text-primary" />}
+          label="Total Trainer"
+          subLabel="Terdaftar di SmartGym"
+          value={trainerStats?.countTrainer ?? 0}
         />
         <CardStats
-          topIcon={<Award className="text-amber-400" />}
-          bottomIcon={<TrendingUp className="text-amber-400" />}
-          label="Spesialisasi Tersedia"
-          subLabel="Kategori keahlian aktif"
-          value={stats.totalSpecializations}
+          topIcon={<CalendarCheck className="text-amber-400" />}
+          bottomIcon={<LayoutGrid className="text-amber-400" />}
+          label="Trainer Bertugas"
+          subLabel="Memiliki slot hari ini"
+          value={trainerStats?.countTrainerWithSlot ?? 0}
         />
         <CardStats
-          topIcon={<Briefcase className="text-blue-400" />}
-          bottomIcon={<TrendingUp className="text-blue-400" />}
-          label="Rata-rata Pengalaman"
-          subLabel="Berdasarkan data halaman ini"
-          value={`${stats.avgExperience} Thn` as unknown as number}
+          topIcon={<CalendarClock className="text-blue-400" />}
+          bottomIcon={<ListChecks className="text-blue-400" />}
+          label="Total Slot Hari Ini"
+          subLabel="Jadwal sesi tersedia"
+          value={trainerStats?.countSlot ?? 0}
         />
-        <CardStats
-          topIcon={<Wallet className="text-orange-400" />}
-          bottomIcon={<TrendingUp className="text-orange-400" />}
-          label="Rata-rata Tarif / Sesi"
-          subLabel="Estimasi biaya sesi PT"
-          value={formatRupiah(stats.avgRate) as unknown as number}
-        />
+        {isAdmin && (
+          <CardStats
+            topIcon={<Wallet className="text-emerald-400" />}
+            bottomIcon={<Banknote className="text-emerald-400" />}
+            label="Pendapatan Sesi PT"
+            subLabel="Akumulasi booking trainer"
+            value={`Rp ${formatRupiah(trainerStats?.sumTransactionBookedTrainer ?? 0)}`}
+          />
+        )}
       </div>
 
       <div

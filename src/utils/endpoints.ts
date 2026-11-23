@@ -46,3 +46,15 @@ export const API_STAFF_TRAINERS_SLOT_LIST = (id: string) => `/staff/dashboard/tr
 export const API_STAFF_CHECKIN_QR_TOKEN = "/staff/dashboard/checkins/qr-token"
 export const API_STAFF_CHECKIN_CHECKOUT = (memberId: string) => `/staff/dashboard/checkins/${memberId}/checkout`
 export const API_ADMIN_CHECKIN_CHECKOUT = (memberId: string) => `/admin/dashboard/checkins/${memberId}/checkout`
+
+export const API_ADMIN_MEMBERS_COUNT = "/admin/dashboard/members/count"
+export const API_STAFF_MEMBERS_COUNT = "/staff/dashboard/member/count"
+
+export const API_ADMIN_STAFF_COUNT = "/admin/dashboard/staff/count"
+
+export const API_ADMIN_MEMBERSHIP_COUNT = "/admin/dashboard/memberships/count"
+
+export const API_ADMIN_TRAINERS_COUNT = "/admin/dashboard/trainers/count"
+export const API_STAFF_TRAINERS_COUNT = "/staff/dashboard/trainers/count"
+
+export const API_ADMIN_TRANSACTIONS_COUNT = "/admin/dashboard/transactions/count"

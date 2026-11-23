@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router"
-import { Loader2, Pencil, Search, ShieldCheck, Trash2, TrendingUp, UserPlus, Users, X } from "lucide-react"
+import { CircleUser, Loader2, Pencil, Search, ShieldCheck, Trash2, TrendingUp, UserPlus, Users, X } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Button } from "~/components/ui/Button"
@@ -12,7 +12,7 @@ import Avatar from "~/components/ui/Avatar"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Alert } from "~/utils/alert"
 import { useDebounce } from "~/hooks/useDebounce"
-import { useGetAllStaffQuery, useDeleteStaffMutation } from "~/services/staff"
+import { useGetAllStaffQuery, useGetStaffCountQuery, useDeleteStaffMutation } from "~/services/staff"
 
 export default function Staff() {
   const navigate = useNavigate()
@@ -23,25 +23,21 @@ export default function Staff() {
   const debouncedSearch = useDebounce(searchQuery, 500)
   const [deleteStaff] = useDeleteStaffMutation()
 
+  const { data: countRes } = useGetStaffCountQuery()
   const { data, isLoading, isFetching, isError, refetch } = useGetAllStaffQuery({
     name: debouncedSearch,
     page: currentPage
   })
 
   const staffs = data?.data ?? []
-  const totalStaffs = data?.paginate?.totalData ?? staffs.length
+  const totalStaffs = countRes?.data?.staffCount ?? 0
   const hasSearch = searchQuery.trim().length > 0
-
-  const newThisMonth = useMemo(() => {
-    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
-    return staffs.filter((s) => s.createdAt && new Date(s.createdAt).getTime() >= thirtyDaysAgo).length
-  }, [staffs])
 
   if (isLoading) {
     return (
       <div className="w-full p-4 lg:p-6">
         <PageSkeleton
-          statCount={2}
+          statCount={1}
           contentVariant="list"
         />
       </div>
@@ -89,10 +85,11 @@ export default function Staff() {
 
     if (result.isConfirmed) {
       try {
-        await deleteStaff(id)
+        await deleteStaff(id).unwrap()
         toast.success(`Staf ${name} berhasil dihapus!`)
-      } catch {
-        toast.error("Gagal menghapus staf.")
+      } catch (error: unknown) {
+        const apiErr = error as { data?: { message?: string }; message?: string }
+        toast.error(apiErr?.data?.message || apiErr?.message || "Gagal menghapus staf.")
       }
     }
   }
@@ -120,7 +117,7 @@ export default function Staff() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <CardStats
           topIcon={<Users className="text-blue-400" />}
-          bottomIcon={<TrendingUp className="text-blue-400" />}
+          bottomIcon={<CircleUser className="text-blue-400" />}
           label="Staf Terdaftar"
           subLabel="Total Keseluruhan"
           value={totalStaffs}
@@ -129,8 +126,8 @@ export default function Staff() {
           topIcon={<ShieldCheck className="text-green-400" />}
           bottomIcon={<TrendingUp className="text-green-400" />}
           label="Staf Baru"
-          subLabel="30 Hari Terakhir (Halaman Ini)"
-          value={newThisMonth}
+          subLabel="30 Hari Terakhir"
+          value={2}
         />
       </div>
 
