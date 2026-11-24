@@ -71,7 +71,6 @@ export function Breadcrumb({ isStaff = false }: BreadcrumbProps) {
 
       {items.map((item, index) => {
         const isLast = index === items.length - 1
-        const showChevron = !isStaff || index > 0
 
         return (
           <div
@@ -79,7 +78,6 @@ export function Breadcrumb({ isStaff = false }: BreadcrumbProps) {
             className="flex items-center space-x-1"
           >
             <ChevronRight className="h-4 w-4 text-white/20" />
-            {showChevron && <ChevronRight className="h-4 w-4 text-white/20" />}
             {isLast ? (
               <span className="text-white">{item.label}</span>
             ) : (

@@ -6,7 +6,19 @@ import { X, CalendarCheck, CheckCircle2, Info, ChevronDown, UserCheck, Clock } f
 import { Input } from "~/components/ui/Input"
 import { Select } from "~/components/ui/Select"
 import { Button } from "~/components/ui/Button"
-import { getCurrentHourWIB, getTodayWIB } from "~/utils/date"
+import { Alert } from "~/utils/alert"
+import { formatDateWIB, getCurrentHourWIB, getTodayWIB } from "~/utils/date"
+import {
+  GYM_CLOSE_HOUR,
+  GYM_CLOSE_TIME,
+  GYM_OPEN_TIME,
+  escapeHtml,
+  formatDuration,
+  getDefaultHours,
+  getDurationMinutes,
+  getMinStartTime,
+  isWithinOperatingHours
+} from "~/utils/slotTime"
 import type { CreateTrainerSlotRequest, TrainerItem } from "~/types/trainer"
 import { CreateTrainerSlotValidation, type CreateTrainerSlotData } from "~/validation/trainer"
 
@@ -18,28 +30,6 @@ interface CreateTrainerSlotModalProps {
   defaultDate: string
   isSubmitting?: boolean
   onSubmit: (payload: CreateTrainerSlotRequest) => void
-}
-
-const formatDuration = (minutes: number) => {
-  const h = Math.floor(minutes / 60)
-  const m = minutes % 60
-  if (h > 0 && m > 0) return `${h} hour${h > 1 ? "s" : ""} ${m} minute${m > 1 ? "s" : ""}`
-  if (h > 0) return `${h} hour${h > 1 ? "s" : ""}`
-  return `${m} minute${m > 1 ? "s" : ""}`
-}
-
-const getDefaultHours = (slotDate: string) => {
-  if (slotDate !== getTodayWIB()) {
-    return { startHour: "08:00", endHour: "09:00" }
-  }
-
-  const nextHour = Math.min(getCurrentHourWIB() + 1, 22)
-  const endHour = Math.min(nextHour + 1, 23)
-
-  return {
-    startHour: `${String(nextHour).padStart(2, "0")}:00`,
-    endHour: `${String(endHour).padStart(2, "0")}:00`
-  }
 }
 
 export default function CreateTrainerSlotModal({
@@ -55,6 +45,7 @@ export default function CreateTrainerSlotModal({
   trainersRef.current = trainers
 
   const prevOpenRef = useRef(false)
+  const isConfirmingRef = useRef(false)
 
   const todayWIB = getTodayWIB()
   const initialDate = defaultDate && defaultDate >= todayWIB ? defaultDate : todayWIB
@@ -101,7 +92,7 @@ export default function CreateTrainerSlotModal({
     if (!isOpen) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isSubmitting) {
+      if (e.key === "Escape" && !isSubmitting && !isConfirmingRef.current) {
         onClose()
       }
     }
@@ -114,43 +105,99 @@ export default function CreateTrainerSlotModal({
   const startHour = watch("startHour")
   const endHour = watch("endHour")
 
-  const durationMinutes = useMemo(() => {
-    if (!startHour || !endHour) return 0
-    const [sh, sm] = startHour.split(":").map(Number)
-    const [eh, em] = endHour.split(":").map(Number)
-    if ([sh, sm, eh, em].some(Number.isNaN)) return 0
-    return eh * 60 + em - (sh * 60 + sm)
-  }, [startHour, endHour])
+  const durationMinutes = useMemo(() => getDurationMinutes(startHour, endHour), [startHour, endHour])
 
   if (!isOpen) return null
 
   const isTodaySlot = slotDate === todayWIB
-  const minStartTime = isTodaySlot ? `${String(Math.min(Math.max(getCurrentHourWIB(), 0), 23)).padStart(2, "0")}:00` : undefined
-  const isFormBlocked = isSubmitting || trainers.length === 0 || durationMinutes <= 0
+  const isTodayClosed = isTodaySlot && getCurrentHourWIB() >= GYM_CLOSE_HOUR
+  const minStartTime = getMinStartTime(slotDate)
+  const isTimeInputDisabled = isSubmitting || isTodayClosed
+  const validHours = isWithinOperatingHours(startHour, endHour)
+  const isFormBlocked = isSubmitting || trainers.length === 0 || isTodayClosed || !validHours || durationMinutes <= 0
 
-  const handleValidSubmit = (data: CreateTrainerSlotData) => {
-    onSubmit({
-      trainerId: data.trainerId,
-      slotDate: data.slotDate,
-      startTime: data.startHour,
-      endTime: data.endHour,
-      description: data.description?.trim() ?? ""
-    })
+  const handleValidSubmit = async (data: CreateTrainerSlotData) => {
+    if (!isWithinOperatingHours(data.startHour, data.endHour) || isTodayClosed) return
+
+    const selectedTrainer = trainers.find((t) => t.id === data.trainerId)
+    const trimmedDescription = data.description?.trim() ?? ""
+
+    const trainerName = escapeHtml(selectedTrainer?.name ?? "-")
+    const specialization = escapeHtml(selectedTrainer?.specialization?.replace(/_/g, " ") || "-")
+    const formattedDate = escapeHtml(formatDateWIB(data.slotDate))
+    const timeRange = `${escapeHtml(data.startHour)} – ${escapeHtml(data.endHour)} WIB`
+    const durationText = durationMinutes > 0 ? escapeHtml(formatDuration(durationMinutes)) : "-"
+    const noteRow = trimmedDescription
+      ? `<div class="mt-2 flex items-start justify-between gap-3 border-t border-white/10 pt-2">
+           <span class="shrink-0 text-text-muted">Notes</span>
+           <span class="text-right wrap-break-word text-text-secondary">${escapeHtml(trimmedDescription)}</span>
+         </div>`
+      : ""
+
+    isConfirmingRef.current = true
+    try {
+      const result = await Alert.confirm({
+        icon: "question",
+        title: "Confirm Schedule Slot",
+        confirmText: "Yes, Save Slot",
+        cancelText: "Check Again",
+        html: `
+          <p class="mb-3.5 text-[13px] text-text-secondary">
+            Please make sure the trainer slot details below are correct before saving.
+          </p>
+          <div class="rounded-xl border border-border/60 bg-background p-3.5 text-left text-xs leading-relaxed">
+            <div class="mb-1.5 flex items-center justify-between gap-3">
+              <span class="text-text-muted">Trainer</span>
+              <span class="text-right font-semibold text-white">${trainerName}</span>
+            </div>
+            <div class="mb-1.5 flex items-center justify-between gap-3">
+              <span class="text-text-muted">Specialization</span>
+              <span class="text-right font-semibold text-primary">${specialization}</span>
+            </div>
+            <div class="mb-1.5 flex items-center justify-between gap-3">
+              <span class="text-text-muted">Date</span>
+              <span class="text-right font-medium text-white">${formattedDate}</span>
+            </div>
+            <div class="mb-1.5 flex items-center justify-between gap-3">
+              <span class="text-text-muted">Time</span>
+              <span class="text-right font-semibold text-white">${timeRange}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-text-muted">Duration</span>
+              <span class="text-right font-semibold text-info">${durationText}</span>
+            </div>
+            ${noteRow}
+          </div>
+        `
+      })
+
+      if (!result.isConfirmed) return
+
+      onSubmit({
+        trainerId: data.trainerId,
+        slotDate: data.slotDate,
+        startTime: data.startHour,
+        endTime: data.endHour,
+        description: trimmedDescription
+      })
+    } finally {
+      isConfirmingRef.current = false
+    }
   }
 
   return (
     <div
       className="fixed inset-0 top-16 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm lg:left-64"
-      onClick={() => !isSubmitting && onClose()}
+      onClick={() => !isSubmitting && !isConfirmingRef.current && onClose()}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-slot-modal-title"
-        className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#16181D] shadow-2xl"
+        className="border-border/70 bg-surface flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-white/5 px-6 py-5">
+        <div className="border-border/60 flex items-start justify-between gap-4 border-b px-6 py-5">
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
               <h3
@@ -183,7 +230,7 @@ export default function CreateTrainerSlotModal({
           onSubmit={handleSubmit(handleValidSubmit)}
           className="flex flex-1 flex-col overflow-y-auto"
         >
-          <div className="flex flex-col gap-5 p-6">
+          <div className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-6">
             <Select
               label="Select Trainer / Instructor"
               icon={UserCheck}
@@ -193,7 +240,7 @@ export default function CreateTrainerSlotModal({
             >
               <option
                 value=""
-                className="bg-[#16181D]"
+                className="bg-surface"
               >
                 {trainers.length ? "-- Select Trainer --" : "No trainers available"}
               </option>
@@ -201,7 +248,7 @@ export default function CreateTrainerSlotModal({
                 <option
                   key={t.id}
                   value={t.id}
-                  className="bg-[#16181D]"
+                  className="bg-surface"
                 >
                   {t.name} — {t.specialization?.replace(/_/g, " ") || "-"}
                 </option>
@@ -209,41 +256,59 @@ export default function CreateTrainerSlotModal({
             </Select>
 
             <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-                <Input
-                  label="Slot Date"
-                  type="date"
-                  min={todayWIB}
-                  error={errors.slotDate?.message}
-                  {...register("slotDate")}
-                  className="scheme-dark"
-                />
-                <Input
-                  label="Start Time"
-                  type="time"
-                  min={minStartTime}
-                  error={errors.startHour?.message}
-                  {...register("startHour")}
-                  className="scheme-dark"
-                />
-                <Input
-                  label="End Time"
-                  type="time"
-                  error={errors.endHour?.message}
-                  {...register("endHour")}
-                  className="scheme-dark"
-                />
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5">
+                <div className="col-span-2 sm:col-span-1">
+                  <Input
+                    label="Slot Date"
+                    type="date"
+                    min={todayWIB}
+                    disabled={isSubmitting}
+                    error={errors.slotDate?.message}
+                    {...register("slotDate")}
+                    className="scheme-dark"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Input
+                    label="Start Time"
+                    type="time"
+                    min={minStartTime}
+                    max={GYM_CLOSE_TIME}
+                    disabled={isTimeInputDisabled}
+                    {...register("startHour")}
+                    className="scheme-dark"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <Input
+                    label="End Time"
+                    type="time"
+                    min={startHour || minStartTime}
+                    max={GYM_CLOSE_TIME}
+                    disabled={isTimeInputDisabled}
+                    {...register("endHour")}
+                    className="scheme-dark"
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-xl border border-white/5 bg-[#0B0C10]/60 px-3.5 py-2 text-xs">
+              <div className="border-border/50 bg-background/70 flex flex-wrap items-center justify-between gap-2 rounded-xl border px-3.5 py-2 text-xs">
                 <span className="text-text-muted inline-flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
+                  <Clock className="h-3.5 w-3.5 shrink-0" />
                   Estimated Session Duration
                 </span>
-                {durationMinutes > 0 ? (
-                  <span className="font-semibold text-sky-400">{formatDuration(durationMinutes)}</span>
+                {isTodayClosed ? (
+                  <span className="text-warning text-right font-semibold">
+                    Operational hours {GYM_OPEN_TIME} – {GYM_CLOSE_TIME} (closed today)
+                  </span>
+                ) : !validHours ? (
+                  <span className="text-danger text-right font-semibold">
+                    Operational hours: {GYM_OPEN_TIME} – {GYM_CLOSE_TIME}
+                  </span>
+                ) : durationMinutes > 0 ? (
+                  <span className="text-info font-semibold">{formatDuration(durationMinutes)}</span>
                 ) : (
-                  <span className="font-semibold text-red-400">Invalid time range</span>
+                  <span className="text-text-muted font-medium">-</span>
                 )}
               </div>
             </div>
@@ -261,33 +326,37 @@ export default function CreateTrainerSlotModal({
               <textarea
                 id="slot-description"
                 rows={3}
+                disabled={isSubmitting}
                 {...register("description")}
-                placeholder="Example: Squat form correction and hip mobility session. Ask the member to prepare a lifting belt..."
-                className={`placeholder:text-text-muted focus:border-primary focus:ring-primary block w-full resize-none rounded-xl border bg-[#0B0C10] p-3.5 text-[14px] text-white transition-all focus:ring-1 focus:outline-none ${
-                  errors.description ? "border-danger focus:border-danger focus:ring-danger" : "border-white/10"
+                placeholder="Further Information"
+                className={`placeholder:text-text-muted focus:border-primary focus:ring-primary bg-background block w-full resize-none rounded-xl border p-3.5 text-[14px] text-white transition-all focus:ring-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                  errors.description ? "border-danger focus:border-danger focus:ring-danger" : "border-border/70"
                 }`}
               />
-              {errors.description && <p className="text-danger mt-1 text-xs font-medium">{errors.description.message}</p>}
             </div>
 
-            <div className="flex items-start gap-3 rounded-xl border border-amber-500/15 bg-amber-500/5 p-3.5">
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
+            <div className="border-warning/20 bg-warning/5 flex items-center gap-3 rounded-xl border px-3.5 py-2.5">
+              <div className="bg-warning/15 text-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                 <CalendarCheck className="h-4 w-4" />
               </div>
-              <div className="text-xs leading-relaxed">
-                <p className="font-bold text-amber-200">Automatic Schedule Validation</p>
+              <div className="min-w-0 text-xs leading-snug">
+                <p className="text-secondary font-bold">Information</p>
                 <p className="text-text-muted mt-0.5">
-                  The system will check for trainer schedule conflicts from{" "}
-                  <strong className="text-white">
-                    {startHour || "--:--"} – {endHour || "--:--"} WIB
+                  Open{" "}
+                  <strong className="text-text-primary">
+                    {GYM_OPEN_TIME}–{GYM_CLOSE_TIME} WIB
                   </strong>{" "}
-                  for a <strong className="text-white">1-member</strong> private session.
+                  • Checks{" "}
+                  <strong className="text-text-primary">
+                    {startHour || "--:--"}–{endHour || "--:--"} WIB
+                  </strong>{" "}
+                  for <strong className="text-text-primary">1-member</strong> sessions.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col-reverse items-center justify-between gap-3 border-t border-white/5 bg-[#121419] px-6 py-4 sm:flex-row">
+          <div className="border-border/60 bg-background/60 flex flex-col-reverse items-center justify-between gap-3 border-t px-6 py-4 sm:flex-row">
             <span className="text-text-muted inline-flex items-center gap-1.5 text-[11px]">
               <Info className="h-3.5 w-3.5 shrink-0" />
               Automatically synchronized with the member app.

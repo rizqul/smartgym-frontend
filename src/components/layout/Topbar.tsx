@@ -25,7 +25,7 @@ export function Topbar() {
             <span className="max-w-32 truncate text-xs leading-tight font-bold text-white">{user?.name ?? "Guest User"}</span>
             <span className="text-[10px] font-semibold tracking-wider text-white/75 uppercase">{user?.role ?? "Administrator"}</span>
           </div>
-          <div className="h-6 w-px bg-white/15" />
+          <div className="hidden sm:flex h-6 w-px bg-white/15" />
           <div className="relative shrink-0">
             <img
               src={getAvatarUrl(user?.name ?? "Guest", user?.profileUrl)}

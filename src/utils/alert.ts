@@ -1,6 +1,7 @@
-import Swal from "sweetalert2"
+import Swal, { type SweetAlertIcon } from "sweetalert2"
 
 const baseCustomClass = {
+  container: "top-16! lg:left-64! backdrop-blur-sm",
   popup: "border border-white/10 rounded-2xl shadow-2xl bg-[#1C1F26]",
   title: "text-xl font-bold text-white",
   htmlContainer: "text-text-secondary text-[14px] mt-2",
@@ -13,6 +14,7 @@ const baseCustomClass = {
 
 const GymSwal = Swal.mixin({
   background: "#1C1F26",
+  backdrop: "rgba(0, 0, 0, 0.75)",
   color: "#ffffff",
   buttonsStyling: false,
   customClass: baseCustomClass
@@ -46,20 +48,24 @@ export const Alert = {
   confirm: ({
     title,
     text,
+    html,
+    icon = "warning",
     confirmText = "Yes, Continue",
     cancelText = "Cancel",
     isDanger = false
   }: {
     title: string
-    text: string
+    text?: string
+    html?: string
+    icon?: SweetAlertIcon
     confirmText?: string
     cancelText?: string
     isDanger?: boolean
   }) => {
     return GymSwal.fire({
-      icon: "warning",
+      icon,
       title,
-      text,
+      ...(html ? { html } : { text }),
       showCancelButton: true,
       reverseButtons: true,
       confirmButtonText: confirmText,
