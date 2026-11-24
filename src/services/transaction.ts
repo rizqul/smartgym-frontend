@@ -9,10 +9,16 @@ export const transactionServiceApi = createApi({
   tagTypes: ["Transactions"],
   endpoints: (build) => ({
     getAllTransactions: build.query<TransactionsApi, TransactionSearchQuery>({
-      query: ({ page = 1, size = 10 }) => ({
+      query: ({ search, type, status, page = 1, size = 10 }) => ({
         url: API_ADMIN_TRANSACTIONS_LIST,
         method: "GET",
-        params: { page, size }
+        params: {
+          page,
+          size,
+          ...(search ? { search } : {}),
+          ...(type ? { type } : {}),
+          ...(status ? { status } : {})
+        }
       }),
       providesTags: ["Transactions"]
     }),

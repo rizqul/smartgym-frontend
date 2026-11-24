@@ -22,6 +22,9 @@ export interface TransactionItem {
 }
 
 export interface TransactionSearchQuery {
+  search?: string
+  type?: string
+  status?: string
   page?: number
   size?: number
 }
