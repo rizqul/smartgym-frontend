@@ -27,28 +27,27 @@ export default function LandingFooter() {
                 <span className="text-text-primary text-lg font-extrabold tracking-wide uppercase">
                   SMART<span className="text-primary">GYM</span>
                 </span>
-                <span className="text-text-secondary mt-1 text-[10px] font-semibold tracking-[0.2em] uppercase">CLUB &amp; SYSTEM</span>
               </div>
             </Link>
 
             <p className="text-text-secondary text-sm leading-relaxed">
-              Pusat kebugaran modern terintegrasi teknologi QR Terminal, personal coaching terukur, dan fasilitas
-              kebugaran premium.
+              A modern fitness center featuring QR terminal technology, measurable personal coaching, and premium
+              fitness facilities.
             </p>
 
             <div className="bg-surface border-border/60 inline-flex w-fit items-center gap-2.5 rounded-xl border px-3.5 py-2 text-xs">
               <span className="bg-success h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
               <span className="text-text-secondary font-medium">
-                Jam Operasional: <strong className="text-primary font-bold">06.00 - 21.00 WIB</strong>
+                Opening Hours: <strong className="text-primary font-bold">07:00 AM - 09:00 PM WIB</strong>
               </span>
             </div>
           </div>
 
           <div className="flex flex-col gap-4">
-            <h4 className="text-text-primary text-base font-bold">Pusat &amp; Front-Desk</h4>
+            <h4 className="text-text-primary text-base font-bold">Headquarters &amp; Receptionist</h4>
             <div className="text-text-secondary flex flex-col gap-1 text-sm leading-relaxed">
-              <span>SmartGym Athletic Complex Lt. 1-3</span>
-              <span>Jl. Badak Bercula 6 No. 88, JKW</span>
+              <span>SmartGym Athletic Complex, Floors 1-3</span>
+              <span>Badak Bercula Street 6, No. 88, JKW</span>
               <span>Ujung Kulon, 12190</span>
             </div>
 
@@ -93,9 +92,9 @@ export default function LandingFooter() {
           </ul>
 
           <div className="flex flex-col gap-4">
-            <h4 className="text-text-primary text-base font-bold">Newsletter &amp; Update</h4>
+            <h4 className="text-text-primary text-base font-bold">Newsletter &amp; Updates</h4>
             <p className="text-text-secondary text-sm leading-relaxed">
-              Dapatkan panduan latihan mandiri, jadwal kelas kebugaran mingguan, dan info eksklusif SmartGym.
+              Get self-guided workout tips, weekly fitness class schedules, and exclusive SmartGym updates.
             </p>
 
             <form
@@ -104,33 +103,33 @@ export default function LandingFooter() {
             >
               <input
                 type="email"
-                placeholder="Masukkan email Anda"
+                placeholder="Enter your email"
                 className="bg-surface border-border/70 text-text-primary placeholder:text-text-muted focus:border-primary w-full min-w-0 flex-1 rounded-xl border px-3.5 py-2.5 text-sm transition-colors outline-none"
               />
               <button
                 type="submit"
                 className="bg-primary hover:bg-primary-hover text-background shrink-0 cursor-pointer rounded-xl px-4 py-2.5 text-xs font-extrabold tracking-wider uppercase shadow-[0_0_16px_rgba(255,107,0,0.35)] transition-colors"
               >
-                KIRIM
+                SUBSCRIBE
               </button>
             </form>
           </div>
         </div>
 
         <div className="border-border/50 text-text-muted mt-12 flex flex-col items-center justify-between gap-3 border-t pt-6 text-xs sm:flex-row">
-          <span>&copy; {new Date().getFullYear()} SmartGym Management &amp; Fitness Club. Hak Cipta Dilindungi Undang-Undang.</span>
+          <span>&copy; 2027 SmartGym Management &amp; Fitness Club. All Rights Reserved.</span>
           <div className="flex items-center gap-6 font-semibold">
             <a
               href="#"
               className="text-text-secondary hover:text-text-primary transition-colors"
             >
-              Syarat &amp; Ketentuan
+              Terms &amp; Conditions
             </a>
             <a
               href="#"
               className="text-text-secondary hover:text-text-primary transition-colors"
             >
-              Kebijakan Privasi
+              Privacy Policy
             </a>
           </div>
         </div>

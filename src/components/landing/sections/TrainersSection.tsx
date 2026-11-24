@@ -16,7 +16,7 @@ const DUMMY_TRAINERS: TrainerItem[] = [
     name: "Bagas Pratama, CSCS",
     specialty: "Hypertrophy & Powerlifting",
     specialtyClass: "bg-primary/20 text-primary border-primary/30",
-    experience: "8+ Tahun Pengalaman",
+    experience: "8+ Years of Experience",
     image: "https://images.unsplash.com/photo-1567013127542-490d757e51fc?auto=format&fit=crop&w=800&q=80"
   },
   {
@@ -24,7 +24,7 @@ const DUMMY_TRAINERS: TrainerItem[] = [
     name: "Clara Anastasia, ACE-CPT",
     specialty: "Mobility & Fat Loss",
     specialtyClass: "bg-secondary/20 text-secondary border-secondary/30",
-    experience: "6+ Tahun Pengalaman",
+    experience: "6+ Years of Experience",
     image: "https://images.unsplash.com/photo-1594381898411-846e7d193883?auto=format&fit=crop&w=800&q=80"
   },
   {
@@ -32,7 +32,7 @@ const DUMMY_TRAINERS: TrainerItem[] = [
     name: "Rendy Setiawan, NASM-PES",
     specialty: "Athletic Performance",
     specialtyClass: "bg-info/20 text-info border-info/30",
-    experience: "7+ Tahun Pengalaman",
+    experience: "7+ Years of Experience",
     image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&q=80"
   },
   {
@@ -40,7 +40,7 @@ const DUMMY_TRAINERS: TrainerItem[] = [
     name: "Dimas Mahendra, CPT",
     specialty: "Calisthenics & Core",
     specialtyClass: "bg-primary/20 text-primary border-primary/30",
-    experience: "5+ Tahun Pengalaman",
+    experience: "5+ Years of Experience",
     image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&q=80"
   },
   {
@@ -48,7 +48,7 @@ const DUMMY_TRAINERS: TrainerItem[] = [
     name: "Nadia Kusuma, RYT-200",
     specialty: "Functional & Recovery",
     specialtyClass: "bg-secondary/20 text-secondary border-secondary/30",
-    experience: "4+ Tahun Pengalaman",
+    experience: "4+ Years of Experience",
     image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80"
   }
 ]
@@ -73,9 +73,9 @@ export default function TrainersSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div className="flex flex-col gap-2">
-            <span className="text-primary text-xs font-extrabold tracking-[0.2em] uppercase">TIM PELATIH</span>
+            <span className="text-primary text-xs font-extrabold tracking-[0.2em] uppercase">COACHING TEAM</span>
             <h2 className="text-text-primary text-2xl leading-tight font-extrabold tracking-tight sm:text-4xl">
-              Dipandu Oleh Coach Berpengalaman
+              Guided by Experienced Coaches
             </h2>
           </div>
 
@@ -83,7 +83,7 @@ export default function TrainersSection() {
             <button
               type="button"
               onClick={() => handleScroll("left")}
-              aria-label="Geser kiri"
+              aria-label="Scroll left"
               className="bg-surface border-border hover:bg-card text-text-secondary hover:text-text-primary flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border transition-colors"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -91,7 +91,7 @@ export default function TrainersSection() {
             <button
               type="button"
               onClick={() => handleScroll("right")}
-              aria-label="Geser kanan"
+              aria-label="Scroll right"
               className="bg-surface border-border hover:bg-card text-text-secondary hover:text-text-primary flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border transition-colors"
             >
               <ChevronRight className="h-5 w-5" />
