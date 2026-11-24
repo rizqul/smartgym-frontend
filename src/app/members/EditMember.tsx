@@ -1,116 +1,175 @@
-import { useState, useEffect } from "react"
-import { useNavigate, useParams } from "react-router"
+import { useEffect, useState } from "react"
+import { useLocation, useNavigate, useParams } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import toast from "react-hot-toast"
-import { ArrowLeft, User, Mail, Phone, Save, Activity, Info } from "lucide-react"
+import { ArrowLeft, User, Mail, Phone, Save, Lock, Upload, X, Loader2 } from "lucide-react"
 
-import { Card, CardHeader, CardContent } from "../../components/ui/Card"
-import { Input } from "../../components/ui/Input"
-import { Button } from "../../components/ui/Button"
-import { Select } from "../../components/ui/Select"
+import { Card, CardHeader, CardContent } from "~/components/ui/Card"
+import { Input } from "~/components/ui/Input"
+import { Button } from "~/components/ui/Button"
+import { getAvatarUrl } from "~/utils/avatar"
+import { useGetAllMemberQuery, useUpdateMemberMutation } from "~/services/member"
+import { UpdateMemberValidation, type UpdateMemberData } from "~/validation/member"
+import type { User as MemberUser } from "~/types/user"
 
-const updateMemberSchema = z.object({
-  name: z.string().min(1, "Nama lengkap wajib diisi"),
-  email: z.string().min(1, "Email wajib diisi").email("Format email tidak valid"),
-  phoneNumber: z.string().min(10, "Nomor telepon wajib diisi (min. 10 angka)"),
-  status: z.enum(["active", "suspended", "inactive"])
-})
-
-type UpdateMemberFormValues = z.infer<typeof updateMemberSchema>
+const MAX_PHOTO_SIZE = 2 * 1024 * 1024
+const ALLOWED_PHOTO_TYPES = ["image/png", "image/jpg", "image/jpeg"]
 
 export default function EditMember() {
   const navigate = useNavigate()
-  const { id } = useParams()
+  const { id = "" } = useParams()
+  const location = useLocation()
 
-  const [isFetching, setIsFetching] = useState(true)
+  const stateMember = (location.state as { member?: MemberUser } | null)?.member
+
+  const { data: membersRes, isLoading, isError } = useGetAllMemberQuery({ size: 50, page: 1 }, { skip: Boolean(stateMember) || !id })
+
+  const member = stateMember ?? membersRes?.data?.find((m) => m.id === id)
+  const [updateMember, { isLoading: isUpdating }] = useUpdateMemberMutation()
+
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoError, setPhotoError] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting }
-  } = useForm<UpdateMemberFormValues>({
-    resolver: zodResolver(updateMemberSchema)
+    formState: { errors }
+  } = useForm<UpdateMemberData>({
+    resolver: zodResolver(UpdateMemberValidation),
+    defaultValues: {
+      name: "",
+      email: "",
+      phoneNumber: "",
+      password: ""
+    }
   })
 
   useEffect(() => {
-    const fetchMemberData = async () => {
-      try {
-        setIsFetching(true)
-        console.log(`Mengambil data member dengan ID: ${id}`)
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+    if (member) {
+      reset({
+        name: member.name ?? "",
+        email: member.email ?? "",
+        phoneNumber: member.phoneNumber ?? "",
+        password: ""
+      })
+    }
+  }, [member, reset])
 
-        const mockDataFromBackend = {
-          name: "Dimas Pratama",
-          email: "dimas.pratama@gmail.com",
-          phoneNumber: "081244569921",
-          status: "active" as const
-        }
+  useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview)
+    }
+  }, [photoPreview])
 
-        reset(mockDataFromBackend)
-      } catch (error) {
-        toast.error("Gagal mengambil data member.")
-        navigate("/dashboard/members")
-      } finally {
-        setIsFetching(false)
-      }
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    setPhotoError(null)
+
+    if (!file) return
+
+    if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+      setPhotoError("File photo harus berupa PNG, JPG, atau JPEG.")
+      e.target.value = ""
+      return
     }
 
-    if (id) {
-      fetchMemberData()
+    if (file.size > MAX_PHOTO_SIZE) {
+      setPhotoError("Ukuran file photo tidak boleh lebih dari 2MB.")
+      e.target.value = ""
+      return
     }
-  }, [id, reset, navigate])
 
-  const onSubmit = async (data: UpdateMemberFormValues) => {
+    if (photoPreview) URL.revokeObjectURL(photoPreview)
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
+  const handleClearPhoto = () => {
+    if (photoPreview) URL.revokeObjectURL(photoPreview)
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    setPhotoError(null)
+  }
+
+  const onSubmit = async (data: UpdateMemberData) => {
+    if (!id) return
+
+    const formData = new FormData()
+    formData.append("name", data.name.trim())
+    formData.append("email", data.email.trim())
+    formData.append("phoneNumber", data.phoneNumber.trim())
+
+    if (data.password && data.password.trim().length > 0) {
+      formData.append("password", data.password.trim())
+    }
+
+    if (photoFile) {
+      formData.append("photo", photoFile)
+    }
+
     try {
-      console.log("Payload Update ke Backend (DTO):", { id, ...data })
-
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      toast.success("Data member berhasil diperbarui!")
-
-      setTimeout(() => {
-        navigate("/dashboard/members")
-      }, 1000)
-    } catch (error) {
-      toast.error("Gagal memperbarui data member. Silakan coba lagi.")
+      const res = await updateMember({ id, data: formData }).unwrap()
+      toast.success(res?.message || "Berhasil memperbarui data member!")
+      navigate("/dashboard/members")
+    } catch (err: unknown) {
+      const apiErr = err as { data?: { message?: string }; message?: string }
+      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal memperbarui data member.")
     }
   }
 
-  if (isFetching) {
+  if (!stateMember && isLoading) {
     return (
-      <div className="flex h-96 w-full items-center justify-center">
-        <p className="text-text-muted animate-pulse font-medium">Memuat data member...</p>
+      <div className="flex h-96 w-full items-center justify-center gap-2">
+        <Loader2 className="text-primary h-5 w-5 animate-spin" />
+        <p className="text-text-muted font-medium">Memuat data member...</p>
       </div>
     )
   }
+
+  if (isError || !member) {
+    return (
+      <div className="flex h-96 w-full flex-col items-center justify-center gap-3">
+        <p className="text-sm text-red-400">Data member tidak ditemukan atau gagal dimuat.</p>
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/dashboard/members")}
+        >
+          Kembali ke Daftar Member
+        </Button>
+      </div>
+    )
+  }
+
+  const currentAvatar = photoPreview || getAvatarUrl(member.name, member.profileUrl)
 
   return (
     <div className="mx-auto mt-4 w-full max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
       <div className="flex items-center gap-4">
         <button
+          type="button"
           onClick={() => navigate("/dashboard/members")}
-          className="text-text-muted flex h-10 w-10 items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
+          className="text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold text-white">Edit Data Member</h1>
-            <span className="bg-primary/20 text-primary border-primary/20 rounded-md border px-2 py-0.5 text-[11px] font-bold">
-              ID: {id}
+            <span className="bg-primary/20 text-primary border-primary/20 rounded-md border px-2 py-0.5 font-mono text-[11px] font-bold">
+              #{id.slice(0, 8)}
             </span>
           </div>
-          <p className="text-text-secondary mt-1 text-[13px]">Perbarui informasi kontak dan status akun member.</p>
+          <p className="text-text-secondary mt-1 text-[13px]">Perbarui profil, kontak, atau kata sandi member.</p>
         </div>
       </div>
 
       <Card className="shadow-2xl">
         <CardHeader className="border-b border-white/5 pb-4">
           <h2 className="text-[16px] font-bold text-white">Informasi Dasar Member</h2>
-          <p className="text-text-secondary text-[12px]">Ubah nama, kontak, atau tangguhkan (suspend) akun jika diperlukan.</p>
+          <p className="text-text-secondary text-[12px]">Kosongkan foto dan password jika tidak ingin mengubahnya.</p>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -118,6 +177,41 @@ export default function EditMember() {
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"
           >
+            <div className="flex flex-col items-start gap-4 rounded-xl border border-white/5 bg-[#0B0C10]/60 p-4 sm:flex-row sm:items-center">
+              <img
+                src={currentAvatar}
+                alt={member.name}
+                className="h-16 w-16 shrink-0 rounded-full border border-white/10 object-cover"
+              />
+              <div className="flex flex-1 flex-col gap-1.5">
+                <span className="text-xs font-semibold text-white">Foto Profil (Opsional)</span>
+                <p className="text-text-muted text-[11px]">Format PNG, JPG, atau JPEG. Maksimal ukuran 2MB.</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/10">
+                    <Upload className="h-3.5 w-3.5" />
+                    Pilih Foto Baru
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg"
+                      onChange={handlePhotoChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {photoFile && (
+                    <button
+                      type="button"
+                      onClick={handleClearPhoto}
+                      className="text-text-muted inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1.5 text-xs hover:bg-white/5 hover:text-red-400"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Batal pilih ({photoFile.name})
+                    </button>
+                  )}
+                </div>
+                {photoError && <p className="text-danger text-xs font-medium">{photoError}</p>}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input
@@ -147,33 +241,15 @@ export default function EditMember() {
                 {...register("phoneNumber")}
               />
 
-              <div className="space-y-1 sm:col-span-2">
-                <label className="text-text-secondary text-[13px] font-medium">Status Akun</label>
-                <div className="relative">
-                  <Select
-                    {...register("status")}
-                    className="pl-10"
-                  >
-                    <option value="active">Active Pass (Aktif)</option>
-                    <option value="inactive">Inactive (Tidak Aktif)</option>
-                    <option value="suspended">Suspended (Ditangguhkan)</option>
-                  </Select>
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Activity className="text-text-muted h-4 w-4" />
-                  </div>
-                </div>
-                {errors.status && <p className="text-danger mt-1 text-[12px]">{errors.status.message}</p>}
-              </div>
-            </div>
-
-            <div className="bg-primary/10 border-primary/20 flex items-start gap-3 rounded-xl border p-4">
-              <Info className="text-primary mt-0.5 h-5 w-5 shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-primary text-[13px] font-semibold">Terkait Perubahan Password</span>
-                <span className="text-primary/80 mt-1 text-[12px]">
-                  Untuk alasan keamanan, perubahan kata sandi hanya dapat dilakukan oleh member secara mandiri melalui menu "Lupa Password"
-                  atau diatur ulang (Reset Force) melalui menu aksi tabel.
-                </span>
+              <div className="sm:col-span-2">
+                <Input
+                  label="Password Baru (Opsional)"
+                  type="password"
+                  placeholder="Kosongkan jika tidak ingin mengubah password (min. 8 karakter)"
+                  icon={Lock}
+                  error={errors.password?.message}
+                  {...register("password")}
+                />
               </div>
             </div>
 
@@ -182,18 +258,18 @@ export default function EditMember() {
                 type="button"
                 variant="secondary"
                 onClick={() => navigate("/dashboard/members")}
-                disabled={isSubmitting}
+                disabled={isUpdating}
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 variant="primary"
-                isLoading={isSubmitting}
-                leftIcon={!isSubmitting && <Save className="h-4 w-4" />}
+                isLoading={isUpdating}
+                leftIcon={!isUpdating && <Save className="h-4 w-4" />}
                 className="font-bold"
               >
-                {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+                {isUpdating ? "Menyimpan..." : "Simpan Perubahan"}
               </Button>
             </div>
           </form>

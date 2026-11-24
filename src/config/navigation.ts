@@ -1,7 +1,7 @@
 import { LayoutDashboard, Users, CreditCard, ClipboardList, UserCheck, UserCircle, Settings, type LucideIcon } from "lucide-react"
 
 export type UserRole = "admin" | "staff"
-export type MenuCategory = "Ringkasan" | "Manajemen" | "Sistem"
+export type MenuCategory = "Overview" | "Management" | "System"
 
 export interface NavItem {
   title: string
@@ -29,13 +29,13 @@ export const navigationMenu: NavItem[] = [
     path: "/dashboard",
     icon: LayoutDashboard,
     roles: ["admin"],
-    category: "Ringkasan"
+    category: "Overview"
   },
   {
     title: "User Management",
     icon: Users,
     roles: ["admin", "staff"],
-    category: "Manajemen",
+    category: "Management",
     children: [
       {
         title: "Member Data",
@@ -54,35 +54,35 @@ export const navigationMenu: NavItem[] = [
     path: "/dashboard/membership",
     icon: CreditCard,
     roles: ["admin", "staff"],
-    category: "Manajemen"
+    category: "Management"
   },
   {
     title: "Transactions",
     path: "/dashboard/transactions",
     icon: ClipboardList,
     roles: ["admin"],
-    category: "Manajemen"
+    category: "Management"
   },
   {
     title: "Attendance",
     path: "/dashboard/attendance",
     icon: UserCheck,
     roles: ["admin", "staff"],
-    category: "Manajemen"
+    category: "Management"
   },
   {
     title: "Trainer Data",
     path: "/dashboard/trainers",
     icon: UserCircle,
     roles: ["admin", "staff"],
-    category: "Manajemen"
+    category: "Management"
   },
   {
     title: "Account Settings",
     path: "/dashboard/settings",
     icon: Settings,
     roles: ["admin", "staff"],
-    category: "Sistem"
+    category: "System"
   }
 ]
 

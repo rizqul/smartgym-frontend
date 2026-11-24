@@ -26,14 +26,20 @@ export default function Table({ children, meta, onPageChange, showRowNumber = tr
     return (page: number): string => {
       if (!sampleUrl) return `?page=${page}`
 
-      try {
-        const base = typeof window !== "undefined" ? window.location.origin : "http://localhost"
-        const url = new URL(sampleUrl, base)
-        url.searchParams.set("page", String(page))
-        return url.toString()
-      } catch {
-        return `?page=${page}`
+      if (/^https?:\/\//i.test(sampleUrl)) {
+        try {
+          const url = new URL(sampleUrl)
+          url.searchParams.set("page", String(page))
+          return url.toString()
+        } catch {
+          return `?page=${page}`
+        }
       }
+
+      const [path, query = ""] = sampleUrl.split("?")
+      const params = new URLSearchParams(query)
+      params.set("page", String(page))
+      return `${path}?${params.toString()}`
     }
   }, [meta?.links, meta?.nextUrl, meta?.prevUrl])
 
@@ -42,18 +48,14 @@ export default function Table({ children, meta, onPageChange, showRowNumber = tr
 
     const pages: Array<number | "..."> = []
 
-    if (totalPages <= 5) {
+    if (totalPages <= 4) {
       for (let i = 1; i <= totalPages; i++) pages.push(i)
-    } else if (currentPage <= 2) {
+    } else if (currentPage <= 3) {
       pages.push(1, 2, 3, "...", totalPages)
-    } else if (currentPage === 3) {
-      pages.push(1, 2, 3, 4, "...", totalPages)
-    } else if (currentPage >= totalPages - 1) {
+    } else if (currentPage >= totalPages - 2) {
       pages.push(1, "...", totalPages - 2, totalPages - 1, totalPages)
-    } else if (currentPage === totalPages - 2) {
-      pages.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
     } else {
-      pages.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages)
+      pages.push(1, "...", currentPage, "...", totalPages)
     }
 
     return pages.map((item) =>

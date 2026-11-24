@@ -39,13 +39,14 @@ export type UpdatePasswordRequest = {
   newPassword: string
 }
 
+export interface UpdateMemberPayload {
+  id: string
+  data: FormData
+}
+
 export interface UpdateStaffPayload {
   id: string
-  name?: string
-  email?: string
-  phoneNumber?: string
-  password?: string
-  profileUrl?: string
+  data: FormData
 }
 
 export interface MemberCount {

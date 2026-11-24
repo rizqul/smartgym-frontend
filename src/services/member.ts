@@ -1,18 +1,20 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { ApiResponse } from "~/types/common"
-import type { MemberCountApi, MembersApi, MemberSearchQuery } from "~/types/user"
+import type { MemberCountApi, MembersApi, MemberSearchQuery, UpdateMemberPayload } from "~/types/user"
 import {
   API_ADMIN_MEMBERS_COUNT,
   API_ADMIN_MEMBERS_CREATE,
   API_ADMIN_MEMBERS_DELETE,
   API_ADMIN_MEMBERS_LIST,
   API_ADMIN_MEMBERS_OTP,
+  API_ADMIN_MEMBERS_UPDATE,
   API_STAFF_MEMBERS_COUNT,
   API_STAFF_MEMBERS_CREATE,
   API_STAFF_MEMBERS_DELETE,
   API_STAFF_MEMBERS_LIST,
-  API_STAFF_MEMBERS_OTP
+  API_STAFF_MEMBERS_OTP,
+  API_STAFF_MEMBERS_UPDATE
 } from "~/utils/endpoints"
 import type { CreateMemberData } from "~/validation/member"
 
@@ -28,7 +30,7 @@ export const memberServiceApi = createApi({
         params: {
           size,
           page,
-          ...(search ? { search } : {}), 
+          ...(search ? { search } : {}),
           ...(membership !== undefined ? { membership } : {})
         }
       }),
@@ -52,6 +54,15 @@ export const memberServiceApi = createApi({
       invalidatesTags: ["Members"]
     }),
 
+    updateMember: build.mutation<ApiResponse, UpdateMemberPayload>({
+      query: ({ id, data }) => ({
+        url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_UPDATE(id) : API_ADMIN_MEMBERS_UPDATE(id)),
+        method: "PUT",
+        data
+      }),
+      invalidatesTags: ["Members"]
+    }),
+
     deleteMember: build.mutation<ApiResponse, string>({
       query: (id) => ({
         url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_DELETE(id) : API_ADMIN_MEMBERS_DELETE(id)),
@@ -70,4 +81,11 @@ export const memberServiceApi = createApi({
   })
 })
 
-export const { useGetAllMemberQuery, useRequestMemberOtpMutation, useCreateMemberMutation, useDeleteMemberMutation, useGetMemberCountQuery } = memberServiceApi
+export const {
+  useGetAllMemberQuery,
+  useRequestMemberOtpMutation,
+  useCreateMemberMutation,
+  useDeleteMemberMutation,
+  useGetMemberCountQuery,
+  useUpdateMemberMutation
+} = memberServiceApi

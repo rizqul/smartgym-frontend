@@ -30,7 +30,6 @@ import NotFound from "./app/NotFound"
 import CreateTrainer from "./app/trainers/CreateTrainer"
 import LandingPage from "./app/LandingPage"
 
-
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -111,10 +110,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, Component: ManageMembers },
               { path: "create", Component: CreateMember },
-              {
-                element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
-                children: [{ path: ":id/edit", Component: EditMember }]
-              }
+              { path: ":id/edit", Component: EditMember }
             ]
           },
           {

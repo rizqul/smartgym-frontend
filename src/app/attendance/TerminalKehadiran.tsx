@@ -169,7 +169,7 @@ export default function TerminalKehadiran() {
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <ScanLine className="text-text-muted h-4 w-4 shrink-0" />
-                <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">LATEST VALIDATION RESULTS</span>
+                <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">Latest 2 Validation Results</span>
               </div>
 
               <div className="flex items-center gap-2.5">

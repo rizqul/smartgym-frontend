@@ -14,12 +14,16 @@ import { memberServiceApi } from "~/services/member"
 import { staffServiceApi } from "~/services/staff"
 import { trainerServiceApi } from "~/services/trainer"
 import { membershipPackageServiceApi } from "~/services/membershipPackage"
+import { checkinServiceApi } from "~/services/checkin"
+import { transactionServiceApi } from "~/services/transaction"
+import { useState } from "react"
 
 export default function useAuth() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const user = useAppSelector((state) => state.user.data)
   const ALLOWED_PORTAL_ROLES = ["admin", "staff"]
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const login = async (data: LoginFormData) => {
     try {
@@ -98,19 +102,31 @@ export default function useAuth() {
   }
 
   const logout = async () => {
+    if (isLoggingOut) return
+    setIsLoggingOut(true)
+  
     try {
       await axiosClient.post(API_AUTH_LOGOUT)
     } catch (error) {
-      console.warn("The server session may have expired or a network issue occurred.")
+      console.warn("The server session may have expired or a network issue occurred.", error)
     } finally {
       dispatch(clearUser())
-      dispatch(userServiceApi.util.resetApiState())
-      dispatch(memberServiceApi.util.resetApiState())
-      dispatch(staffServiceApi.util.resetApiState())
-      dispatch(membershipPackageServiceApi.util.resetApiState())
-      dispatch(trainerServiceApi.util.resetApiState())
+  
+      const apisToReset = [
+        userServiceApi,
+        memberServiceApi,
+        staffServiceApi,
+        membershipPackageServiceApi,
+        trainerServiceApi,
+        checkinServiceApi,
+        transactionServiceApi
+      ]
+  
+      apisToReset.forEach((api) => dispatch(api.util.resetApiState()))
+  
       localStorage.setItem("isAuthenticated", "false")
-      navigate("/")
+      setIsLoggingOut(false)
+      navigate("/auth/login", { replace: true })
     }
   }
 

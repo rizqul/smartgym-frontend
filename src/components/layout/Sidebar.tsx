@@ -2,7 +2,10 @@ import { useState } from "react"
 import { Link, useLocation } from "react-router"
 import { ChevronDown, ChevronRight, X } from "lucide-react"
 
+import { LogOut } from "lucide-react"
+
 import useAuth from "~/hooks/useAuth"
+import { Alert } from "~/utils/alert"
 import { navigationMenu, type UserRole } from "../../config/navigation"
 import logoGym from "../../assets/logo.png"
 import { SidebarClock } from "../ui/SidebarClock"
@@ -13,7 +16,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const location = useLocation()
 
   const userRole = user?.role?.toLowerCase() as UserRole
@@ -64,6 +67,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     },
     {} as Record<string, typeof navigationMenu>
   )
+
+  const handleLogout = async () => {
+    const result = await Alert.confirm({
+      title: "Log out of the portal?",
+      text: "You will need to log in again to access the system.",
+      confirmText: "Yes, Log Out",
+      isDanger: true
+    })
+
+    if (result.isConfirmed) await logout()
+  }
 
   return (
     <>
@@ -169,7 +183,20 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           ))}
         </div>
 
-        <SidebarClock />
+        <div className="flex w-full items-center justify-between gap-2 border-t border-white/10 px-4 py-3.5">
+          <div className="min-w-0 flex-1">
+            <SidebarClock />
+          </div>
+          <button
+            type="button"
+            title="Log out"
+            aria-label="Log out"
+            onClick={handleLogout}
+            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-red-500/20 hover:text-red-400"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </aside>
     </>
   )

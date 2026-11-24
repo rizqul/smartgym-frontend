@@ -1,16 +1,20 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import toast from "react-hot-toast"
-import { ArrowLeft, User as UserIcon, Mail, Phone, Lock, Save } from "lucide-react"
+import { ArrowLeft, User as UserIcon, Mail, Phone, Lock, Save, Upload, X } from "lucide-react"
 
 import { Card, CardHeader, CardContent } from "~/components/ui/Card"
 import { Input } from "~/components/ui/Input"
 import { Button } from "~/components/ui/Button"
+import { getAvatarUrl } from "~/utils/avatar"
 import { UpdateStaffValidation, type UpdateStaffData } from "~/validation/staff"
 import { useUpdateStaffMutation } from "~/services/staff"
 import type { User } from "~/types/user"
+
+const MAX_PHOTO_SIZE = 2 * 1024 * 1024
+const ALLOWED_PHOTO_TYPES = ["image/png", "image/jpg", "image/jpeg"]
 
 export default function EditStaff() {
   const navigate = useNavigate()
@@ -19,6 +23,10 @@ export default function EditStaff() {
 
   const staffData = (location.state as { staff?: User } | null)?.staff
   const [updateStaff, { isLoading: isUpdating }] = useUpdateStaffMutation()
+
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoError, setPhotoError] = useState<string | null>(null)
 
   const {
     register,
@@ -44,18 +52,60 @@ export default function EditStaff() {
     })
   }, [staffData, reset, navigate])
 
+  useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview)
+    }
+  }, [photoPreview])
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    setPhotoError(null)
+
+    if (!file) return
+
+    if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+      setPhotoError("Photo must be a PNG, JPG, or JPEG file.")
+      e.target.value = ""
+      return
+    }
+
+    if (file.size > MAX_PHOTO_SIZE) {
+      setPhotoError("Photo size must not exceed 2MB.")
+      e.target.value = ""
+      return
+    }
+
+    if (photoPreview) URL.revokeObjectURL(photoPreview)
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
+  const handleClearPhoto = () => {
+    if (photoPreview) URL.revokeObjectURL(photoPreview)
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    setPhotoError(null)
+  }
+
   const onSubmit = async (data: UpdateStaffData) => {
     if (!id) return
 
-    try {
-      const res = await updateStaff({
-        id,
-        name: data.name,
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        ...(data.password ? { password: data.password } : {})
-      }).unwrap()
+    const formData = new FormData()
+    formData.append("name", data.name.trim())
+    formData.append("email", data.email.trim())
+    formData.append("phoneNumber", data.phoneNumber.trim())
 
+    if (data.password && data.password.trim().length > 0) {
+      formData.append("password", data.password.trim())
+    }
+
+    if (photoFile) {
+      formData.append("photo", photoFile)
+    }
+
+    try {
+      const res = await updateStaff({ id, data: formData }).unwrap()
       toast.success(res?.message || "Staff data updated successfully!")
       navigate("/dashboard/staffs")
     } catch (err: unknown) {
@@ -63,6 +113,8 @@ export default function EditStaff() {
       toast.error(apiErr?.data?.message || apiErr?.message || "Failed to update staff data.")
     }
   }
+
+  const currentAvatar = photoPreview || getAvatarUrl(staffData?.name ?? "Staff", staffData?.profileUrl)
 
   return (
     <div className="mx-auto mt-4 w-full max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
@@ -84,7 +136,7 @@ export default function EditStaff() {
       <Card className="shadow-2xl">
         <CardHeader className="border-b border-white/5 pb-4">
           <h2 className="text-[16px] font-bold text-white">Staff Basic Information</h2>
-          <p className="text-text-secondary text-[12px]">Change the staff name, email, phone number, or reset their password.</p>
+          <p className="text-text-secondary text-[12px]">Leave the photo and password blank if you do not want to change them.</p>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -92,7 +144,42 @@ export default function EditStaff() {
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"
           >
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 mt-4">
+            <div className="flex flex-col items-start gap-4 rounded-xl border border-white/5 bg-[#0B0C10]/60 p-4 sm:flex-row sm:items-center">
+              <img
+                src={currentAvatar}
+                alt={staffData?.name || "Staff"}
+                className="h-16 w-16 shrink-0 rounded-full border border-white/10 object-cover"
+              />
+              <div className="flex flex-1 flex-col gap-1.5">
+                <span className="text-xs font-semibold text-white">Profile Photo (Optional)</span>
+                <p className="text-text-muted text-[11px]">PNG, JPG, or JPEG format. Maximum size 2MB.</p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/10">
+                    <Upload className="h-3.5 w-3.5" />
+                    Choose New Photo
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg"
+                      onChange={handlePhotoChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {photoFile && (
+                    <button
+                      type="button"
+                      onClick={handleClearPhoto}
+                      className="text-text-muted inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1.5 text-xs hover:bg-white/5 hover:text-red-400"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Clear ({photoFile.name})
+                    </button>
+                  )}
+                </div>
+                {photoError && <p className="text-danger text-xs font-medium">{photoError}</p>}
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input
                   label="Full Name"

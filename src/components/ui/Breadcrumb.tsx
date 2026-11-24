@@ -15,9 +15,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 }
 
 const isIdSegment = (segment: string): boolean => {
-  return (
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)
-  )
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)
 }
 
 const formatLabel = (segment: string): string => {
@@ -27,11 +25,19 @@ const formatLabel = (segment: string): string => {
   return segment.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
-export function Breadcrumb() {
+interface BreadcrumbProps {
+  isStaff?: boolean
+}
+
+export function Breadcrumb({ isStaff = false }: BreadcrumbProps) {
   const location = useLocation()
   const rawSegments = location.pathname.split("/").filter(Boolean)
 
   const items = rawSegments.reduce<Array<{ label: string; routeTo: string }>>((acc, segment, index) => {
+    if (isStaff && segment.toLowerCase() === "dashboard") {
+      return acc
+    }
+
     const routeTo = `/${rawSegments.slice(0, index + 1).join("/")}`
     const isLast = index === rawSegments.length - 1
 
@@ -46,21 +52,26 @@ export function Breadcrumb() {
     return acc
   }, [])
 
+  if (isStaff && items.length === 0) return null
+
   return (
     <nav
       aria-label="Breadcrumb"
       className="text-text-muted flex items-center space-x-1 text-[13px] font-medium"
     >
-      <Link
-        to="/dashboard"
-        aria-label="Dashboard"
-        className="flex items-center gap-1 transition-colors hover:text-white"
-      >
-        <Home className="h-4 w-4" />
-      </Link>
+      {!isStaff && (
+        <Link
+          to="/dashboard"
+          aria-label="Dashboard"
+          className="flex items-center gap-1 transition-colors hover:text-white"
+        >
+          <Home className="h-4 w-4" />
+        </Link>
+      )}
 
       {items.map((item, index) => {
         const isLast = index === items.length - 1
+        const showChevron = !isStaff || index > 0
 
         return (
           <div
@@ -68,6 +79,7 @@ export function Breadcrumb() {
             className="flex items-center space-x-1"
           >
             <ChevronRight className="h-4 w-4 text-white/20" />
+            {showChevron && <ChevronRight className="h-4 w-4 text-white/20" />}
             {isLast ? (
               <span className="text-white">{item.label}</span>
             ) : (

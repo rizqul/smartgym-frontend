@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Loader2,
   MinusCircle,
+  Pencil,
   Search,
   ShieldExclamationPoint,
   Trash2,
@@ -375,6 +376,16 @@ export default function Member() {
 
                         <TableTD>
                           <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => navigate(`${member.id}/edit`, { state: { member } })}
+                              title="Edit Member"
+                              aria-label={`Edit ${member.name}`}
+                              className="text-text-muted hover:text-primary cursor-pointer rounded-lg p-2 transition-colors hover:bg-white/5"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+
                             <button
                               type="button"
                               onClick={() => handleDelete(member.id, member.name)}

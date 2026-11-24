@@ -1,11 +1,12 @@
-export type DateFormatVariant = "default" | "short" | "long" | "hour" | "time"
+export type DateFormatVariant = "default" | "short" | "long" | "hour" | "time" | "compact"
 
 const FORMAT_OPTIONS: Record<DateFormatVariant, Intl.DateTimeFormatOptions> = {
   default: { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Jakarta" },
   short: { weekday: "long", day: "numeric", month: "short", timeZone: "Asia/Jakarta" },
   long: { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" },
   hour: { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Jakarta" },
-  time: { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "Asia/Jakarta" }
+  time: { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "Asia/Jakarta" },
+  compact: { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Jakarta" },
 }
 
 export function getTodayWIB(): string {
@@ -33,8 +34,7 @@ export function formatWIB(date: string | Date | null | undefined, variant: DateF
 
     if (Number.isNaN(d.getTime())) return "-"
 
-    const formatted = new Intl.DateTimeFormat("id-ID", FORMAT_OPTIONS[variant]).format(d)
-    return variant === "hour" || variant === "time" ? formatted.replace(/\./g, ":") : formatted
+    return new Intl.DateTimeFormat("en-GB", FORMAT_OPTIONS[variant]).format(d)
   } catch {
     return "-"
   }

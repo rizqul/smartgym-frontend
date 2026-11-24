@@ -37,10 +37,10 @@ export const staffServiceApi = createApi({
       invalidatesTags: ["Staffs"]
     }),
     updateStaff: build.mutation<ApiResponse, UpdateStaffPayload>({
-      query: ({ id, ...body }) => ({
+      query: ({ id, data }) => ({
         url: API_ADMIN_STAFF_UPDATE(id),
         method: "PUT",
-        data: body
+        data
       }),
       invalidatesTags: ["Staffs"]
     }),
