@@ -8,6 +8,7 @@ import { Input } from "~/components/ui/Input"
 import { Select } from "~/components/ui/Select"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Table, TableHead, TableBody, TableTR, TableTH, TableTD } from "~/components/ui/table"
+import ExportTransactionPopover from "~/components/transactions/ExportTransactionPopover"
 import TransactionTableRow from "~/components/transactions/TransactionTableRow"
 import { useDebounce } from "~/hooks/useDebounce"
 import { usePagination } from "~/hooks/usePagination"
@@ -84,6 +85,11 @@ export default function Transaction() {
             Monitor automatic payments via Midtrans Payment Gateway, membership subscriptions, and PT bookings.
           </p>
         </div>
+
+        <ExportTransactionPopover
+          currentTransactions={transactions.map((transaction) => ({ ...transaction, name: "—" }))}
+          typeFilter={typeFilter}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
