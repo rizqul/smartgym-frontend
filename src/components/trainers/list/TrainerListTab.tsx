@@ -49,7 +49,7 @@ export default function TrainerListTab({
         <Input
           type="text"
           icon={Search}
-          placeholder="Cari nama pelatih atau spesialisasi..."
+          placeholder="Search by trainer name or specialization..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="py-2.5 text-[13px]"
@@ -58,7 +58,7 @@ export default function TrainerListTab({
               <button
                 type="button"
                 onClick={() => onSearchChange("")}
-                aria-label="Hapus pencarian"
+                aria-label="Clear search"
                 className="text-text-muted cursor-pointer rounded-md p-0.5 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <X className="h-4 w-4" />

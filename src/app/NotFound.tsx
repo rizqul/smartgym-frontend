@@ -16,7 +16,7 @@ export default function NotFound() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-[#0B0C10] px-4 py-10 text-center">
-      {/* Custom Keyframes untuk animasi gym kebingungan */}
+      {/* Custom keyframes for the confused gym animation */}
       <style>{`
         @keyframes gymFloat {
           0%, 100% { transform: translateY(0px) rotate(-3deg); }
@@ -73,13 +73,13 @@ export default function NotFound() {
         </span>
       </div>
 
-      {/* Ilustrasi Animasi: 4 [Kettlebell Kebingungan] 4 */}
+      {/* Animated illustration: 4 [Confused Kettlebell] 4 */}
       <div className="relative z-10 my-2 flex items-center justify-center gap-2 sm:gap-3">
         <span className="bg-linear-to-b from-white to-white/25 bg-clip-text text-7xl font-black text-transparent select-none sm:text-9xl">
           4
         </span>
 
-        {/* Karakter Kettlebell Kebingungan */}
+        {/* Confused kettlebell character */}
         <div className="relative h-36 w-36 sm:h-44 sm:w-44">
           <svg
             viewBox="0 0 200 200"
@@ -87,7 +87,7 @@ export default function NotFound() {
             xmlns="http://www.w3.org/2000/svg"
             className="h-full w-full"
           >
-            {/* Tanda Tanya Melayang */}
+            {/* Floating question marks */}
             <text
               x="28"
               y="55"
@@ -119,7 +119,7 @@ export default function NotFound() {
               ?
             </text>
 
-            {/* Bayangan di lantai */}
+            {/* Floor shadow */}
             <ellipse
               cx="100"
               cy="176"
@@ -129,9 +129,9 @@ export default function NotFound() {
               className="animate-shadow-pulse"
             />
 
-            {/* Grup Karakter Kettlebell */}
+            {/* Kettlebell character group */}
             <g className="animate-gym-float">
-              {/* Gagang Kettlebell */}
+              {/* Kettlebell handle */}
               <path
                 d="M68 78 V58 C68 40 82 32 100 32 C118 32 132 40 132 58 V78"
                 stroke="#F97316"
@@ -146,7 +146,7 @@ export default function NotFound() {
                 opacity="0.45"
               />
 
-              {/* Badan Kettlebell */}
+              {/* Kettlebell body */}
               <rect
                 x="46"
                 y="70"
@@ -158,7 +158,7 @@ export default function NotFound() {
                 strokeWidth="3.5"
               />
 
-              {/* Highlight Kilau */}
+              {/* Shine highlight */}
               <path
                 d="M64 92 C66 84 74 80 82 79"
                 stroke="white"
@@ -167,9 +167,9 @@ export default function NotFound() {
                 opacity="0.2"
               />
 
-              {/* Wajah Kebingungan */}
+              {/* Confused face */}
               <g className="animate-eye-look">
-                {/* Mata Kiri (Agak besar) */}
+                {/* Left eye (slightly larger) */}
                 <circle
                   cx="80"
                   cy="112"
@@ -183,7 +183,7 @@ export default function NotFound() {
                   fill="#0B0C10"
                 />
 
-                {/* Mata Kanan (Agak sipit/kecil biar kelihatan bingung) */}
+                {/* Right eye (slightly narrower/smaller for a confused look) */}
                 <circle
                   cx="118"
                   cy="114"
@@ -198,7 +198,7 @@ export default function NotFound() {
                 />
               </g>
 
-              {/* Alis Miring (Ekspresi bingung) */}
+              {/* Slanted eyebrows (confused expression) */}
               <path
                 d="M71 100 Q80 95 88 100"
                 stroke="#FDBA74"
@@ -212,7 +212,7 @@ export default function NotFound() {
                 strokeLinecap="round"
               />
 
-              {/* Mulut Bergelombang */}
+              {/* Wavy mouth */}
               <path
                 d="M88 134 Q94 129 100 134 T112 134"
                 stroke="#F97316"
@@ -221,7 +221,7 @@ export default function NotFound() {
                 fill="none"
               />
 
-              {/* Label Berat di Bawah */}
+              {/* Weight label below */}
               <text
                 x="100"
                 y="153"
@@ -243,16 +243,15 @@ export default function NotFound() {
         </span>
       </div>
 
-      {/* Teks Penjelasan */}
+      {/* Description text */}
       <div className="relative z-10 mt-2 max-w-md">
-        <h1 className="text-xl font-bold text-white sm:text-2xl">Waduh, Salah Masuk Ruangan!</h1>
+        <h1 className="text-xl font-bold text-white sm:text-2xl">Oops, Wrong Room!</h1>
         <p className="text-text-secondary mt-2.5 text-sm leading-relaxed">
-          Halaman yang Anda cari sepertinya lagi <span className="font-semibold text-white">rest day</span> atau alamat URL-nya sudah
-          berpindah.
+          The page you&apos;re looking for may be taking a <span className="font-semibold text-white">rest day</span> or its URL may have changed.
         </p>
       </div>
 
-      {/* Tombol Aksi */}
+      {/* Action button */}
       <div className="relative z-10 mt-8 flex flex-wrap items-center justify-center gap-3">
         <Button
           type="button"
@@ -261,7 +260,7 @@ export default function NotFound() {
           className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold shadow-lg shadow-[#F97316]/20"
         >
           <ArrowLeft className="h-4 w-4" />
-          Kembali
+          Go Back
         </Button>
       </div>
     </div>

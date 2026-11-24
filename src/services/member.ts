@@ -22,13 +22,14 @@ export const memberServiceApi = createApi({
   tagTypes: ["Members"],
   endpoints: (build) => ({
     getAllMember: build.query<MembersApi, MemberSearchQuery>({
-      query: ({ name = "", size = 10, page = 1 }) => ({
+      query: ({ search, membership, size = 10, page = 1 }) => ({
         url: (isStaff) => (isStaff ? API_STAFF_MEMBERS_LIST : API_ADMIN_MEMBERS_LIST),
         method: "GET",
         params: {
-          name,
           size,
-          page
+          page,
+          ...(search ? { search } : {}), 
+          ...(membership !== undefined ? { membership } : {})
         }
       }),
       providesTags: ["Members"]

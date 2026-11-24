@@ -15,15 +15,16 @@ export type User = {
 }
 
 export type MemberSearchQuery = {
-  page?: number
+  search?: string
+  membership?: boolean
   size?: number
-  name?: string
+  page?: number
 }
 
 export type StaffSearchQuery = {
   page?: number
   size?: number
-  name?: string
+  search?: string
 }
 
 export type UpdateProfileRequest = {

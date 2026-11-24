@@ -50,9 +50,9 @@ export function ForgotPasswordEmail({ onSuccess }: Props) {
             className="h-8 w-8 object-contain drop-shadow-md"
           />
         </div>
-        <h1 className="text-2xl font-bold text-white">Lupa Kata Sandi?</h1>
+        <h1 className="text-2xl font-bold text-white">Forgot Password?</h1>
         <p className="text-text-secondary mt-2 text-[14px]">
-          Masukkan alamat email yang terdaftar. Kami akan mengirimkan kode OTP untuk mereset kata sandi Anda.
+          Enter your registered email address. We will send an OTP code to reset your password.
         </p>
       </CardHeader>
 
@@ -62,7 +62,7 @@ export function ForgotPasswordEmail({ onSuccess }: Props) {
           className="space-y-6"
         >
           <Input
-            label="Alamat Email"
+            label="Email Address"
             type="email"
             placeholder="admin@smartgym.id"
             icon={Mail}
@@ -77,7 +77,7 @@ export function ForgotPasswordEmail({ onSuccess }: Props) {
             className="w-full py-3.5 font-bold"
             isLoading={isSubmitting}
           >
-            {isSubmitting ? "Memproses..." : "Kirim Kode OTP"}
+            {isSubmitting ? "Processing..." : "Send OTP Code"}
           </Button>
 
           <div className="pt-2 text-center">
@@ -86,7 +86,7 @@ export function ForgotPasswordEmail({ onSuccess }: Props) {
               className="text-text-secondary inline-flex items-center gap-2 text-[13px] font-medium transition-colors hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
-              Kembali ke Halaman Login
+              Back to Login
             </Link>
           </div>
         </form>

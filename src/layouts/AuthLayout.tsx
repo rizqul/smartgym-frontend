@@ -43,7 +43,7 @@ export default function AuthLayout() {
       </main>
 
       <footer className="text-text-muted relative z-10 w-full px-5 py-6 text-center text-xs">
-        © 2027 SmartGym Systems LLC • Portal Operasional Terenkripsi SSL
+        © 2027 SmartGym Systems LLC • Secure Operations Portal
       </footer>
     </div>
   )

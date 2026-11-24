@@ -60,9 +60,9 @@ export function ForgotPasswordReset({ email, onSubmit }: Props) {
             className="h-8 w-8 object-contain drop-shadow-md"
           />
         </div>
-        <h1 className="mb-2 text-xl font-bold text-white sm:text-2xl">Buat Kata Sandi Baru</h1>
+        <h1 className="mb-2 text-xl font-bold text-white sm:text-2xl">Create a New Password</h1>
         <p className="text-text-secondary text-[13px] sm:text-[14px]">
-          OTP berhasil diverifikasi. Silakan buat kata sandi baru untuk akun Anda.
+          Your OTP has been verified. Please create a new password for your account.
         </p>
       </CardHeader>
 

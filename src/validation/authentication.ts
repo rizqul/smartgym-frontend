@@ -25,7 +25,7 @@ export const ForgotPasswordResetValidation = z.object({
   password: rules.password,
   confirmPassword: rules.passwordConfirmation
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Konfirmasi kata sandi tidak cocok!",
+  message: "Password confirmation does not match!",
   path: ["confirmPassword"]
 })
 

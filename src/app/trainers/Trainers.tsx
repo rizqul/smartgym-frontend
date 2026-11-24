@@ -71,9 +71,9 @@ export default function Trainers() {
     <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full max-w-2xl flex-col gap-1.5">
-          <h2 className="text-xl font-bold text-white sm:text-2xl">Data Pelatih &amp; Manajemen Sesi</h2>
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Trainer Data &amp; Session Management</h2>
           <p className="text-text-muted text-[13px] sm:text-[14px]">
-            Kelola direktori Personal Pelatih, spesialisasi keahlian, tarif per sesi, serta jadwal ketersediaan slot reservasi anggota.
+            Manage the Personal Trainer directory, areas of expertise, session rates, and member reservation slot availability.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function Trainers() {
               onClick={() => navigate("/dashboard/trainers/create")}
               className="w-full whitespace-nowrap sm:w-auto"
             >
-              Tambah Pelatih
+              Add Trainer
             </Button>
           </div>
         )}
@@ -95,30 +95,30 @@ export default function Trainers() {
         <CardStats
           topIcon={<Dumbbell className="text-primary" />}
           bottomIcon={<Whistle className="text-primary" />}
-          label="Total Pelatih"
-          subLabel="Terdaftar"
+          label="Total Trainers"
+          subLabel="Registered"
           value={trainerStats?.countTrainer ?? 0}
         />
         <CardStats
           topIcon={<CalendarCheck className="text-amber-400" />}
           bottomIcon={<LayoutGrid className="text-amber-400" />}
-          label="Pelatih Bertugas"
-          subLabel="Hari ini"
+          label="Trainers on Duty"
+          subLabel="Today"
           value={trainerStats?.countTrainerWithSlot ?? 0}
         />
         <CardStats
           topIcon={<CalendarClock className="text-blue-400" />}
           bottomIcon={<ListChecks className="text-blue-400" />}
-          label="Total Slot Hari Ini"
-          subLabel="Sesi tersedia"
+          label="Total Slots Today"
+          subLabel="Sessions available"
           value={trainerStats?.countSlot ?? 0}
         />
         {isAdmin && (
           <CardStats
             topIcon={<Wallet className="text-emerald-400" />}
             bottomIcon={<Banknote className="text-emerald-400" />}
-            label="Pendapatan Pelatih"
-            subLabel="Akumulasi"
+            label="Trainer Revenue"
+            subLabel="Accumulated"
             value={`Rp ${formatRupiah(trainerStats?.sumTransactionBookedTrainer ?? 0)}`}
           />
         )}
@@ -126,7 +126,7 @@ export default function Trainers() {
 
       <div
         role="tablist"
-        aria-label="Navigasi Trainer"
+        aria-label="Trainer navigation"
         className="grid w-full grid-cols-2 gap-2 rounded-xl border border-white/5 bg-[#1C1F26] p-2"
       >
         <Button
@@ -140,7 +140,7 @@ export default function Trainers() {
             activeTab === "trainers" ? "shadow-md" : "text-text-muted hover:bg-white/5 hover:text-white"
           }`}
         >
-          <span className="truncate">Daftar Pelatih</span>
+          <span className="truncate">Trainer List</span>
         </Button>
 
         <Button
@@ -154,7 +154,7 @@ export default function Trainers() {
             activeTab === "schedule" ? "shadow-md" : "text-text-muted hover:bg-white/5 hover:text-white"
           }`}
         >
-          <span className="truncate">Kalender &amp; Jadwal Sesi</span>
+          <span className="truncate">Calendar &amp; Session Schedule</span>
         </Button>
       </div>
 
@@ -192,13 +192,13 @@ export default function Trainers() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/15 text-red-400">
                   <Trash2 className="h-4 w-4" />
                 </div>
-                <h3 className="text-base font-bold text-white">Hapus Trainer</h3>
+                <h3 className="text-base font-bold text-white">Delete Trainer</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setTrainerToDelete(null)}
                 // disabled={isDeleting}
-                aria-label="Tutup modal"
+                aria-label="Close modal"
                 className="text-text-muted cursor-pointer rounded-lg p-1 transition-colors hover:bg-white/5 hover:text-white"
               >
                 <X className="h-4 w-4" />
@@ -206,8 +206,8 @@ export default function Trainers() {
             </div>
 
             <div className="px-5 py-4 text-sm leading-relaxed text-white/80">
-              Apakah kamu yakin ingin menghapus trainer <strong className="text-white">{trainerToDelete.name}</strong>? Tindakan ini tidak
-              dapat dibatalkan.
+              Are you sure you want to delete trainer <strong className="text-white">{trainerToDelete.name}</strong>? This action
+              cannot be undone.
             </div>
 
             <div className="flex items-center justify-end gap-2.5 border-t border-white/5 bg-[#121419] px-5 py-3.5">
@@ -217,7 +217,7 @@ export default function Trainers() {
                 onClick={() => setTrainerToDelete(null)}
                 // disabled={isDeleting}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="button"
@@ -226,7 +226,7 @@ export default function Trainers() {
                 // onClick={handleConfirmDelete}
                 className="bg-red-600 hover:bg-red-700"
               >
-                {/* {isDeleting ? "Menghapus..." : "Ya, Hapus"} */}
+                {/* {isDeleting ? "Deleting..." : "Yes, Delete"} */}
               </Button>
             </div>
           </div>

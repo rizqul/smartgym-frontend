@@ -30,7 +30,7 @@ export default function useAuth() {
 
       if (!userRole || !ALLOWED_PORTAL_ROLES.includes(userRole)) {
         await axiosClient.post(API_AUTH_LOGOUT).catch(() => {})
-        throw new Error("Akses ditolak! Portal ini hanya untuk Admin dan Staff.")
+        throw new Error("Access denied! This portal is only for Admins and Staff.")
       }
 
       dispatch(storeUser(response.data))
@@ -46,12 +46,12 @@ export default function useAuth() {
         const backendMessage = error.response?.data?.message
 
         if (error.response?.status === 401 || error.response?.status === 404) {
-          throw new Error(backendMessage || "Alamat Email atau Kata Sandi Salah!")
+          throw new Error(backendMessage || "Incorrect email address or password!")
         }
 
-        throw new Error(error.response?.data?.message || "Gagal melakukan login.")
+        throw new Error(error.response?.data?.message || "Failed to log in.")
       }
-      throw new Error("Masukan Email dan Kata Sandi yang sesuai")
+      throw new Error("Please enter a valid email and password.")
     }
   }
 
@@ -61,10 +61,10 @@ export default function useAuth() {
       return response
     } catch (error) {
       if (isAxiosError(error)) {
-        if (error.response?.status === 404) throw new Error("Email tidak terdaftar.")
-        throw new Error(error.response?.data?.message || "Gagal mengirim OTP.")
+        if (error.response?.status === 404) throw new Error("Email is not registered.")
+        throw new Error(error.response?.data?.message || "Failed to send OTP.")
       }
-      throw new Error("Terjadi kesalahan sistem.")
+      throw new Error("A system error occurred.")
     }
   }
 
@@ -75,11 +75,11 @@ export default function useAuth() {
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.status === 400 || error.response?.status === 404) {
-          throw new Error("Kode OTP salah atau sudah kedaluwarsa.")
+          throw new Error("Invalid or expired OTP code.")
         }
-        throw new Error(error.response?.data?.message || "Gagal memverifikasi OTP.")
+        throw new Error(error.response?.data?.message || "Failed to verify OTP.")
       }
-      throw new Error("Terjadi kesalahan sistem.")
+      throw new Error("A system error occurred.")
     }
   }
 
@@ -89,11 +89,11 @@ export default function useAuth() {
       return response
     } catch (error) {
       if (isAxiosError(error)) {
-        if (error.response?.status === 400) throw new Error("Kode OTP salah atau sudah kedaluwarsa.")
-        if (error.response?.status === 422) throw new Error("Format data tidak valid/tidak sesuai dengan server.")
-        throw new Error(error.response?.data?.message || "Gagal mereset kata sandi.")
+        if (error.response?.status === 400) throw new Error("Invalid or expired OTP code.")
+        if (error.response?.status === 422) throw new Error("Invalid data format or server mismatch.")
+        throw new Error(error.response?.data?.message || "Failed to reset password.")
       }
-      throw new Error("Terjadi kesalahan sistem.")
+      throw new Error("A system error occurred.")
     }
   }
 
@@ -101,7 +101,7 @@ export default function useAuth() {
     try {
       await axiosClient.post(API_AUTH_LOGOUT)
     } catch (error) {
-      console.warn("Sesi di server mungkin sudah berakhir atau terjadi masalah jaringan.")
+      console.warn("The server session may have expired or a network issue occurred.")
     } finally {
       dispatch(clearUser())
       dispatch(userServiceApi.util.resetApiState())

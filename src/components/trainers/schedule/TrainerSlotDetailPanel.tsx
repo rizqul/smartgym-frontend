@@ -45,7 +45,7 @@ export default function TrainerSlotDetailPanel({
       return (
         <div className="text-text-muted flex items-center justify-center gap-2 py-6 text-xs">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Memuat daftar slot...
+          Loading slots...
         </div>
       )
     }
@@ -53,7 +53,7 @@ export default function TrainerSlotDetailPanel({
     if (!slots.length) {
       return (
         <div className="text-text-muted rounded-xl border border-dashed border-white/10 bg-[#0B0C10]/50 p-4 text-center text-xs">
-          Belum ada slot terjadwal pada tanggal ini.
+          No slots scheduled for this date.
         </div>
       )
     }
@@ -100,7 +100,7 @@ export default function TrainerSlotDetailPanel({
                   >
                     <span className="inline-flex items-center gap-1">
                       <FileText className="h-3 w-3 text-sky-400" />
-                      Catatan Sesi
+                      Session Notes
                     </span>
                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                   </button>
@@ -124,7 +124,7 @@ export default function TrainerSlotDetailPanel({
           <div className="flex items-center justify-between">
             <span className="text-text-muted inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wider uppercase">
               <FileText className="h-3.5 w-3.5" />
-              DETAIL JADWAL
+              SCHEDULE DETAILS
             </span>
             <div className="flex items-center gap-2">
               <LocalDate
@@ -135,7 +135,7 @@ export default function TrainerSlotDetailPanel({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Tutup detail jadwal"
+                aria-label="Close schedule details"
                 className="text-text-muted cursor-pointer rounded-md p-1 transition-colors hover:bg-white/10 hover:text-white"
               >
                 <X className="h-4 w-4" />
@@ -156,7 +156,7 @@ export default function TrainerSlotDetailPanel({
               <p className="text-primary truncate text-xs font-medium uppercase">{trainer.specialization.replace(/_/g, " ")}</p>
               <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-2 text-[11px]">
                 <span className="inline-flex items-center gap-1 text-amber-300">
-                  Pengalaman {trainer.experience} Thn
+                  {trainer.experience} years of experience
                 </span>
                 <span>•</span>
                 <span>{trainer.phoneNumber || trainer.email}</span>
@@ -166,8 +166,8 @@ export default function TrainerSlotDetailPanel({
 
           <div className="flex flex-col gap-2.5 border-t border-white/5 pt-4">
             <div className="flex items-center justify-between">
-              <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">SEMUA SLOT HARI INI</span>
-              <span className="text-xs font-semibold text-sky-400">{slots.length} Sesi</span>
+              <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">ALL SLOTS TODAY</span>
+              <span className="text-xs font-semibold text-sky-400">{slots.length} Sessions</span>
             </div>
 
             {renderSlotList("max-h-80")}
@@ -183,7 +183,7 @@ export default function TrainerSlotDetailPanel({
               onClick={() => onOpenCreateModal(trainer.id)}
               className="w-full justify-center"
             >
-              Tambah Slot untuk {trainer.name.split(" ")[0]}
+              Add Slot for {trainer.name.split(" ")[0]}
             </Button>
           </CardFooter>
         )}
@@ -205,11 +205,11 @@ export default function TrainerSlotDetailPanel({
               <div className="flex flex-wrap items-center gap-2">
                 <h4 className="truncate text-sm font-bold text-white">{trainer.name}</h4>
                 <span className="rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
-                  Pengalaman {trainer.experience} Thn
+                  {trainer.experience} years of experience
                 </span>
               </div>
               <p className="text-text-muted mt-0.5 text-xs">
-                Total <strong className="text-white">{slots.length} slot</strong> pada{" "}
+                Total <strong className="text-white">{slots.length} slots</strong> on{" "}
                 <LocalDate
                   date={selectedDate}
                   variant="short"
@@ -221,7 +221,7 @@ export default function TrainerSlotDetailPanel({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Tutup detail jadwal"
+            aria-label="Close schedule details"
             className="text-text-muted shrink-0 cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-white/10 hover:text-white"
           >
             <X className="h-4 w-4" />
@@ -238,7 +238,7 @@ export default function TrainerSlotDetailPanel({
             onClick={() => onOpenCreateModal(trainer.id)}
             className="w-full justify-center"
           >
-            Tambah Slot untuk {trainer.name.split(" ")[0]}
+            Add Slot for {trainer.name.split(" ")[0]}
           </Button>
         )}
       </div>

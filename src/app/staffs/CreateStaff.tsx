@@ -34,10 +34,10 @@ export default function CreateStaff() {
   const onSubmit = async (data: CreateStaffData) => {
     try {
       await createStaff(data).unwrap()
-      toast.success("Staf baru berhasil didaftarkan!")
+      toast.success("New staff member registered successfully!")
       navigate("/dashboard/staffs")
     } catch {
-      toast.error("Gagal mendaftarkan staf. Silakan periksa kembali data Anda.")
+      toast.error("Failed to register the staff member. Please check your information.")
     }
   }
 
@@ -49,21 +49,21 @@ export default function CreateStaff() {
         <button
           type="button"
           onClick={() => navigate("/dashboard/staffs")}
-          aria-label="Kembali ke daftar staf"
+          aria-label="Back to staff list"
           className="text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-white">Tambah Staf Baru</h1>
-          <p className="text-text-secondary mt-1 text-[13px]">Daftarkan akun staf baru ke dalam sistem operasional SmartGym.</p>
+          <h1 className="text-2xl font-bold text-white">Add New Staff Member</h1>
+          <p className="text-text-secondary mt-1 text-[13px]">Register a new staff account in the SmartGym operations system.</p>
         </div>
       </div>
 
       <Card className="shadow-2xl">
         <CardHeader className="border-b border-white/5 pb-4">
-          <h2 className="text-[16px] font-bold text-white">Informasi Dasar Staf</h2>
-          <p className="text-text-secondary text-[12px]">Lengkapi data profil dan kata sandi awal akun staf.</p>
+          <h2 className="text-[16px] font-bold text-white">Basic Staff Information</h2>
+          <p className="text-text-secondary text-[12px]">Enter the profile details and initial password for the staff account.</p>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -74,8 +74,8 @@ export default function CreateStaff() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input
-                  label="Nama Lengkap"
-                  placeholder="Masukkan nama sesuai identitas"
+                  label="Full Name"
+                  placeholder="Enter the name as shown on the ID"
                   icon={User}
                   error={errors.name?.message}
                   {...register("name")}
@@ -83,16 +83,16 @@ export default function CreateStaff() {
               </div>
 
               <Input
-                label="Alamat Email"
+                label="Email Address"
                 type="email"
-                placeholder="email@contoh.com"
+                placeholder="email@example.com"
                 icon={Mail}
                 error={errors.email?.message}
                 {...register("email")}
               />
 
               <Input
-                label="Nomor WhatsApp / Telepon"
+                label="WhatsApp / Phone Number"
                 inputMode="numeric"
                 type="tel"
                 placeholder="081234567890"
@@ -106,10 +106,10 @@ export default function CreateStaff() {
 
               <div className="sm:col-span-2">
                 <Input
-                  label="Kata Sandi Awal"
+                  label="Password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="password"
-                  placeholder="Min. 8 karakter"
+                  placeholder="Min. 8 characters"
                   icon={Lock}
                   error={errors.password?.message}
                   {...register("password")}
@@ -130,10 +130,10 @@ export default function CreateStaff() {
             <div className="bg-primary/10 border-primary/20 flex items-start gap-3 rounded-xl border p-4">
               <Info className="text-primary mt-0.5 h-5 w-5 shrink-0" />
               <div className="flex flex-col">
-                <span className="text-primary text-[13px] font-semibold">Terkait Akses Sistem</span>
+                  <span className="text-primary text-[13px] font-semibold">About System Access</span>
                 <span className="text-primary/80 mt-1 text-[12px]">
-                  Berikan email dan kata sandi awal ini kepada staf yang bersangkutan. Staf <strong>Admin</strong> memiliki hak penuh,
-                  sedangkan <strong>Staf/Resepsionis</strong> hanya dapat mengakses modul operasional harian.
+                  Share this email address and initial password with the staff member. <strong>Admins</strong> have full access,
+                  while <strong>Staff/Receptionists</strong> can only access daily operations modules.
                 </span>
               </div>
             </div>
@@ -145,7 +145,7 @@ export default function CreateStaff() {
                 onClick={() => navigate("/dashboard/staffs")}
                 disabled={isBusy}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -155,7 +155,7 @@ export default function CreateStaff() {
                 leftIcon={!isBusy && <Save className="h-4 w-4" />}
                 className="font-bold"
               >
-                {isBusy ? "Menyimpan..." : "Simpan Data Staf"}
+                {isBusy ? "Saving..." : "Save Staff Details"}
               </Button>
             </div>
           </form>

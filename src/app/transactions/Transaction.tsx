@@ -61,7 +61,7 @@ export default function Transaction() {
         setPage(nextPage)
       }
     } catch (e) {
-      console.error("Gagal membaca URL paginasi", e)
+      console.error("Failed to read pagination URL", e)
     }
   }
 
@@ -86,9 +86,9 @@ export default function Transaction() {
     <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full max-w-2xl flex-col gap-1.5">
-          <h2 className="text-xl font-bold text-white sm:text-2xl">Manajemen Transaksi</h2>
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Transaction Management</h2>
           <p className="text-text-muted text-[13px] sm:text-[14px]">
-            Monitoring pembayaran otomatis via Midtrans Payment Gateway, langganan membership, dan PT Booking.
+            Monitor automatic payments via Midtrans Payment Gateway, membership subscriptions, and PT bookings.
           </p>
         </div>
       </div>
@@ -96,25 +96,25 @@ export default function Transaction() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <CardStats
           topIcon={<Receipt className="text-gray-300" />}
-          label={`OMSET (${currentYear})`}
-          subLabel="Total transaksi terbayar"
+          label={`REVENUE (${currentYear})`}
+          subLabel="Total paid transactions"
           value={`Rp ${formatRupiah(txStats?.sumTransactionYearly ?? 0)}`}
         />
         <CardStats
           topIcon={<CheckCircle2 className="text-emerald-400" />}
-          label="TRANSAKSI BERHASIL"
-          subLabel="Status Success"
+          label="SUCCESSFUL TRANSACTIONS"
+          subLabel="Status: Success"
           value={txStats?.transactionSuccess ?? 0}
         />
         <CardStats
           topIcon={<Hourglass className="text-amber-400" />}
-          label="MENUNGGU PEMBAYARAN"
-          subLabel="Status Process"
+          label="AWAITING PAYMENT"
+          subLabel="Status: Process"
           value={txStats?.transactionProcess ?? 0}
         />
         <CardStats
           topIcon={<XCircle className="text-red-400" />}
-          label="GAGAL / DIBATALKAN"
+          label="FAILED / CANCELLED"
           subLabel="Failure / Cancelled"
           value={txStats?.transactionFailed ?? 0}
         />
@@ -126,18 +126,18 @@ export default function Transaction() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <span className="bg-primary h-2.5 w-2.5 rounded-full" />
-                <h3 className="text-[15px] font-bold text-white">Riwayat Transaksi</h3>
+                <h3 className="text-[15px] font-bold text-white">Transaction History</h3>
               </div>
               {isFetching && (
                 <span className="text-text-muted inline-flex items-center gap-1.5 text-xs">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Memperbarui...
+                  Updating...
                 </span>
               )}
             </div>
 
             <span className="text-text-muted text-[12px]">
-              Total Transaksi: <strong className="text-white">{pagination?.totalData ?? transactions.length}</strong>
+              Total Transactions: <strong className="text-white">{pagination?.totalData ?? transactions.length}</strong>
             </span>
           </div>
 
@@ -145,7 +145,7 @@ export default function Transaction() {
             <div className="relative w-full lg:flex-1">
               <Input
                 type="text"
-                placeholder="Cari Order ID, nama member, atau email..."
+                placeholder="Search by Order ID, member name, or email..."
                 className="placeholder:text-text-muted focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -155,7 +155,7 @@ export default function Transaction() {
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    aria-label="Hapus pencarian"
+                    aria-label="Clear search"
                     className="text-text-muted cursor-pointer rounded-md p-0.5 hover:bg-white/10 hover:text-white"
                   >
                     <X className="h-4 w-4" />
@@ -173,7 +173,7 @@ export default function Transaction() {
                   onChange={(e) => setTypeFilter(e.target.value)}
                   className="focus:border-primary focus:ring-primary w-full appearance-none rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
                 >
-                  <option value="">Semua Jenis</option>
+                  <option value="">All Types</option>
                   <option value="MEMBERSHIP">Membership</option>
                   <option value="TRAINER">PT Booking</option>
                 </Select>
@@ -188,11 +188,11 @@ export default function Transaction() {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="focus:border-primary focus:ring-primary w-full appearance-none rounded-xl border border-white/10 bg-[#0B0C10] py-2.5 pr-10 pl-4 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
                 >
-                  <option value="">Semua Status</option>
-                  <option value="PROCESS">Diproses</option>
-                  <option value="PENDING">Menunggu</option>
-                  <option value="EXPIRED">Kedaluwarsa</option>
-                  <option value="CANCELLED">Dibatalkan</option>
+                  <option value="">All Statuses</option>
+                  <option value="PROCESS">Processing</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="EXPIRED">Expired</option>
+                  <option value="CANCELLED">Cancelled</option>
                 </Select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
                   <ChevronDown className="text-text-muted h-4 w-4" />
@@ -205,12 +205,12 @@ export default function Transaction() {
         <CardContent className="p-5 sm:p-5">
           {isError ? (
             <div className="flex min-h-60 flex-col items-center justify-center gap-3 text-center">
-              <p className="text-sm text-red-400">Gagal memuat data transaksi.</p>
+              <p className="text-sm text-red-400">Failed to load transaction data.</p>
               <Button
                 variant="secondary"
                 onClick={refetch}
               >
-                Coba Lagi
+                Try Again
               </Button>
             </div>
           ) : (
@@ -225,10 +225,10 @@ export default function Transaction() {
                       <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">MEMBER</div>
                     </TableTH>
                     <TableTH>
-                      <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">TIPE TRANSAKSI</div>
+                      <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">TRANSACTION TYPE</div>
                     </TableTH>
                     <TableTH>
-                      <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">NOMINAL</div>
+                      <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">AMOUNT</div>
                     </TableTH>
                     <TableTH>
                       <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">MIDTRANS ORDER ID</div>
@@ -247,12 +247,12 @@ export default function Transaction() {
                           <Receipt className="h-8 w-8 opacity-30" />
                           <div className="flex flex-col gap-1">
                             <span className="font-medium text-white/80">
-                              {hasActiveFilter ? "Tidak ada transaksi yang sesuai filter" : "Belum ada data transaksi"}
+                              {hasActiveFilter ? "No transactions match your filters" : "No transaction data available"}
                             </span>
                             <span className="text-xs">
                               {hasActiveFilter
-                                ? "Coba ubah kata kunci pencarian atau filter status."
-                                : "Transaksi pembayaran member akan otomatis tercatat di sini."}
+                                ? "Try changing your search keywords or status filter."
+                                : "Member payment transactions will be recorded automatically here."}
                             </span>
                           </div>
                           {hasActiveFilter && (
@@ -260,7 +260,7 @@ export default function Transaction() {
                               variant="secondary"
                               onClick={handleResetFilters}
                             >
-                              Reset Filter
+                              Reset Filters
                             </Button>
                           )}
                         </div>

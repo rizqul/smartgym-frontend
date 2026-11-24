@@ -19,7 +19,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const userRole = user?.role?.toLowerCase() as UserRole
 
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
-    "Manajemen User": true
+    "User Management": true
   })
 
   const isActive = (path: string) => location.pathname === path

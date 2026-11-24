@@ -17,11 +17,11 @@ export const staffServiceApi = createApi({
   tagTypes: ["Staffs"],
   endpoints: (build) => ({
     getAllStaff: build.query<StaffsApi, StaffSearchQuery>({
-      query: ({ name = "", size = 10, page = 1 }) => ({
+      query: ({ search, size = 10, page = 1 }) => ({
         url: API_ADMIN_STAFF_LIST,
         method: "GET",
         params: {
-          name,
+          ...(search ? { search } : {}),
           size,
           page
         }

@@ -46,7 +46,7 @@ export default function MembershipPage() {
   if (isError) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
-        <p className="text-sm text-red-400">Gagal memuat katalog membership.</p>
+        <p className="text-sm text-red-400">Failed to load the membership catalog.</p>
         <Button
           variant="secondary"
           onClick={() => {
@@ -54,7 +54,7 @@ export default function MembershipPage() {
             if (isAdmin) refetchCount()
           }}
         >
-          Coba Lagi
+          Try Again
         </Button>
       </div>
     )
@@ -62,9 +62,9 @@ export default function MembershipPage() {
 
   const handleDelete = async (id: string, name: string) => {
     const result = await Alert.confirm({
-      title: "Hapus Paket?",
-      text: `Apakah Anda yakin ingin menghapus paket "${name}"? Tindakan ini tidak dapat dibatalkan.`,
-      confirmText: "Ya, Hapus",
+      title: "Delete Package?",
+      text: `Are you sure you want to delete the package "${name}"? This action cannot be undone.`,
+      confirmText: "Yes, Delete",
       isDanger: true
     })
 
@@ -73,10 +73,9 @@ export default function MembershipPage() {
     setDeletingId(id)
     try {
       await deletePackage(id).unwrap()
-      toast.success(`Paket ${name} berhasil dihapus!`)
+      toast.success(`Package ${name} was deleted successfully!`)
     } catch (error: unknown) {
-      const apiErr = error as { data?: { message?: string }; message?: string }
-      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal menghapus paket membership.")
+      toast.error("Failed to delete the membership package.")
     } finally {
       setDeletingId(null)
     }
@@ -86,9 +85,9 @@ export default function MembershipPage() {
     <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full max-w-2xl flex-col gap-1.5">
-          <h2 className="text-xl font-bold text-white sm:text-2xl">Manajemen Membership</h2>
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Membership Management</h2>
           <p className="text-text-muted text-[13px] sm:text-[14px]">
-            Kelola katalog paket membership dan pantau status langganan member terdaftar secara real-time.
+            Manage the membership package catalog and monitor registered members' subscription status in real time.
           </p>
         </div>
 
@@ -100,7 +99,7 @@ export default function MembershipPage() {
               onClick={() => navigate("/dashboard/membership/create")}
               className="w-full whitespace-nowrap sm:w-auto"
             >
-              Tambah Paket
+              Add Package
             </Button>
           </div>
         )}
@@ -110,8 +109,8 @@ export default function MembershipPage() {
         <CardStats
           topIcon={<Layers className="text-blue-400" />}
           bottomIcon={<SquareLibrary className="text-blue-400" />}
-          label="Katalog Aktif"
-          subLabel="Total Paket Tersedia"
+          label="Active Catalog"
+          subLabel="Total Available Packages"
           value={totalPackages}
         />
 
@@ -119,15 +118,15 @@ export default function MembershipPage() {
           <CardStats
             topIcon={<Wallet className="text-emerald-400" />}
             bottomIcon={<Banknote className="text-emerald-400" />}
-            label="Total Pendapatan Membership"
-            subLabel="Akumulasi Transaksi"
+            label="Total Membership Revenue"
+            subLabel="Accumulated Transactions"
             value={`Rp ${formatRupiah(membershipStats?.totalMembershipIncome ?? 0)}`}
           />
         )}
       </div>
 
       {packagesList.length === 0 ? (
-        <div className="text-text-muted flex w-full justify-center py-20 text-sm">Belum ada paket membership tersedia.</div>
+        <div className="text-text-muted flex w-full justify-center py-20 text-sm">No membership packages are currently available.</div>
       ) : (
         <div className="mt-2 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {packagesList.map((pkg) => {
@@ -145,7 +144,7 @@ export default function MembershipPage() {
             }
 
             if (featuresList.length === 0) {
-              featuresList = ["Akses seluruh fasilitas Gym"]
+              featuresList = ["Access to all gym facilities"]
             }
 
             const isDeleting = deletingId === pkg.id
@@ -163,7 +162,7 @@ export default function MembershipPage() {
                       <button
                         type="button"
                         onClick={() => navigate(`/dashboard/membership/${pkg.id}/edit`)}
-                        title="Edit Paket"
+                        title="Edit Package"
                         aria-label={`Edit ${pkg.name}`}
                         className="text-text-muted flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
                       >
@@ -173,7 +172,7 @@ export default function MembershipPage() {
                         type="button"
                         onClick={() => handleDelete(pkg.id, pkg.name)}
                         disabled={isDeleting}
-                        title="Hapus Paket"
+                        title="Delete Package"
                         aria-label={`Hapus ${pkg.name}`}
                         className="text-text-muted flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
                       >
@@ -193,11 +192,11 @@ export default function MembershipPage() {
                     <span className="text-xs font-semibold">Rp</span>
                     <span className="text-2xl font-bold tracking-tight">{formatRupiah(pkg.price)}</span>
                   </div>
-                  <span className="text-primary text-xs font-semibold whitespace-nowrap">/ {pkg.duration} Hari</span>
+                  <span className="text-primary text-xs font-semibold whitespace-nowrap">/ {pkg.duration} days</span>
                 </div>
 
                 <div className="flex flex-1 flex-col gap-2 border-t border-white/5 pt-3">
-                  <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">FASILITAS TERMASUK</span>
+                  <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">INCLUDED FACILITIES</span>
                   <ul className="flex flex-col gap-1.5">
                     {featuresList.map((feat, idx) => (
                       <li

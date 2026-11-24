@@ -11,9 +11,9 @@ export function Topbar() {
 
   const handleLogout = async () => {
     const result = await Alert.confirm({
-      title: "Keluar dari Portal?",
-      text: "Anda harus login kembali untuk mengakses sistem.",
-      confirmText: "Ya, Keluar",
+      title: "Log out of the portal?",
+      text: "You will need to log in again to access the system.",
+      confirmText: "Yes, Log Out",
       isDanger: true
     })
 
@@ -29,7 +29,7 @@ export function Topbar() {
       <div className="border-primary/75 bg-primary/50 flex shrink-0 items-center gap-1 rounded-xl border p-1">
         <Link
           to="/dashboard/settings"
-          title="Pengaturan Profil"
+          title="Profile Settings"
           className="flex items-center gap-2.5 rounded-lg px-2 py-1 transition-colors hover:bg-primary/75"
         >
           <div className="relative shrink-0">
@@ -51,8 +51,8 @@ export function Topbar() {
 
         <button
           type="button"
-          title="Keluar"
-          aria-label="Keluar"
+          title="Log out"
+          aria-label="Log out"
           onClick={handleLogout}
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-red-500 hover:text-red-300"
         >

@@ -2,16 +2,16 @@ import { Link, useLocation } from "react-router"
 import { ChevronRight, Home } from "lucide-react"
 
 const SEGMENT_LABELS: Record<string, string> = {
-  dashboard: "Dasbor",
-  staffs: "Staf",
-  transactions: "Transaksi",
-  membership: "Keanggotaan",
-  settings: "Pengaturan",
-  members: "Anggota",
-  attendance: "Kehadiran",
-  trainers: "Pelatih",
-  create: "Tambah",
-  edit: "Ubah"
+  dashboard: "Dashboard",
+  staffs: "Staff",
+  transactions: "Transactions",
+  membership: "Membership",
+  settings: "Settings",
+  members: "Members",
+  attendance: "Attendance",
+  trainers: "Trainers",
+  create: "Create",
+  edit: "Edit"
 }
 
 const isIdSegment = (segment: string): boolean => {
@@ -53,7 +53,7 @@ export function Breadcrumb() {
     >
       <Link
         to="/dashboard"
-        aria-label="Dasbor"
+        aria-label="Dashboard"
         className="flex items-center gap-1 transition-colors hover:text-white"
       >
         <Home className="h-4 w-4" />

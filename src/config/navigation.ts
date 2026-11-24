@@ -25,60 +25,60 @@ export interface FooterNavItem {
 
 export const navigationMenu: NavItem[] = [
   {
-    title: "Dasbor",
+    title: "Dashboard",
     path: "/dashboard",
     icon: LayoutDashboard,
     roles: ["admin"],
     category: "Ringkasan"
   },
   {
-    title: "Manajemen Pengguna",
+    title: "User Management",
     icon: Users,
     roles: ["admin", "staff"],
     category: "Manajemen",
     children: [
       {
-        title: "Data Anggota",
+        title: "Member Data",
         path: "/dashboard/members",
         roles: ["admin", "staff"]
       },
       {
-        title: "Data Staf",
+        title: "Staff Data",
         path: "/dashboard/staffs",
         roles: ["admin"]
       }
     ]
   },
   {
-    title: "Keanggotaan",
+    title: "Membership",
     path: "/dashboard/membership",
     icon: CreditCard,
     roles: ["admin", "staff"],
     category: "Manajemen"
   },
   {
-    title: "Transaksi",
+    title: "Transactions",
     path: "/dashboard/transactions",
     icon: ClipboardList,
     roles: ["admin"],
     category: "Manajemen"
   },
   {
-    title: "Kehadiran",
+    title: "Attendance",
     path: "/dashboard/attendance",
     icon: UserCheck,
     roles: ["admin", "staff"],
     category: "Manajemen"
   },
   {
-    title: "Data Pelatih",
+    title: "Trainer Data",
     path: "/dashboard/trainers",
     icon: UserCircle,
     roles: ["admin", "staff"],
     category: "Manajemen"
   },
   {
-    title: "Pengaturan Akun",
+    title: "Account Settings",
     path: "/dashboard/settings",
     icon: Settings,
     roles: ["admin", "staff"],
@@ -88,23 +88,23 @@ export const navigationMenu: NavItem[] = [
 
 export const landingNavigationMenu: LandingNavItem[] = [
   {
-    title: "Beranda",
+    title: "Home",
     href: "#beranda"
   },
   {
-    title: "Tentang Kami",
+    title: "About Us",
     href: "#fitur"
   },
   {
-    title: "Alur Daftar",
+    title: "Registration Flow",
     href: "#alur-pendaftaran"
   },
   {
-    title: "Keanggotaan",
+    title: "Membership",
     href: "#paket"
   },
   {
-    title: "Pelatih",
+    title: "Trainers",
     href: "#trainer"
   },
   {
@@ -114,9 +114,9 @@ export const landingNavigationMenu: LandingNavItem[] = [
 ]
 
 export const footerEcosystemMenu: FooterNavItem[] = [
-  { title: "Aplikasi Anggota", href: "#alur-pendaftaran" },
-  { title: "Portal Staf & Admin", to: "/auth/login" },
-  { title: "Paket Keanggotaan", href: "#paket" },
-  { title: "Pelatih Profesional", href: "#trainer" },
-  { title: "FAQ & Bantuan", href: "#faq" }
+  { title: "Member App", href: "#alur-pendaftaran" },
+  { title: "Staff & Admin Portal", to: "/auth/login" },
+  { title: "Membership Packages", href: "#paket" },
+  { title: "Professional Trainers", href: "#trainer" },
+  { title: "FAQ & Help", href: "#faq" }
 ]

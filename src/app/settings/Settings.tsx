@@ -100,12 +100,12 @@ export default function Settings() {
     if (!file) return
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      toast.error("File photo harus berupa PNG, JPG, atau JPEG.")
+      toast.error("Photo must be a PNG, JPG, or JPEG file.")
       return
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error("Ukuran foto maksimal 2MB.")
+      toast.error("Photo size must not exceed 2MB.")
       return
     }
 
@@ -168,12 +168,12 @@ export default function Settings() {
       formData.append("photo", croppedFile)
 
       await updateProfile(formData).unwrap()
-      toast.success("Foto profil berhasil diperbarui!")
+      toast.success("Profile photo updated successfully!")
       setIsProcessingCrop(false)
       handleClosePhotoModal()
     } catch (error: any) {
       setIsProcessingCrop(false)
-      toast.error(error?.data?.message || "Gagal memperbarui foto profil.")
+      toast.error("Failed to update profile photo.")
     }
   }
 
@@ -185,7 +185,7 @@ export default function Settings() {
     const isPasswordFilled = Boolean(values.currentPassword && values.newPassword)
 
     if (!isProfileChanged && !isPasswordFilled) {
-      toast("Tidak ada perubahan untuk disimpan.")
+      toast("There are no changes to save.")
       return
     }
 
@@ -216,27 +216,27 @@ export default function Settings() {
       })
 
       if (isProfileChanged && isPasswordFilled) {
-        toast.success("Profil dan kata sandi berhasil diperbarui!")
+        toast.success("Profile and password updated successfully!")
       } else if (isPasswordFilled) {
-        toast.success("Kata sandi berhasil diperbarui!")
+        toast.success("Password updated successfully!")
       } else {
-        toast.success("Profil berhasil diperbarui!")
+        toast.success("Profile updated successfully!")
       }
     } catch (error: any) {
-      toast.error(error?.data?.message || "Gagal menyimpan perubahan.")
+      toast.error("Failed to save changes.")
     }
   }
 
   const handleCopyPhone = () => {
     if (!profile?.phoneNumber) return
     navigator.clipboard.writeText(profile.phoneNumber)
-    toast.success("Nomor telepon disalin!")
+    toast.success("Phone number copied!")
   }
 
   const handleCopyEmail = () => {
     if (!profile?.email) return
     navigator.clipboard.writeText(profile.email)
-    toast.success("Alamat email disalin!")
+    toast.success("Email address copied!")
   }
 
   if (isLoading) {
@@ -253,12 +253,12 @@ export default function Settings() {
   if (isError || !profile) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
-        <p className="text-sm text-red-400">Gagal memuat data profil.</p>
+        <p className="text-sm text-red-400">Failed to load profile data.</p>
         <Button
           variant="secondary"
           onClick={() => refetch()}
         >
-          Coba Lagi
+          Try Again
         </Button>
       </div>
     )
@@ -268,8 +268,8 @@ export default function Settings() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 p-4 lg:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white lg:text-2xl">Pengaturan Profil &amp; Akun</h1>
-          <p className="text-text-secondary mt-0.5 text-[13px]">Kelola informasi profil pribadi dan keamanan kata sandi akun Anda.</p>
+          <h1 className="text-xl font-bold text-white lg:text-2xl">Profile &amp; Account Settings</h1>
+          <p className="text-text-secondary mt-0.5 text-[13px]">Manage your personal profile information and account password security.</p>
         </div>
         <Button
           type="button"
@@ -279,7 +279,7 @@ export default function Settings() {
           className="w-full font-bold sm:w-auto"
           leftIcon={!isSaving && <CheckCircle className="h-4 w-4" />}
         >
-          {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+          {isSaving ? "Saving..." : "Save Changes"}
         </Button>
       </div>
 
@@ -300,7 +300,7 @@ export default function Settings() {
                 <button
                   type="button"
                   onClick={() => setIsPhotoModalOpen(true)}
-                  title="Ubah foto profil"
+                  title="Change profile photo"
                   className="bg-primary absolute -right-2.5 -bottom-2.5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border-[3px] border-[#1C1F26] text-white transition-transform hover:scale-105"
                 >
                   <Pencil className="h-4 w-4" />
@@ -328,7 +328,7 @@ export default function Settings() {
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-text-muted flex shrink-0 items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Bergabung
+                    Joined
                   </span>
                   <LocalDate
                     date={profile.createdAt}
@@ -346,17 +346,17 @@ export default function Settings() {
               <UserCircle className="text-text-secondary h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-[15px] font-bold text-white">Informasi Pribadi</h3>
-              <p className="text-text-secondary text-[12px]">Perbarui rincian kontak dan profil identitas akun Anda.</p>
+              <h3 className="text-[15px] font-bold text-white">Personal Information</h3>
+              <p className="text-text-secondary text-[12px]">Update your account contact details and profile information.</p>
             </div>
           </CardHeader>
 
           <CardContent className="grid flex-1 grid-cols-1 content-center gap-4 pt-4 xl:grid-cols-2">
             <div className="xl:col-span-2">
               <Input
-                label="Nama Lengkap"
+                label="Full Name"
                 autoComplete="name"
-                placeholder="Masukkan nama lengkap"
+                placeholder="Enter your full name"
                 error={errors.fullName?.message}
                 {...register("fullName")}
               />
@@ -380,7 +380,7 @@ export default function Settings() {
               }
             />
             <Input
-              label="No. WhatsApp"
+                label="WhatsApp Number"
               autoComplete="tel"
               inputMode="numeric"
               type="tel"
@@ -408,15 +408,15 @@ export default function Settings() {
               <History className="text-text-secondary h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-[15px] font-bold text-white">Keamanan Kata Sandi</h3>
-              <p className="text-text-secondary text-[12px]">Ubah kata sandi secara berkala untuk menjaga keamanan akun Anda.</p>
+              <h3 className="text-[15px] font-bold text-white">Password Security</h3>
+              <p className="text-text-secondary text-[12px]">Change your password regularly to keep your account secure.</p>
             </div>
           </CardHeader>
 
           <CardContent className="pt-3">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Input
-                label="Kata Sandi Saat Ini"
+                label="Current Password"
                 type={showCurrentPassword ? "text" : "password"}
                 autoComplete="current-password"
                 placeholder="••••••••••••"
@@ -433,10 +433,10 @@ export default function Settings() {
                 }
               />
               <Input
-                label="Kata Sandi Baru"
+                label="New Password"
                 type={showNewPassword ? "text" : "password"}
                 autoComplete="new-password"
-                placeholder="Min. 8 karakter"
+                placeholder="At least 8 characters"
                 error={errors.newPassword?.message}
                 {...register("newPassword")}
                 rightElement={
@@ -450,10 +450,10 @@ export default function Settings() {
                 }
               />
               <Input
-                label="Konfirmasi Kata Sandi"
+                label="Confirm Password"
                 type={showConfirmPassword ? "text" : "password"}
                 autoComplete="new-password"
-                placeholder="Ulangi Kata sandi"
+                placeholder="Re-enter your password"
                 error={errors.confirmPassword?.message}
                 {...register("confirmPassword")}
                 rightElement={
@@ -470,7 +470,7 @@ export default function Settings() {
 
             <div className="text-text-muted mt-4 flex items-center gap-2 rounded-lg border border-white/5 bg-[#0B0C10] px-3 py-2.5">
               <Info className="text-primary h-4 w-4 shrink-0" />
-              <span className="text-[12px]">Gunakan kombinasi minimal 8 karakter dengan huruf kapital, angka, dan simbol.</span>
+              <span className="text-[12px]">Use a combination of at least 8 characters, including uppercase letters, numbers, and symbols.</span>
             </div>
           </CardContent>
         </Card>
@@ -479,7 +479,7 @@ export default function Settings() {
       <div className="text-text-muted flex items-center gap-2 px-1">
         <CloudLightning className="text-primary h-4 w-4 shrink-0" />
         <span className="text-[12px] font-medium">
-          Terakhir diperbarui pada{" "}
+          Last updated on{" "}
           <LocalDate
             date={profile.updatedAt}
             className="text-white"
@@ -499,18 +499,18 @@ export default function Settings() {
           >
             <div className="flex items-start justify-between gap-3 pb-4">
               <div>
-                <h3 className="text-base font-bold text-white">Ubah Foto Profil</h3>
+                <h3 className="text-base font-bold text-white">Change Profile Photo</h3>
                 <p className="text-text-secondary text-xs">
                   {previewUrl
-                    ? "Geser dan atur zoom untuk menyesuaikan area foto."
-                    : "Unggah foto baru dengan format JPG, PNG, atau WebP (maks. 2MB)."}
+                    ? "Drag and adjust the zoom to crop your photo."
+                    : "Upload a new JPG, PNG, or WebP photo (max. 2MB)."}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleClosePhotoModal}
                 disabled={isPhotoSubmitting}
-                aria-label="Tutup modal"
+                aria-label="Close dialog"
                 className="text-text-muted cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <X className="h-4 w-4" />
@@ -563,7 +563,7 @@ export default function Settings() {
                     disabled={isPhotoSubmitting}
                     className="text-primary hover:text-primary-hover cursor-pointer text-xs font-semibold whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Ganti Foto
+                    Change Photo
                   </button>
                 </div>
 
@@ -578,7 +578,7 @@ export default function Settings() {
                 <div className="mb-4 flex flex-col items-center">
                   <img
                     src={getAvatarUrl(profile.name, profile.profileUrl)}
-                    alt="Preview Foto Profil"
+                    alt="Profile photo preview"
                     className="h-32 w-32 rounded-2xl border border-white/10 object-cover shadow-md"
                   />
                 </div>
@@ -594,9 +594,9 @@ export default function Settings() {
                 >
                   <UploadCloud className={`mb-2 h-8 w-8 ${isDragging ? "text-primary" : "text-text-muted"}`} />
                   <p className="text-sm font-medium text-white">
-                    Tarik &amp; lepas foto di sini, atau <span className="text-primary underline">pilih file</span>
+                    Drag and drop a photo here, or <span className="text-primary underline">choose a file</span>
                   </p>
-                  <p className="text-text-muted mt-1 text-[11px]">JPG, PNG, WebP • Maksimal 2MB</p>
+                  <p className="text-text-muted mt-1 text-[11px]">JPG, PNG, WebP • Maximum 2MB</p>
                 </div>
               </>
             )}
@@ -608,7 +608,7 @@ export default function Settings() {
                 onClick={handleClosePhotoModal}
                 disabled={isPhotoSubmitting}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="button"
@@ -617,7 +617,7 @@ export default function Settings() {
                 disabled={!selectedPhoto || !croppedAreaPixels || isPhotoSubmitting}
                 isLoading={isPhotoSubmitting}
               >
-                {isPhotoSubmitting ? "Mengunggah..." : "Simpan Foto"}
+                {isPhotoSubmitting ? "Uploading..." : "Save Photo"}
               </Button>
             </div>
           </div>

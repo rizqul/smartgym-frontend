@@ -46,8 +46,8 @@ export const Alert = {
   confirm: ({
     title,
     text,
-    confirmText = "Ya, Lanjutkan",
-    cancelText = "Batal",
+    confirmText = "Yes, Continue",
+    cancelText = "Cancel",
     isDanger = false
   }: {
     title: string

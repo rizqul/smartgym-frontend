@@ -36,19 +36,19 @@ const loadStoredQr = (): StoredQrToken | null => {
 function MemberAccessGuide() {
   return (
     <>
-      <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">PANDUAN AKSES ANGGOTA</span>
+      <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">MEMBER ACCESS GUIDE</span>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <div className="bg-primary flex flex-col gap-1.5 rounded-xl p-3">
           <span className="flex items-center gap-1.5 border-b border-white/40 pb-1.5 text-[12px] font-bold text-white">
-            <Smartphone className="h-4 w-4 shrink-0 text-white" /> Langkah 1 & 2
+            <Smartphone className="h-4 w-4 shrink-0 text-white" /> Step 1 & 2
           </span>
-          <span className="text-[12px] leading-snug text-white">Buka aplikasi SmartGym, lalu masuk menu Pemindai Akses.</span>
+          <span className="text-[12px] leading-snug text-white">Open the SmartGym app, then enter the Access Scanner menu.</span>
         </div>
         <div className="bg-primary flex flex-col gap-1.5 rounded-xl p-3">
           <span className="flex items-center gap-1.5 border-b border-white/40 pb-1.5 text-[12px] font-bold text-white">
-            <ScanLine className="h-4 w-4 shrink-0 text-white" /> Langkah 3
+            <ScanLine className="h-4 w-4 shrink-0 text-white" /> Step 3
           </span>
-          <span className="text-[12px] leading-snug text-white">Arahkan kamera ke layar QR ini.</span>
+          <span className="text-[12px] leading-snug text-white">Point the camera at this QR screen.</span>
         </div>
       </div>
     </>
@@ -84,12 +84,11 @@ export default function LiveTokenGenerator() {
           setRemainingSeconds(Math.max(0, Math.floor((targetExpiresAtMs - Date.now()) / 1000)))
 
           if (showToast) {
-            toast.success(res.message || "QR token berhasil diperbarui!")
+            toast.success("QR token updated successfully!")
           }
         }
       } catch (err: unknown) {
-        const apiErr = err as { data?: { message?: string }; message?: string }
-        toast.error(apiErr?.data?.message || apiErr?.message || "Gagal membuat QR token.")
+        toast.error("Failed to generate QR token. Please try again.")
       }
     },
     [generateQrToken]
@@ -127,13 +126,13 @@ export default function LiveTokenGenerator() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={`h-2 w-2 rounded-full ${isExpired ? "bg-red-500" : "bg-primary/85 animate-pulse"}`} />
-          <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">Pembuat Token Langsung</span>
+          <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">Live Token Generator</span>
         </div>
 
         <div className="group relative hidden xl:block">
           <button
             type="button"
-            aria-label="Panduan Akses Member"
+            aria-label="Member Access Guide"
             className="text-text-muted hover:border-primary/40 hover:bg-primary/10 hover:text-primary flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors"
           >
             <HelpCircle className="h-4 w-4" />
@@ -155,7 +154,7 @@ export default function LiveTokenGenerator() {
           {isLoading || !qrUrl ? (
             <div className="flex flex-col items-center gap-2 text-gray-500">
               <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="text-xs font-medium">Membuat QR...</span>
+              <span className="text-xs font-medium">Generating QR...</span>
             </div>
           ) : (
             <>
@@ -169,8 +168,8 @@ export default function LiveTokenGenerator() {
 
               {isExpired && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 p-4 text-center backdrop-blur-[2px]">
-                  <span className="text-sm font-bold text-white">QR Kedaluwarsa</span>
-                  <span className="text-[11px] text-white/80">Klik tombol segarkan untuk membuat QR baru.</span>
+                  <span className="text-sm font-bold text-white">QR Code Expired</span>
+                  <span className="text-[11px] text-white/80">Click the refresh button to generate a new QR code.</span>
                 </div>
               )}
             </>
@@ -181,11 +180,11 @@ export default function LiveTokenGenerator() {
           <div className="text-text-muted flex items-center text-[12px] font-medium">
             <span className={`flex items-center gap-1.5 font-mono ${isExpired ? "text-red-400" : "text-primary"}`}>
               <Clock className="h-3.5 w-3.5" />
-              {isExpired ? "Token kedaluwarsa" : `Token valid: ${formatCountdown(remainingSeconds)}`}
+              {isExpired ? "Token expired" : `Token valid for: ${formatCountdown(remainingSeconds)}`}
             </span>
           </div>
           <p className="text-text-muted text-[12px] leading-relaxed">
-            Tampilan QR aktif selama 10 menit. Setelah waktu habis, QR akan diburamkan hingga diperbarui kembali.
+            The QR code stays active for 10 minutes. After it expires, it will be blurred until refreshed.
           </p>
           <button
             type="button"
@@ -196,7 +195,7 @@ export default function LiveTokenGenerator() {
             }`}
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            {isLoading ? "Memperbarui Token..." : "segarkan Token Sekarang"}
+            {isLoading ? "Refreshing Token..." : "Refresh Token Now"}
           </button>
 
           <div className="mt-2 border-t border-white/5 pt-4 xl:hidden">

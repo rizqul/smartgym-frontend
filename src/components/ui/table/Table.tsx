@@ -11,30 +11,34 @@ export interface TableProps {
   entityName?: string
 }
 
-export default function Table({ children, meta, onPageChange, showRowNumber = true, entityName = "data" }: TableProps) {
-  const startData = meta ? (meta.currentPage - 1) * meta.size + 1 : 1
-  const endData = meta ? Math.min(meta.currentPage * meta.size, meta.totalData) : 0
+export default function Table({ children, meta, onPageChange, showRowNumber = true, entityName = "items" }: TableProps) {
+  const currentPage = Number(meta?.currentPage ?? 1)
+  const totalPages = Number(meta?.totalPages ?? 0)
+  const size = Number(meta?.size ?? 10)
+  const totalData = Number(meta?.totalData ?? 0)
 
-  const visibleLinks = useMemo(() => {
-    if (!meta || meta.totalPages <= 0) return []
+  const startData = totalData > 0 ? (currentPage - 1) * size + 1 : 0
+  const endData = totalData > 0 ? Math.min(currentPage * size, totalData) : 0
 
-    const { currentPage, totalPages, links = [], nextUrl, prevUrl } = meta
+  const buildPageUrl = useMemo(() => {
+    const sampleUrl = meta?.links?.find((l) => l.url)?.url || meta?.nextUrl || meta?.prevUrl || ""
 
-    const getPageUrl = (page: number): string | null => {
-      const existing = links.find((l) => Number(l.label) === page && l.url)
-      if (existing?.url) return existing.url
-
-      const sampleUrl = links.find((l) => l.url)?.url || nextUrl || prevUrl
-      if (!sampleUrl) return null
+    return (page: number): string => {
+      if (!sampleUrl) return `?page=${page}`
 
       try {
-        const url = new URL(sampleUrl)
+        const base = typeof window !== "undefined" ? window.location.origin : "http://localhost"
+        const url = new URL(sampleUrl, base)
         url.searchParams.set("page", String(page))
         return url.toString()
       } catch {
-        return null
+        return `?page=${page}`
       }
     }
+  }, [meta?.links, meta?.nextUrl, meta?.prevUrl])
+
+  const visibleLinks = useMemo(() => {
+    if (!meta || totalPages <= 0) return []
 
     const pages: Array<number | "..."> = []
 
@@ -54,44 +58,58 @@ export default function Table({ children, meta, onPageChange, showRowNumber = tr
 
     return pages.map((item) =>
       item === "..."
-        ? { label: "...", url: null, active: false }
+        ? { label: "...", page: null, active: false }
         : {
             label: String(item),
-            url: getPageUrl(item),
+            page: item,
             active: item === currentPage
           }
     )
-  }, [meta])
+  }, [meta, currentPage, totalPages])
+
+  const canGoPrev = currentPage > 1
+  const canGoNext = currentPage < totalPages
+
+  const handleGoToPage = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return
+    onPageChange?.(buildPageUrl(page))
+  }
 
   return (
-    <TableContext.Provider value={{ showRowNumber, startNumber: startData }}>
+    <TableContext.Provider value={{ showRowNumber, startNumber: startData || 1 }}>
       <div className="mx-auto w-full">
         <div className="custom-scrollbar w-full overflow-x-auto rounded-md">
           <table className="w-full min-w-max">{children}</table>
         </div>
 
-        {meta && meta.totalData > 0 && (
+        {meta && totalData > 0 && (
           <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-4 sm:flex-row">
             <p className="text-text-secondary text-[13px]">
-              Menampilkan {startData} - {endData} dari total {meta.totalData} {entityName}
+              Showing <span className="font-medium text-white">{startData}</span> –{" "}
+              <span className="font-medium text-white">{endData}</span> of <span className="font-medium text-white">{totalData}</span>{" "}
+              {entityName}
             </p>
 
-            <div className="flex items-center gap-1.5">
+            <nav
+              aria-label="Pagination"
+              className="flex items-center gap-1.5"
+            >
               <button
                 type="button"
-                aria-label="Halaman sebelumnya"
-                onClick={() => meta.prevUrl && onPageChange?.(meta.prevUrl)}
-                disabled={!meta.prevUrl}
+                aria-label="Previous page"
+                onClick={() => handleGoToPage(currentPage - 1)}
+                disabled={!canGoPrev}
                 className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-[#111318] text-white/80 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
               >
                 <ChevronLeft size={16} />
               </button>
 
               {visibleLinks.map((link, index) => {
-                if (link.label === "...") {
+                if (link.page === null) {
                   return (
                     <span
                       key={`ellipsis-${index}`}
+                      aria-hidden="true"
                       className="flex h-9 min-w-6 items-center justify-center text-sm tracking-widest text-white/45 select-none"
                     >
                       ...
@@ -101,10 +119,12 @@ export default function Table({ children, meta, onPageChange, showRowNumber = tr
 
                 return (
                   <button
-                    key={`${link.label}-${index}`}
+                    key={`page-${link.page}`}
                     type="button"
-                    onClick={() => link.url && onPageChange?.(link.url)}
-                    disabled={link.active || !link.url}
+                    aria-label={`Page ${link.label}`}
+                    aria-current={link.active ? "page" : undefined}
+                    onClick={() => handleGoToPage(link.page)}
+                    disabled={link.active}
                     className={`flex h-9 min-w-9 cursor-pointer items-center justify-center rounded-lg px-2.5 text-[13px] tabular-nums transition-all ${
                       link.active
                         ? "bg-primary cursor-default font-bold text-[#0B0C10]"
@@ -118,14 +138,14 @@ export default function Table({ children, meta, onPageChange, showRowNumber = tr
 
               <button
                 type="button"
-                aria-label="Halaman berikutnya"
-                onClick={() => meta.nextUrl && onPageChange?.(meta.nextUrl)}
-                disabled={!meta.nextUrl}
+                aria-label="Next page"
+                onClick={() => handleGoToPage(currentPage + 1)}
+                disabled={!canGoNext}
                 className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg bg-[#111318] text-white/80 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
               >
                 <ChevronRight size={16} />
               </button>
-            </div>
+            </nav>
           </div>
         )}
       </div>

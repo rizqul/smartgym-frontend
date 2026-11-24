@@ -29,9 +29,9 @@ export const API_ADMIN_STAFF_UPDATE = (id: string) => `/admin/dashboard/staff/up
 export const API_ADMIN_TRAINERS_SLOT_LIST = (id: string) => `/admin/dashboard/trainers/slot/${id}`
 export const API_ADMIN_TRAINERS_SLOT_CREATE = (id: string) => `/admin/dashboard/trainers/slot/create/${id}`
 
-export const API_ADMIN_CHECKIN_LIST = "/admin/dashboard/checkins"
-export const API_ADMIN_CHECKIN_SUMMARY = "/admin/dashboard/checkins/summary"
-export const API_ADMIN_CHECKIN_QR_TOKEN = "/admin/dashboard/checkins/qr-token"
+export const API_ADMIN_CHECKIN_LIST = "/admin/dashboard/attendances"
+export const API_ADMIN_CHECKIN_SUMMARY = "/admin/dashboard/attendances/summary"
+export const API_ADMIN_CHECKIN_QR_TOKEN = "/admin/dashboard/attendances/qr-token"
 
 export const API_STAFF_MEMBERS_LIST = "/staff/dashboard/member"
 export const API_STAFF_MEMBERS_OTP = "/staff/dashboard/member/otp"
@@ -43,9 +43,9 @@ export const API_STAFF_MEMBERSHIP_PACKAGE_LIST = "/staff/dashboard/memberships/p
 export const API_STAFF_TRAINERS_LIST = "/staff/dashboard/trainers"
 export const API_STAFF_TRAINERS_SLOT_LIST = (id: string) => `/staff/dashboard/trainers/slot/${id}`
 
-export const API_STAFF_CHECKIN_QR_TOKEN = "/staff/dashboard/checkins/qr-token"
-export const API_STAFF_CHECKIN_CHECKOUT = (memberId: string) => `/staff/dashboard/checkins/${memberId}/checkout`
-export const API_ADMIN_CHECKIN_CHECKOUT = (memberId: string) => `/admin/dashboard/checkins/${memberId}/checkout`
+export const API_STAFF_CHECKIN_QR_TOKEN = "/staff/dashboard/attendances/qr-token"
+export const API_STAFF_CHECKIN_CHECKOUT = (memberId: string) => `/staff/dashboard/attendances/${memberId}/checkout`
+export const API_ADMIN_CHECKIN_CHECKOUT = (memberId: string) => `/admin/dashboard/attendances/${memberId}/checkout`
 
 export const API_ADMIN_MEMBERS_COUNT = "/admin/dashboard/members/count"
 export const API_STAFF_MEMBERS_COUNT = "/staff/dashboard/member/count"

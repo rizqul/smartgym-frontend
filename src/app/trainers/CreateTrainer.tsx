@@ -46,10 +46,10 @@ export default function CreateTrainer() {
   const onSubmit = async (values: CreateTrainerData) => {
     try {
       const res = await createTrainer(values).unwrap()
-      toast.success(res?.message || "Berhasil menambahkan trainer!")
+      toast.success(res?.message || "Trainer added successfully!")
       navigate("/dashboard/trainers")
     } catch (error: any) {
-      toast.error(error?.data?.message || "Gagal menambahkan trainer.")
+      toast.error(error?.data?.message || "Failed to add trainer.")
     }
   }
 
@@ -65,8 +65,8 @@ export default function CreateTrainer() {
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-white lg:text-2xl">Tambah Pelatih Baru</h1>
-            <p className="text-text-secondary mt-0.5 text-[13px]">Daftarkan instruktur baru beserta spesialisasi dan tarif per sesi.</p>
+            <h1 className="text-xl font-bold text-white lg:text-2xl">Add New Trainer</h1>
+            <p className="text-text-secondary mt-0.5 text-[13px]">Register a new instructor with their specialization and session rate.</p>
           </div>
         </div>
       </div>
@@ -81,32 +81,32 @@ export default function CreateTrainer() {
               <UserCircle className="text-text-secondary h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-[15px] font-bold text-white">Informasi Pelatih</h3>
-              <p className="text-text-secondary text-[12px]">Data dasar dan kontak instruktur.</p>
+              <h3 className="text-[15px] font-bold text-white">Trainer Information</h3>
+              <p className="text-text-secondary text-[12px]">The instructor's basic details and contact information.</p>
             </div>
           </CardHeader>
 
           <CardContent className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <Input
-                label="Nama Lengkap"
-                placeholder="Contoh: Rio Santoso"
+                label="Full Name"
+                placeholder="Example: Rio Santoso"
                 error={errors.name?.message}
                 {...register("name")}
               />
             </div>
             <Input
-              label="Alamat Email"
+              label="Email Address"
               type="email"
-              placeholder="Contoh: rio@smartgym.id"
+              placeholder="Example: rio@smartgym.id"
               error={errors.email?.message}
               {...register("email")}
             />
             <Input
-              label="No. WhatsApp / Telepon"
+              label="WhatsApp / Phone Number"
               type="tel"
               inputMode="numeric"
-              placeholder="Contoh: 081234567890"
+              placeholder="Example: 081234567890"
               error={errors.phoneNumber?.message}
               {...register("phoneNumber")}
               onInput={(e) => {
@@ -122,19 +122,19 @@ export default function CreateTrainer() {
               <Dumbbell className="text-text-secondary h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-[15px] font-bold text-white">Detail Kepelatihan &amp; Tarif</h3>
-              <p className="text-text-secondary text-[12px]">Tentukan spesialisasi, lama pengalaman, dan tarif per sesi PT.</p>
+              <h3 className="text-[15px] font-bold text-white">Training Details &amp; Rate</h3>
+              <p className="text-text-secondary text-[12px]">Set the specialization, years of experience, and PT session rate.</p>
             </div>
           </CardHeader>
 
           <CardContent className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-text-secondary text-xs font-semibold tracking-wider uppercase">Spesialisasi</label>
+              <label className="text-text-secondary text-xs font-semibold tracking-wider uppercase">Specialization</label>
               <Select
                 {...register("specialization")}
                 className="focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] px-4 py-2.5 text-[13px] text-white transition-all focus:ring-1 focus:outline-none"
               >
-                <option value="">Pilih Spesialisasi</option>
+                <option value="">Select Specialization</option>
                 {SPECIALIZATION_OPTIONS.map((opt) => (
                   <option
                     key={opt.value}
@@ -148,19 +148,19 @@ export default function CreateTrainer() {
             </div>
 
             <Input
-              label="Pengalaman (Tahun)"
+              label="Experience (Years)"
               type="text"
               inputMode="numeric"
-              placeholder="Contoh: 5"
+              placeholder="Example: 5"
               error={errors.experience?.message}
               {...register("experience")}
             />
 
             <Input
-              label="Tarif per Sesi (Rp)"
+              label="Rate per Session (Rp)"
               type="text"
               inputMode="numeric"
-              placeholder="Contoh: 150000"
+              placeholder="Example: 150000"
               error={errors.rate?.message}
               {...register("rate")}
             />
@@ -171,7 +171,7 @@ export default function CreateTrainer() {
                 variant="secondary"
                 onClick={() => navigate("/dashboard/trainers")}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="button"
@@ -181,7 +181,7 @@ export default function CreateTrainer() {
                 className="w-full font-bold sm:w-auto"
                 leftIcon={!isLoading && <Save className="h-4 w-4" />}
               >
-                {isLoading ? "Menyimpan..." : "Simpan Pelatih"}
+                {isLoading ? "Saving..." : "Save Trainer"}
               </Button>
             </div>
           </CardContent>

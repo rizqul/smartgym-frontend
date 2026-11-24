@@ -61,13 +61,13 @@ export default function TrainerScheduleCard({
               </div>
             </div>
 
-            {isSelected && <span className="bg-primary shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-bold text-black">Dipilih</span>}
+            {isSelected && <span className="bg-primary shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-bold text-black">Selected</span>}
           </div>
 
           <div className="text-text-muted flex flex-wrap items-center gap-2 border-b border-white/5 pb-3 text-[11px]">
             <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 font-semibold text-amber-300">
               <Briefcase className="h-3 w-3" />
-              Pengalaman {trainer.experience} Thn
+              {trainer.experience} Years of Experience
             </span>
             <span className="inline-flex items-center gap-1">
               <Phone className="h-3 w-3 text-sky-400" />
@@ -78,21 +78,21 @@ export default function TrainerScheduleCard({
 
         <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-4 pt-0 sm:p-4 sm:pt-0">
           <div className="flex items-center justify-between">
-            <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">JADWAL SESI HARI INI</span>
+            <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">TODAY&apos;S SESSION SCHEDULE</span>
             <span className="text-text-muted inline-flex items-center gap-1 text-[10px] font-medium">
               <Award className="text-primary h-3 w-3" />
-              {slots.length} Sesi
+              {slots.length} Sessions
             </span>
           </div>
 
           {isLoading ? (
             <div className="text-text-muted flex flex-1 items-center justify-center gap-2 text-xs">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Memuat jadwal...
+              Loading schedule...
             </div>
           ) : !slots.length ? (
             <div className="text-text-muted flex flex-1 items-center justify-center rounded-xl border border-dashed border-white/10 bg-[#0B0C10]/40 px-3 text-center text-[11px]">
-              Belum ada slot di tanggal ini
+              No slots available on this date
             </div>
           ) : (
             <div className="flex flex-col gap-1.5">
@@ -140,7 +140,7 @@ export default function TrainerScheduleCard({
 
               {remainingSlotsCount > 0 && (
                 <div className="text-text-muted flex justify-center pt-0.5 text-[11px] font-medium">
-                  <span>+{remainingSlotsCount} slot lainnya</span>
+                  <span>+{remainingSlotsCount} more slots</span>
                 </div>
               )}
             </div>
@@ -149,8 +149,8 @@ export default function TrainerScheduleCard({
       </div>
 
       <CardFooter className="justify-between border-t border-white/5 p-4 pt-3 text-[11px] sm:p-4 sm:pt-3">
-        <span className="font-medium text-sky-400">{slots.length > 0 ? `${slots.length} Slot Terjadwal` : "Slot Kosong"}</span>
-        <span className="text-text-muted text-[10px]">Tekan untuk lihat detail</span>
+        <span className="font-medium text-sky-400">{slots.length > 0 ? `${slots.length} Scheduled Slots` : "No Slots"}</span>
+        <span className="text-text-muted text-[10px]">Click to view details</span>
       </CardFooter>
     </Card>
   )

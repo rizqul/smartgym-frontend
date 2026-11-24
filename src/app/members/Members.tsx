@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router"
 import {
   Award,
@@ -31,7 +31,7 @@ import { useGetAllMemberQuery, useDeleteMemberMutation, useGetMemberCountQuery }
 
 type StatusFilter = "all" | "active" | "expired"
 
-const isMembershipActive = (expiredAt?: string | null) => Boolean(expiredAt && new Date(expiredAt).getTime() > Date.now())
+const isMembershipActive = (expiredAt: string | null | undefined, now: number) => Boolean(expiredAt && new Date(expiredAt).getTime() > now)
 
 export default function Member() {
   const navigate = useNavigate()
@@ -42,28 +42,37 @@ export default function Member() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const debouncedSearch = useDebounce(searchQuery, 500)
-  const [deleteMember] = useDeleteMemberMutation()
+  const trimmedSearch = debouncedSearch.trim()
+  const isDebouncing = searchQuery.trim() !== trimmedSearch
 
-  const { data: countRes, isLoading: isLoadingCount, refetch: refetchCount } = useGetMemberCountQuery()
+  const filterKey = `${trimmedSearch}|${statusFilter}`
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey)
+
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey)
+    setCurrentPage(1)
+  }
+
+  const effectivePage = filterKey !== prevFilterKey ? 1 : currentPage
+
+  const [deleteMember] = useDeleteMemberMutation()
+  const { data: countRes, refetch: refetchCount } = useGetMemberCountQuery()
+
+  const membershipParam = statusFilter === "active" ? true : statusFilter === "expired" ? false : undefined
 
   const { data, isLoading, isFetching, isError, refetch } = useGetAllMemberQuery({
-    name: debouncedSearch,
-    page: currentPage
+    search: trimmedSearch || undefined,
+    membership: membershipParam,
+    page: effectivePage
   })
 
-  const members = useMemo(() => data?.data ?? [], [data?.data])
+  const members = data?.data ?? []
   const memberStats = countRes?.data
   const hasSearch = searchQuery.trim().length > 0
+  const hasActiveFilter = hasSearch || statusFilter !== "all"
+  const isTableUpdating = isFetching || isDebouncing
 
-  const filteredMembers = useMemo(() => {
-    if (statusFilter === "all") return members
-    return members.filter((m) => {
-      const active = isMembershipActive(m.membershipExpiredAt)
-      return statusFilter === "active" ? active : !active
-    })
-  }, [members, statusFilter])
-
-  if (isLoading || isLoadingCount) {
+  if (isLoading && !data) {
     return (
       <div className="w-full p-4 lg:p-6">
         <PageSkeleton
@@ -74,25 +83,9 @@ export default function Member() {
     )
   }
 
-  if (isError) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
-        <p className="text-sm text-red-400">Gagal memuat data member.</p>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            refetch()
-            refetchCount()
-          }}
-        >
-          Coba Lagi
-        </Button>
-      </div>
-    )
-  }
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
+  const handleResetFilters = () => {
+    setSearchQuery("")
+    setStatusFilter("all")
     setCurrentPage(1)
   }
 
@@ -100,19 +93,19 @@ export default function Member() {
     try {
       const urlObj = new URL(url, window.location.origin)
       const pageParam = Number(urlObj.searchParams.get("page"))
-      if (pageParam && pageParam !== currentPage) {
+      if (Number.isInteger(pageParam) && pageParam >= 1 && pageParam !== effectivePage) {
         setCurrentPage(pageParam)
       }
     } catch (e) {
-      console.error("Gagal membaca URL paginasi", e)
+      console.error("Failed to read pagination URL", e)
     }
   }
 
   const handleDelete = async (id: string, name: string) => {
     const result = await Alert.confirm({
-      title: "Hapus Member?",
-      text: `Apakah Anda yakin ingin menghapus Member "${name}"? Data yang sudah dihapus tidak dapat dikembalikan.`,
-      confirmText: "Ya, Hapus",
+      title: "Delete Member?",
+      text: `Are you sure you want to delete member "${name}"? This action cannot be undone.`,
+      confirmText: "Yes, Delete",
       isDanger: true
     })
 
@@ -121,22 +114,29 @@ export default function Member() {
     setDeletingId(id)
     try {
       await deleteMember(id).unwrap()
-      toast.success(`Member ${name} berhasil dihapus!`)
+      toast.success(`Member ${name} was deleted successfully!`)
+      refetchCount()
+
+      if (members.length === 1 && effectivePage > 1) {
+        setCurrentPage(effectivePage - 1)
+      }
     } catch (error: unknown) {
       const apiErr = error as { data?: { message?: string }; message?: string }
-      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal menghapus member.")
+      toast.error(apiErr?.data?.message || apiErr?.message || "Failed to delete member.")
     } finally {
       setDeletingId(null)
     }
   }
 
+  const now = Date.now()
+
   return (
     <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full max-w-2xl flex-col gap-1.5">
-          <h2 className="text-xl font-bold text-white sm:text-2xl">Manajemen Member</h2>
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Member Management</h2>
           <p className="text-text-muted text-[13px] sm:text-[14px]">
-            Kelola data master member, status membership, dan pendaftaran akun dalam ekosistem SmartGym.
+            Manage member records, membership status, and account registration in the SmartGym ecosystem.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export default function Member() {
           onClick={() => navigate("/dashboard/members/create")}
           className="w-full shrink-0 whitespace-nowrap sm:w-auto"
         >
-          Tambah Member
+          Add Member
         </Button>
       </div>
 
@@ -154,29 +154,29 @@ export default function Member() {
         <CardStats
           topIcon={<Users className="text-blue-400" />}
           bottomIcon={<CalendarClock className="text-blue-400" />}
-          label="Total Terdaftar"
+          label="Total Members"
           subLabel="All-Time"
           value={memberStats?.memberCount ?? 0}
         />
         <CardStats
           topIcon={<Award className="text-green-400" />}
           bottomIcon={<UserGroup className="text-green-400" />}
-          label="Membership Aktif"
-          subLabel="Total Aktif"
+          label="Active Memberships"
+          subLabel="Total Active"
           value={memberStats?.memberActiveCount ?? 0}
         />
         <CardStats
           topIcon={<MinusCircle className="text-red-400" />}
           bottomIcon={<ShieldExclamationPoint className="text-red-400" />}
-          label="Kadaluarsa / Nonaktif"
-          subLabel="Total Nonaktif"
+          label="Expired / Inactive"
+          subLabel="Total Inactive"
           value={memberStats?.memberInactiveCount ?? 0}
         />
         <CardStats
           topIcon={<Users className="text-yellow-400" />}
           bottomIcon={<UserPlus className="text-yellow-400" />}
-          label="Member Baru"
-          subLabel="30 Hari Terakhir"
+          label="New Members"
+          subLabel="Last 30 Days"
           value={memberStats?.newMemberCount ?? 0}
         />
       </div>
@@ -188,19 +188,16 @@ export default function Member() {
               <Input
                 type="text"
                 icon={Search}
-                placeholder="Cari nama member..."
+                placeholder="Search by name or email..."
                 value={searchQuery}
-                onChange={handleSearch}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="py-2.5 text-[13px]"
                 rightElement={
                   hasSearch ? (
                     <button
                       type="button"
-                      onClick={() => {
-                        setSearchQuery("")
-                        setCurrentPage(1)
-                      }}
-                      aria-label="Hapus pencarian"
+                      onClick={() => setSearchQuery("")}
+                      aria-label="Clear search"
                       className="text-text-muted cursor-pointer rounded-md p-0.5 hover:bg-white/10 hover:text-white"
                     >
                       <X className="h-4 w-4" />
@@ -220,162 +217,184 @@ export default function Member() {
                   value="all"
                   className="bg-[#16181D]"
                 >
-                  Semua Status
+                  All Statuses
                 </option>
                 <option
                   value="active"
                   className="bg-[#16181D]"
                 >
-                  Membership Aktif
+                  Active Membership
                 </option>
                 <option
                   value="expired"
                   className="bg-[#16181D]"
                 >
-                  Kadaluarsa / Nonaktif
+                  Expired / Inactive
                 </option>
               </Select>
             </div>
           </div>
 
-          {isFetching && (
+          {isTableUpdating && (
             <span className="text-text-muted inline-flex shrink-0 items-center gap-1.5 text-xs">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Memperbarui...
+              Updating...
             </span>
           )}
         </div>
 
-        <div className={`transition-opacity duration-200 ${isFetching ? "pointer-events-none opacity-60" : "opacity-100"}`}>
-          <Table
-            meta={data?.paginate}
-            onPageChange={handlePageChange}
-          >
-            <TableHead>
-              <TableTR isHeader={true}>
-                <TableTH>
-                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">MEMBER DETAILS</div>
-                </TableTH>
-                <TableTH>
-                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">KONTAK</div>
-                </TableTH>
-                <TableTH>
-                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS MEMBERSHIP</div>
-                </TableTH>
-                <TableTH>
-                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">BERGABUNG</div>
-                </TableTH>
-                <TableTH>
-                  <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">AKSI</div>
-                </TableTH>
-              </TableTR>
-            </TableHead>
-
-            <TableBody>
-              {!filteredMembers.length ? (
-                <TableTR hideRowNumber>
-                  <TableTD colSpan={6}>
-                    <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
-                      <Users className="h-8 w-8 opacity-30" />
-                      <span>Tidak ada member ditemukan</span>
-                      {(hasSearch || statusFilter !== "all") && (
-                        <Button
-                          variant="secondary"
-                          onClick={() => {
-                            setSearchQuery("")
-                            setStatusFilter("all")
-                            setCurrentPage(1)
-                          }}
-                        >
-                          Reset Filter
-                        </Button>
-                      )}
-                    </div>
-                  </TableTD>
-                </TableTR>
-              ) : (
-                filteredMembers.map((member, index) => {
-                  const isActive = isMembershipActive(member.membershipExpiredAt)
-                  const hasPackage = Boolean(member.membershipExpiredAt)
-                  const isDeleting = deletingId === member.id
-
-                  return (
-                    <TableTR
-                      key={member.id}
-                      isEven={index % 2 === 0}
-                    >
-                      <TableTD>
-                        <div className="flex items-center gap-3">
-                          <Avatar
-                            src={member.profileUrl}
-                            name={member.name}
-                            className="h-10 w-10 shrink-0 rounded-xl border border-white/10 shadow-sm"
-                          />
-                          <span className="truncate text-[14px] font-bold text-white">{member.name}</span>
-                        </div>
-                      </TableTD>
-
-                      <TableTD>
-                        <div className="flex flex-col">
-                          <span className="text-[13px] text-white">{member.email}</span>
-                          <span className="text-[12px] font-medium tracking-wide whitespace-nowrap text-[#A28F79]">
-                            {member.phoneNumber || "-"}
-                          </span>
-                        </div>
-                      </TableTD>
-
-                      <TableTD>
-                        <div className="flex flex-col items-start gap-1">
-                          <Badge
-                            variant={isActive ? "yellow" : "plain"}
-                            label={isActive ? "Aktif" : hasPackage ? "Kadaluarsa" : "Belum Aktif"}
-                            icon={<div className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-yellow-400" : "bg-gray-400"}`} />}
-                          />
-                          <span className="text-text-muted text-[11px] whitespace-nowrap">
-                            {hasPackage ? (
-                              <>
-                                s.d{" "}
-                                <LocalDate
-                                  date={member.membershipExpiredAt}
-                                  variant="default"
-                                />
-                              </>
-                            ) : (
-                              "Belum ada paket"
-                            )}
-                          </span>
-                        </div>
-                      </TableTD>
-
-                      <TableTD>
-                        <LocalDate
-                          date={member.createdAt}
-                          variant="default"
-                          className="text-[13px] whitespace-nowrap text-white"
-                        />
-                      </TableTD>
-
-                      <TableTD>
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(member.id, member.name)}
-                            disabled={isDeleting}
-                            title="Hapus Member"
-                            aria-label={`Hapus ${member.name}`}
-                            className="text-text-muted cursor-pointer rounded-lg p-2 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                          </button>
-                        </div>
-                      </TableTD>
-                    </TableTR>
-                  )
-                })
+        {isError ? (
+          <div className="flex min-h-72 flex-col items-center justify-center gap-3 text-center">
+            <p className="text-sm text-red-400">Failed to load member data.</p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  refetch()
+                  refetchCount()
+                }}
+              >
+                Try Again
+              </Button>
+              {hasActiveFilter && (
+                <Button
+                  variant="secondary"
+                  onClick={handleResetFilters}
+                >
+                  Reset Filters
+                </Button>
               )}
-            </TableBody>
-          </Table>
-        </div>
+            </div>
+          </div>
+        ) : (
+          <div className={`transition-opacity duration-200 ${isTableUpdating ? "pointer-events-none opacity-60" : "opacity-100"}`}>
+            <Table
+              meta={data?.paginate}
+              onPageChange={handlePageChange}
+              entityName="members"
+            >
+              <TableHead>
+                <TableTR isHeader={true}>
+                  <TableTH>
+                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">MEMBER DETAILS</div>
+                  </TableTH>
+                  <TableTH>
+                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">CONTACT</div>
+                  </TableTH>
+                  <TableTH>
+                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">MEMBERSHIP STATUS</div>
+                  </TableTH>
+                  <TableTH>
+                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">JOINED</div>
+                  </TableTH>
+                  <TableTH>
+                    <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">ACTIONS</div>
+                  </TableTH>
+                </TableTR>
+              </TableHead>
+
+              <TableBody>
+                {!members.length ? (
+                  <TableTR hideRowNumber>
+                    <TableTD colSpan={6}>
+                      <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
+                        <Users className="h-8 w-8 opacity-30" />
+                        <span>No members found</span>
+                        {hasActiveFilter && (
+                          <Button
+                            variant="secondary"
+                            onClick={handleResetFilters}
+                          >
+                            Reset Filters
+                          </Button>
+                        )}
+                      </div>
+                    </TableTD>
+                  </TableTR>
+                ) : (
+                  members.map((member, index) => {
+                    const isActive = isMembershipActive(member.membershipExpiredAt, now)
+                    const hasPackage = Boolean(member.membershipExpiredAt)
+                    const isDeleting = deletingId === member.id
+
+                    return (
+                      <TableTR
+                        key={member.id}
+                        isEven={index % 2 === 0}
+                      >
+                        <TableTD>
+                          <div className="flex items-center gap-3">
+                            <Avatar
+                              src={member.profileUrl}
+                              name={member.name}
+                              className="h-10 w-10 shrink-0 rounded-xl border border-white/10 shadow-sm"
+                            />
+                            <span className="truncate text-[14px] font-bold text-white">{member.name}</span>
+                          </div>
+                        </TableTD>
+
+                        <TableTD>
+                          <div className="flex flex-col">
+                            <span className="text-[13px] text-white">{member.email}</span>
+                            <span className="text-[12px] font-medium tracking-wide whitespace-nowrap text-[#A28F79]">
+                              {member.phoneNumber || "-"}
+                            </span>
+                          </div>
+                        </TableTD>
+
+                        <TableTD>
+                          <div className="flex flex-col items-start gap-1">
+                            <Badge
+                              variant={isActive ? "yellow" : "plain"}
+                              label={isActive ? "Active" : hasPackage ? "Expired" : "Not Active"}
+                              icon={<div className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-yellow-400" : "bg-gray-400"}`} />}
+                            />
+                            <span className="text-text-muted text-[11px] whitespace-nowrap">
+                              {hasPackage ? (
+                                <>
+                                  until{" "}
+                                  <LocalDate
+                                    date={member.membershipExpiredAt}
+                                    variant="default"
+                                  />
+                                </>
+                              ) : (
+                                "No membership package"
+                              )}
+                            </span>
+                          </div>
+                        </TableTD>
+
+                        <TableTD>
+                          <LocalDate
+                            date={member.createdAt}
+                            variant="default"
+                            className="text-[13px] whitespace-nowrap text-white"
+                          />
+                        </TableTD>
+
+                        <TableTD>
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(member.id, member.name)}
+                              disabled={isDeleting}
+                              title="Delete Member"
+                              aria-label={`Delete ${member.name}`}
+                              className="text-text-muted cursor-pointer rounded-lg p-2 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                            </button>
+                          </div>
+                        </TableTD>
+                      </TableTR>
+                    )
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
     </div>
   )

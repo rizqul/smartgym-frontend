@@ -31,7 +31,7 @@ export default function EditStaff() {
 
   useEffect(() => {
     if (!staffData) {
-      toast.error("Data staf tidak ditemukan.")
+      toast.error("Staff data not found.")
       navigate("/dashboard/staffs")
       return
     }
@@ -56,11 +56,11 @@ export default function EditStaff() {
         ...(data.password ? { password: data.password } : {})
       }).unwrap()
 
-      toast.success(res?.message || "Data staf berhasil diperbarui!")
+      toast.success(res?.message || "Staff data updated successfully!")
       navigate("/dashboard/staffs")
     } catch (err: unknown) {
       const apiErr = err as { data?: { message?: string }; message?: string }
-      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal memperbarui data staf.")
+      toast.error(apiErr?.data?.message || apiErr?.message || "Failed to update staff data.")
     }
   }
 
@@ -70,21 +70,21 @@ export default function EditStaff() {
         <button
           type="button"
           onClick={() => navigate("/dashboard/staffs")}
-          aria-label="Kembali"
+          aria-label="Back"
           className="text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-white">Edit Data Staf</h1>
-          <p className="text-text-secondary mt-1 text-[13px]">Perbarui informasi dasar dan kontak akun staf.</p>
+          <h1 className="text-2xl font-bold text-white">Edit Staff Data</h1>
+          <p className="text-text-secondary mt-1 text-[13px]">Update the basic information and contact details for the staff account.</p>
         </div>
       </div>
 
       <Card className="shadow-2xl">
         <CardHeader className="border-b border-white/5 pb-4">
-          <h2 className="text-[16px] font-bold text-white">Informasi Dasar Staf</h2>
-          <p className="text-text-secondary text-[12px]">Ubah nama, email, nomor telepon, atau atur ulang kata sandi staf.</p>
+          <h2 className="text-[16px] font-bold text-white">Staff Basic Information</h2>
+          <p className="text-text-secondary text-[12px]">Change the staff name, email, phone number, or reset their password.</p>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -92,11 +92,11 @@ export default function EditStaff() {
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"
           >
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 mt-4">
               <div className="sm:col-span-2">
                 <Input
-                  label="Nama Lengkap"
-                  placeholder="Masukkan nama sesuai identitas"
+                  label="Full Name"
+                  placeholder="Enter the name shown on their identification"
                   icon={UserIcon}
                   error={errors.name?.message}
                   {...register("name")}
@@ -104,16 +104,16 @@ export default function EditStaff() {
               </div>
 
               <Input
-                label="Alamat Email"
+                label="Email Address"
                 type="email"
-                placeholder="email@contoh.com"
+                placeholder="email@example.com"
                 icon={Mail}
                 error={errors.email?.message}
                 {...register("email")}
               />
 
               <Input
-                label="Nomor WhatsApp / Telepon"
+                label="WhatsApp / Phone Number"
                 type="tel"
                 placeholder="081234567890"
                 icon={Phone}
@@ -123,9 +123,9 @@ export default function EditStaff() {
 
               <div className="sm:col-span-2">
                 <Input
-                  label="Kata Sandi Baru (Opsional)"
+                  label="New Password (Optional)"
                   type="password"
-                  placeholder="Kosongkan jika tidak ingin mengubah kata sandi"
+                  placeholder="Leave blank if you do not want to change the password"
                   icon={Lock}
                   error={errors.password?.message}
                   {...register("password")}
@@ -140,7 +140,7 @@ export default function EditStaff() {
                 onClick={() => navigate("/dashboard/staffs")}
                 disabled={isUpdating}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -149,7 +149,7 @@ export default function EditStaff() {
                 leftIcon={!isUpdating && <Save className="h-4 w-4" />}
                 className="font-bold"
               >
-                {isUpdating ? "Menyimpan..." : "Simpan Perubahan"}
+                {isUpdating ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
