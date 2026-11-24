@@ -6,6 +6,7 @@ import { X, CalendarCheck, CheckCircle2, Info, ChevronDown, UserCheck, Clock } f
 import { Input } from "~/components/ui/Input"
 import { Select } from "~/components/ui/Select"
 import { Button } from "~/components/ui/Button"
+import { getCurrentHourWIB, getTodayWIB } from "~/utils/date"
 import type { CreateTrainerSlotRequest, TrainerItem } from "~/types/trainer"
 import { CreateTrainerSlotValidation, type CreateTrainerSlotData } from "~/validation/trainer"
 
@@ -27,6 +28,20 @@ const formatDuration = (minutes: number) => {
   return `${m} menit`
 }
 
+const getDefaultHours = (slotDate: string) => {
+  if (slotDate !== getTodayWIB()) {
+    return { startHour: "08:00", endHour: "09:00" }
+  }
+
+  const nextHour = Math.min(getCurrentHourWIB() + 1, 22)
+  const endHour = Math.min(nextHour + 1, 23)
+
+  return {
+    startHour: `${String(nextHour).padStart(2, "0")}:00`,
+    endHour: `${String(endHour).padStart(2, "0")}:00`
+  }
+}
+
 export default function CreateTrainerSlotModal({
   isOpen,
   onClose,
@@ -36,6 +51,10 @@ export default function CreateTrainerSlotModal({
   isSubmitting = false,
   onSubmit
 }: CreateTrainerSlotModalProps) {
+  const todayWIB = getTodayWIB()
+  const initialDate = defaultDate && defaultDate >= todayWIB ? defaultDate : todayWIB
+  const initialHours = getDefaultHours(initialDate)
+
   const {
     register,
     handleSubmit,
@@ -46,20 +65,24 @@ export default function CreateTrainerSlotModal({
     resolver: zodResolver(CreateTrainerSlotValidation),
     defaultValues: {
       trainerId: defaultTrainerId || trainers[0]?.id || "",
-      slotDate: defaultDate,
-      startHour: "16:00",
-      endHour: "17:00",
+      slotDate: initialDate,
+      startHour: initialHours.startHour,
+      endHour: initialHours.endHour,
       description: ""
     }
   })
 
   useEffect(() => {
     if (isOpen) {
+      const today = getTodayWIB()
+      const validDate = defaultDate && defaultDate >= today ? defaultDate : today
+      const { startHour, endHour } = getDefaultHours(validDate)
+
       reset({
         trainerId: defaultTrainerId || trainers[0]?.id || "",
-        slotDate: defaultDate,
-        startHour: "06:00",
-        endHour: "07:20",
+        slotDate: validDate,
+        startHour,
+        endHour,
         description: ""
       })
     }
@@ -81,8 +104,8 @@ export default function CreateTrainerSlotModal({
     onSubmit({
       trainerId: data.trainerId,
       slotDate: data.slotDate,
-      startTime: `${data.slotDate}T${data.startHour}`,
-      endTime: `${data.slotDate}T${data.endHour}`,
+      startTime: data.startHour,
+      endTime: data.endHour,
       description: data.description ?? ""
     })
   }
@@ -101,7 +124,7 @@ export default function CreateTrainerSlotModal({
             <div className="flex flex-wrap items-center gap-2.5">
               <h3 className="text-lg font-bold text-white">Tambah Slot Jadwal Pelatih</h3>
               <span className="bg-primary/15 text-primary rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
-                Pelatih Slot
+                Slot Pelatih
               </span>
             </div>
             <p className="text-text-muted mt-1 text-xs leading-relaxed">
@@ -154,6 +177,7 @@ export default function CreateTrainerSlotModal({
                 <Input
                   label="Tanggal Slot"
                   type="date"
+                  min={todayWIB}
                   error={errors.slotDate?.message}
                   {...register("slotDate")}
                   className="scheme-dark"

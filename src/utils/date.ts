@@ -8,8 +8,25 @@ const FORMAT_OPTIONS: Record<DateFormatVariant, Intl.DateTimeFormatOptions> = {
   time: { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "Asia/Jakarta" }
 }
 
+export function getTodayWIB(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date())
+}
+
+export function getCurrentHourWIB(): number {
+  const hourStr = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Jakarta"
+  }).format(new Date())
+  return Number(hourStr) % 24
+}
+
 export function formatWIB(date: string | Date | null | undefined, variant: DateFormatVariant = "default"): string {
   if (!date) return "-"
+
+  if (typeof date === "string" && /^\d{2}:\d{2}(:\d{2})?$/.test(date)) {
+    return variant === "hour" ? date.slice(0, 5) : date
+  }
 
   try {
     const d = date instanceof Date ? date : new Date(/^\d{4}-\d{2}-\d{2}$/.test(date) ? `${date}T00:00:00+07:00` : date)
