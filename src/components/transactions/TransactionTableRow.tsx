@@ -22,9 +22,9 @@ export default function TransactionTableRow({ transaction, isEven }: Transaction
   const handleCopyOrderId = async () => {
     try {
       await navigator.clipboard.writeText(transaction.orderId)
-      toast.success("Order ID berhasil disalin!")
+      toast.success("Order ID successfully copied!")
     } catch {
-      toast.error("Gagal menyalin Order ID.")
+      toast.error("Failed to copy Order ID.")
     }
   }
 
@@ -85,7 +85,7 @@ export default function TransactionTableRow({ transaction, isEven }: Transaction
           <span className="text-text-muted text-[11px]">
             {transaction.paidAt ? (
               <>
-                Dibayar: <LocalDate date={transaction.paidAt} />{" "}
+                Paid: <LocalDate date={transaction.paidAt} />{" "}
                 <LocalDate
                   date={transaction.paidAt}
                   variant="hour"
@@ -93,7 +93,7 @@ export default function TransactionTableRow({ transaction, isEven }: Transaction
               </>
             ) : (
               <>
-                Dibuat: <LocalDate date={transaction.createdAt} />
+                Made: <LocalDate date={transaction.createdAt} />
               </>
             )}
           </span>

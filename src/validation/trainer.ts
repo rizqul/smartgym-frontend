@@ -27,7 +27,7 @@ export const CreateTrainerSlotValidation = z
       return eh * 60 + em > sh * 60 + sm
     },
     {
-      message: "Jam selesai harus lebih besar dari jam mulai.",
+      message: "End time must be later than start time.",
       path: ["endHour"]
     }
   )
@@ -37,7 +37,7 @@ export const CreateTrainerSlotValidation = z
       return startDateTime.getTime() >= Date.now()
     },
     {
-      message: "Waktu mulai harus di masa sekarang atau mendatang.",
+      message: "Start time must be now or in the future.",
       path: ["startHour"]
     }
   )

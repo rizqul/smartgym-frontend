@@ -1,12 +1,28 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router"
-import { UserPlus, Dumbbell, Wallet, Calendar, CalendarCheck, CalendarClock, Users, Trash2, X, Whistle, LayoutGrid, ListChecks, Banknote } from "lucide-react"
+import {
+  UserPlus,
+  Dumbbell,
+  Wallet,
+  Calendar,
+  CalendarCheck,
+  CalendarClock,
+  Users,
+  Trash2,
+  X,
+  Whistle,
+  LayoutGrid,
+  ListChecks,
+  Banknote
+} from "lucide-react"
 
 import { Button } from "~/components/ui/Button"
 import { CardStats } from "~/components/ui/CardStats"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import TrainerListTab from "~/components/trainers/list/TrainerListTab"
 import TrainerScheduleTab from "~/components/trainers/list/TrainerScheduleTab"
+import { useDebounce } from "~/hooks/useDebounce"
+import { usePagination } from "~/hooks/usePagination"
 import { useGetAllTrainerQuery, useGetTrainerCountQuery } from "~/services/trainer"
 import { useAppSelector } from "~/store/hooks"
 import { formatRupiah } from "~/utils/format"
@@ -21,19 +37,24 @@ export default function Trainers() {
 
   const [activeTab, setActiveTab] = useState<TabType>("trainers")
   const [searchQuery, setSearchQuery] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [page, setPage] = useState(1)
   const [trainerToDelete, setTrainerToDelete] = useState<TrainerItem | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery.trim())
-      setPage(1)
-    }, 400)
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+  const { page, size, handlePageChange, handlePageSizeChange, resetPage } = usePagination(5)
 
-  const { data: countRes, isLoading: isLoadingCount } = useGetTrainerCountQuery()
+  const debouncedSearch = useDebounce(searchQuery, 500)
+  const trimmedSearch = debouncedSearch.trim()
+  const isDebouncing = searchQuery.trim() !== trimmedSearch
+
+  const [prevSearch, setPrevSearch] = useState(trimmedSearch)
+  if (trimmedSearch !== prevSearch) {
+    setPrevSearch(trimmedSearch)
+    resetPage()
+  }
+
+  const effectivePage = trimmedSearch !== prevSearch ? 1 : page
+
+  const { data: countRes } = useGetTrainerCountQuery()
+
   const {
     data: trainersRes,
     isLoading,
@@ -41,22 +62,19 @@ export default function Trainers() {
     isError,
     refetch
   } = useGetAllTrainerQuery({
-    name: debouncedSearch,
-    page
+    search: trimmedSearch || undefined,
+    page: effectivePage,
+    size
   })
 
+  const { data: scheduleTrainersRes } = useGetAllTrainerQuery({ page: 1, size: 50 }, { skip: activeTab !== "schedule" })
+
   const trainers = trainersRes?.data ?? []
+  const scheduleTrainers = scheduleTrainersRes?.data ?? trainers
   const trainerStats = countRes?.data
+  const isTableUpdating = isFetching || isDebouncing
 
-  const handlePageChange = (url: string) => {
-    const parsedUrl = new URL(url, window.location.origin)
-    const nextPage = Number(parsedUrl.searchParams.get("page"))
-    if (nextPage && nextPage !== page) {
-      setPage(nextPage)
-    }
-  }
-
-  if (isLoading || isLoadingCount) {
+  if (isLoading && !trainersRes) {
     return (
       <div className="w-full p-4 lg:p-6">
         <PageSkeleton
@@ -71,9 +89,9 @@ export default function Trainers() {
     <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex w-full max-w-2xl flex-col gap-1.5">
-          <h2 className="text-xl font-bold text-white sm:text-2xl">Data Trainer &amp; Manajemen Sesi PT</h2>
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Trainer Data &amp; Session Management</h2>
           <p className="text-text-muted text-[13px] sm:text-[14px]">
-            Kelola direktori Personal Trainer, spesialisasi keahlian, tarif per sesi, serta jadwal ketersediaan slot reservasi member.
+            Manage the Personal Trainer directory, areas of expertise, session rates, and member reservation slot availability.
           </p>
         </div>
 
@@ -85,7 +103,7 @@ export default function Trainers() {
               onClick={() => navigate("/dashboard/trainers/create")}
               className="w-full whitespace-nowrap sm:w-auto"
             >
-              Tambah Trainer
+              Add Trainer
             </Button>
           </div>
         )}
@@ -95,30 +113,30 @@ export default function Trainers() {
         <CardStats
           topIcon={<Dumbbell className="text-primary" />}
           bottomIcon={<Whistle className="text-primary" />}
-          label="Total Trainer"
-          subLabel="Terdaftar di SmartGym"
+          label="Total Trainers"
+          subLabel="Registered"
           value={trainerStats?.countTrainer ?? 0}
         />
         <CardStats
           topIcon={<CalendarCheck className="text-amber-400" />}
           bottomIcon={<LayoutGrid className="text-amber-400" />}
-          label="Trainer Bertugas"
-          subLabel="Memiliki slot hari ini"
+          label="Trainers on Duty"
+          subLabel="Today"
           value={trainerStats?.countTrainerWithSlot ?? 0}
         />
         <CardStats
           topIcon={<CalendarClock className="text-blue-400" />}
           bottomIcon={<ListChecks className="text-blue-400" />}
-          label="Total Slot Hari Ini"
-          subLabel="Jadwal sesi tersedia"
+          label="Total Slots Today"
+          subLabel="Sessions available"
           value={trainerStats?.countSlot ?? 0}
         />
         {isAdmin && (
           <CardStats
             topIcon={<Wallet className="text-emerald-400" />}
             bottomIcon={<Banknote className="text-emerald-400" />}
-            label="Pendapatan Sesi PT"
-            subLabel="Akumulasi booking trainer"
+            label="Trainer Revenue"
+            subLabel="Accumulated"
             value={`Rp ${formatRupiah(trainerStats?.sumTransactionBookedTrainer ?? 0)}`}
           />
         )}
@@ -126,7 +144,7 @@ export default function Trainers() {
 
       <div
         role="tablist"
-        aria-label="Navigasi Trainer"
+        aria-label="Trainer navigation"
         className="grid w-full grid-cols-2 gap-2 rounded-xl border border-white/5 bg-[#1C1F26] p-2"
       >
         <Button
@@ -140,7 +158,7 @@ export default function Trainers() {
             activeTab === "trainers" ? "shadow-md" : "text-text-muted hover:bg-white/5 hover:text-white"
           }`}
         >
-          <span className="truncate">Daftar Trainer</span>
+          <span className="truncate">Trainer List</span>
         </Button>
 
         <Button
@@ -154,7 +172,7 @@ export default function Trainers() {
             activeTab === "schedule" ? "shadow-md" : "text-text-muted hover:bg-white/5 hover:text-white"
           }`}
         >
-          <span className="truncate">Kalender &amp; Jadwal Sesi</span>
+          <span className="truncate">Calendar &amp; Session Schedule</span>
         </Button>
       </div>
 
@@ -165,15 +183,17 @@ export default function Trainers() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onPageChange={handlePageChange}
-          isFetching={isFetching}
+          onPageSizeChange={handlePageSizeChange}
+          isFetching={isTableUpdating}
           isError={isError}
           onRefetch={refetch}
+          onEdit={(trainer) => navigate(`/dashboard/trainers/${trainer.id}/edit`, { state: { trainer } })}
           onDelete={(trainer) => setTrainerToDelete(trainer)}
           isAdmin={isAdmin}
         />
       ) : (
         <TrainerScheduleTab
-          trainers={trainers}
+          trainers={scheduleTrainers}
           isAdmin={isAdmin}
         />
       )}
@@ -181,7 +201,7 @@ export default function Trainers() {
       {trainerToDelete && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm lg:left-64"
-          // onClick={() => !isDeleting && setTrainerToDelete(null)}
+          onClick={() => setTrainerToDelete(null)}
         >
           <div
             className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#16181D] shadow-2xl"
@@ -192,13 +212,12 @@ export default function Trainers() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/15 text-red-400">
                   <Trash2 className="h-4 w-4" />
                 </div>
-                <h3 className="text-base font-bold text-white">Hapus Trainer</h3>
+                <h3 className="text-base font-bold text-white">Delete Trainer</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setTrainerToDelete(null)}
-                // disabled={isDeleting}
-                aria-label="Tutup modal"
+                aria-label="Close modal"
                 className="text-text-muted cursor-pointer rounded-lg p-1 transition-colors hover:bg-white/5 hover:text-white"
               >
                 <X className="h-4 w-4" />
@@ -206,8 +225,8 @@ export default function Trainers() {
             </div>
 
             <div className="px-5 py-4 text-sm leading-relaxed text-white/80">
-              Apakah kamu yakin ingin menghapus trainer <strong className="text-white">{trainerToDelete.name}</strong>? Tindakan ini tidak
-              dapat dibatalkan.
+              Are you sure you want to delete trainer <strong className="text-white">{trainerToDelete.name}</strong>? This action cannot be
+              undone.
             </div>
 
             <div className="flex items-center justify-end gap-2.5 border-t border-white/5 bg-[#121419] px-5 py-3.5">
@@ -215,18 +234,16 @@ export default function Trainers() {
                 type="button"
                 variant="secondary"
                 onClick={() => setTrainerToDelete(null)}
-                // disabled={isDeleting}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="button"
                 variant="primary"
-                // isLoading={isDeleting}
-                // onClick={handleConfirmDelete}
+                onClick={() => setTrainerToDelete(null)}
                 className="bg-red-600 hover:bg-red-700"
               >
-                {/* {isDeleting ? "Menghapus..." : "Ya, Hapus"} */}
+                Yes, Delete
               </Button>
             </div>
           </div>

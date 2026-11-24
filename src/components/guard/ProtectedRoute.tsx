@@ -11,7 +11,7 @@ export default function ProtectedRoute({ allowedRoles, redirectTo = "/404" }: Pr
   const { data: user, status } = useAppSelector((state) => state.user)
 
   if (status === "loading") {
-    return <div className="flex h-screen w-full items-center justify-center bg-[#0B0C10] text-white">Memuat sesi...</div>
+    return <div className="flex h-screen w-full items-center justify-center bg-[#0B0C10] text-white">Loading Session...</div>
   }
 
   if (status === "unauthenticated" || !user) {

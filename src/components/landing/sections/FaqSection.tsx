@@ -1,13 +1,11 @@
 import { useState } from "react"
 import {
-  Building2,
   CalendarCheck,
   ChevronDown,
-  Headset,
   HelpCircle,
-  MessageSquareText,
-  QrCode,
+  RefreshCw,
   ShieldCheck,
+  Sparkles,
   Store,
   Wallet,
   type LucideIcon
@@ -28,11 +26,11 @@ interface FaqItem {
 const FAQ_ITEMS: FaqItem[] = [
   {
     id: 0,
-    question: "Bagaimana cara mendaftar menjadi member baru SmartGym?",
+    question: "How do I register as a new SmartGym member?",
     answer:
-      "Pendaftaran dilakukan langsung di meja Front-Desk cabang kami. Staf admin akan membantu verifikasi identitas, aktivasi keanggotaan, serta memberikan akses masuk pertama dan aktivasi akun aplikasi mobile SmartGym.",
-    note: "Dilayani di Resepsionis Cabang",
-    tag: "Resepsionis",
+      "Registration is done directly at our club Receptionist. Our admin staff will assist with identity verification, membership activation, your first gym entry, and setting up your SmartGym Mobile App account.",
+    note: "Served at Club Reception",
+    tag: "Receptionist",
     icon: Store,
     iconWrapClass: "bg-primary/10 border-primary/20",
     iconClass: "text-primary",
@@ -40,10 +38,10 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: 1,
-    question: "Mengapa pendaftaran akun dilakukan melalui admin dan staf, bukan registrasi mandiri?",
+    question: "Why is account registration handled by staff instead of online self-registration?",
     answer:
-      "Untuk menjaga keamanan fasilitas 24/7 dan mencegah penyalahgunaan akun, setiap member wajib melewati verifikasi identitas fisik satu kali di resepsionis agar akses QR dan RFID terikat secara resmi.",
-    tag: "Keamanan",
+      "To maintain facility security and prevent account misuse, every member completes a one-time in-person identity verification at the Receptionist so your dynamic QR access is officially tied to your verified account.",
+    tag: "Security",
     icon: ShieldCheck,
     iconWrapClass: "bg-secondary/10 border-secondary/20",
     iconClass: "text-secondary",
@@ -51,20 +49,20 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: 2,
-    question: "Bagaimana cara mengakses gate/turnstile jika datang di luar jam staf (tengah malam)?",
+    question: "How does the AI Trainer feature work?",
     answer:
-      "Member dengan paket All-Access Pro atau VIP Elite cukup membuka SmartGym Mobile App dan memindai QR dinamis (atau tap kartu RFID) pada turnstile otomatis di pintu masuk cabang.",
-    tag: "Akses 24/7",
-    icon: QrCode,
+      "Available directly in the SmartGym Mobile App, AI Trainer generates personalized workout routines and adaptive training recommendations based on your fitness goals, experience level, and weekly progress.",
+    tag: "AI Trainer",
+    icon: Sparkles,
     iconWrapClass: "bg-info/10 border-info/20",
     iconClass: "text-info",
     tagClass: "bg-info/10 text-info"
   },
   {
     id: 3,
-    question: "Apakah sesi Personal Trainer (PT) bisa dijadwalkan lewat aplikasi mobile?",
+    question: "Can Personal Trainer (PT) sessions be booked through the mobile app?",
     answer:
-      "Ya. Setelah akun aktif, Anda dapat melihat profil coach yang tersedia, mengecek ketersediaan slot secara real-time, dan langsung mengunci jadwal latihan privat 1-on-1 dari aplikasi.",
+      "Yes. Once your account is active, you can browse available coach profiles, check real-time slot availability, and instantly lock in 1-on-1 private training sessions from the app.",
     tag: "Trainer",
     icon: CalendarCheck,
     iconWrapClass: "bg-primary/10 border-primary/20",
@@ -73,10 +71,9 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: 4,
-    question: "Metode pembayaran apa saja yang diterima di kasir front-desk?",
-    answer:
-      "Kami menerima pembayaran via QRIS, Virtual Account bank nasional, kartu debit/kredit, serta pembayaran terintegrasi melalui Midtrans Payment Gateway untuk perpanjangan otomatis.",
-    tag: "Pembayaran",
+    question: "What payment methods are accepted?",
+    answer: "We accept QRIS, major bank Virtual Accounts, e-wallet, and QRIS payments for membership renewals and PT bookings.",
+    tag: "Payment",
     icon: Wallet,
     iconWrapClass: "bg-secondary/10 border-secondary/20",
     iconClass: "text-secondary",
@@ -84,11 +81,11 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: 5,
-    question: "Apakah membership saya berlaku di seluruh cabang SmartGym?",
+    question: "How do I check my membership status and renew it?",
     answer:
-      "Paket Basic berlaku untuk 1 cabang terdaftar pilihan Anda, sedangkan paket All-Access Pro dan VIP Elite memberikan akses penuh lintas seluruh cabang SmartGym.",
-    tag: "Multi-Club",
-    icon: Building2,
+      "You can monitor your active membership period and expiration date anytime in the SmartGym Mobile App. When it is time to renew, simply choose your preferred package and pay directly through the app or at the Receptionist.",
+    tag: "Membership",
+    icon: RefreshCw,
     iconWrapClass: "bg-info/10 border-info/20",
     iconClass: "text-info",
     tagClass: "bg-info/10 text-info"
@@ -111,15 +108,15 @@ export default function FaqSection() {
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <span className="bg-surface border-border/70 text-primary inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-bold tracking-wider uppercase shadow-[0_0_24px_rgba(255,107,0,0.15)]">
             <HelpCircle className="h-3.5 w-3.5" />
-            FAQ RESMI SMARTGYM
+            OFFICIAL SMARTGYM FAQ
           </span>
 
           <h2 className="text-text-primary mt-5 text-2xl leading-tight font-extrabold tracking-tight sm:text-4xl">
-            Pertanyaan yang Sering Diajukan
+            Frequently Asked Questions
           </h2>
 
           <p className="text-text-secondary mt-3 text-sm leading-relaxed">
-            Segala hal yang perlu Anda ketahui mengenai sistem operasional, pendaftaran akun, dan aplikasi mobile SmartGym.
+            Everything you need to know about our operations, account registration, and the SmartGym mobile app.
           </p>
         </div>
 
@@ -175,28 +172,6 @@ export default function FaqSection() {
               </div>
             )
           })}
-        </div>
-
-        <div className="bg-surface/80 border-border/60 mt-6 flex flex-col items-start justify-between gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:px-6">
-          <div className="flex items-center gap-3.5">
-            <div className="bg-primary/15 border-primary/25 text-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
-              <Headset className="h-5 w-5" />
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <h3 className="text-text-primary text-sm font-bold">Punya Pertanyaan Lain yang Belum Terjawab?</h3>
-              <p className="text-text-muted text-xs">Tim customer care &amp; staf front-desk kami siap membantu Anda setiap hari.</p>
-            </div>
-          </div>
-
-          <a
-            href="https://wa.me/6281200000000"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-primary hover:bg-primary-hover text-background inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold shadow-[0_0_20px_rgba(255,107,0,0.3)] transition-colors sm:w-auto"
-          >
-            <MessageSquareText className="h-4 w-4 shrink-0" />
-            <span>Tanya Front-Desk via WA</span>
-          </a>
         </div>
       </div>
     </section>

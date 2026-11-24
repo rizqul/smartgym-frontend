@@ -32,18 +32,18 @@ export const navigationMenu: NavItem[] = [
     category: "Overview"
   },
   {
-    title: "Manajemen User",
+    title: "User Management",
     icon: Users,
     roles: ["admin", "staff"],
     category: "Management",
     children: [
       {
-        title: "Manajemen Member",
+        title: "Member Data",
         path: "/dashboard/members",
         roles: ["admin", "staff"]
       },
       {
-        title: "Manajemen Staff",
+        title: "Staff Data",
         path: "/dashboard/staffs",
         roles: ["admin"]
       }
@@ -57,28 +57,28 @@ export const navigationMenu: NavItem[] = [
     category: "Management"
   },
   {
-    title: "Transaksi",
+    title: "Transactions",
     path: "/dashboard/transactions",
     icon: ClipboardList,
     roles: ["admin"],
     category: "Management"
   },
   {
-    title: "Kehadiran",
+    title: "Attendance",
     path: "/dashboard/attendance",
     icon: UserCheck,
     roles: ["admin", "staff"],
     category: "Management"
   },
   {
-    title: "Data Trainer",
+    title: "Trainer Data",
     path: "/dashboard/trainers",
     icon: UserCircle,
     roles: ["admin", "staff"],
     category: "Management"
   },
   {
-    title: "Pengaturan Akun",
+    title: "Account Settings",
     path: "/dashboard/settings",
     icon: Settings,
     roles: ["admin", "staff"],
@@ -88,15 +88,15 @@ export const navigationMenu: NavItem[] = [
 
 export const landingNavigationMenu: LandingNavItem[] = [
   {
-    title: "Beranda",
+    title: "Home",
     href: "#beranda"
   },
   {
-    title: "Tentang Kami",
+    title: "About Us",
     href: "#fitur"
   },
   {
-    title: "Alur Daftar",
+    title: "Registration Flow",
     href: "#alur-pendaftaran"
   },
   {
@@ -104,7 +104,7 @@ export const landingNavigationMenu: LandingNavItem[] = [
     href: "#paket"
   },
   {
-    title: "Trainer",
+    title: "Trainers",
     href: "#trainer"
   },
   {
@@ -114,9 +114,9 @@ export const landingNavigationMenu: LandingNavItem[] = [
 ]
 
 export const footerEcosystemMenu: FooterNavItem[] = [
-  { title: "Aplikasi Member", href: "#alur-pendaftaran" },
-  { title: "Portal Staf & Admin", to: "/auth/login" },
-  { title: "Paket Membership", href: "#paket" },
-  { title: "Trainer Profesional", href: "#trainer" },
-  { title: "FAQ & Bantuan", href: "#faq" }
+  { title: "Member App", href: "#alur-pendaftaran" },
+  { title: "Staff & Admin Portal", to: "/auth/login" },
+  { title: "Membership Packages", href: "#paket" },
+  { title: "Professional Trainers", href: "#trainer" },
+  { title: "FAQ & Help", href: "#faq" }
 ]

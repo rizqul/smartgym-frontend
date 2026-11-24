@@ -17,11 +17,11 @@ export const staffServiceApi = createApi({
   tagTypes: ["Staffs"],
   endpoints: (build) => ({
     getAllStaff: build.query<StaffsApi, StaffSearchQuery>({
-      query: ({ name = "", size = 10, page = 1 }) => ({
+      query: ({ search, size = 10, page = 1 }) => ({
         url: API_ADMIN_STAFF_LIST,
         method: "GET",
         params: {
-          name,
+          ...(search ? { search } : {}),
           size,
           page
         }
@@ -37,10 +37,10 @@ export const staffServiceApi = createApi({
       invalidatesTags: ["Staffs"]
     }),
     updateStaff: build.mutation<ApiResponse, UpdateStaffPayload>({
-      query: ({ id, ...body }) => ({
+      query: ({ id, data }) => ({
         url: API_ADMIN_STAFF_UPDATE(id),
         method: "PUT",
-        data: body
+        data
       }),
       invalidatesTags: ["Staffs"]
     }),

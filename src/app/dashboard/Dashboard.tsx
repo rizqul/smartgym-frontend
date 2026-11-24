@@ -129,12 +129,12 @@ function VisitorTooltip({ active, payload, label }: CustomTooltipProps) {
 
   return (
     <div className="bg-background border-border rounded-xl border px-3.5 py-2.5 shadow-xl">
-      <p className="text-text-muted text-[10px] font-bold tracking-wider uppercase">JAM {label}</p>
+      <p className="text-text-muted text-[10px] font-bold tracking-wider uppercase">HOUR {label}</p>
       <p className="text-primary mt-1 text-[12px] font-semibold">
-        Pengunjung: <span className="text-text-primary">{todayVal} Orang</span>
+        Visitors: <span className="text-text-primary">{todayVal} People</span>
       </p>
       <p className="text-info text-[12px] font-semibold">
-        Rata-rata 7H: <span className="text-text-primary">{avgVal} Orang</span>
+        7-Day Average: <span className="text-text-primary">{avgVal} People</span>
       </p>
     </div>
   )
@@ -149,7 +149,7 @@ export default function Dashboard() {
       <div className="flex flex-col gap-1.5">
         <h1 className="text-text-primary text-xl font-bold sm:text-2xl">Dashboard Overview</h1>
         <p className="text-text-muted text-[13px] sm:text-[14px]">
-          Ringkasan performa operasional, trafik pengunjung harian, kehadiran member, dan transaksi SmartGym.
+          An overview of operational performance, daily visitor traffic, member attendance, and SmartGym transactions.
         </p>
       </div>
 
@@ -157,65 +157,65 @@ export default function Dashboard() {
         <CardStats
           topIcon={<Users className="text-info" />}
           bottomIcon={<TrendingUp className="text-info" />}
-          label="Total Member"
-          subLabel="Terdaftar"
+          label="Total Members"
+          subLabel="Registered"
           value="2.845"
         />
-        {isAdmin && (
-          <CardStats
-            topIcon={<Wallet className="text-primary" />}
-            bottomIcon={<TrendingUp className="text-primary" />}
-            label="Total Transaction"
-            subLabel="Pendapatan"
-            value="Rp 184,5M"
-          />
-        )}
         <CardStats
           topIcon={<Award className="text-secondary" />}
           bottomIcon={<TrendingUp className="text-secondary" />}
-          label="Total Member Aktif"
-          subLabel="Membership Aktif"
+          label="Active Members"
+          subLabel="Active Memberships"
           value="2.350"
         />
         <CardStats
           topIcon={<Dumbbell className="text-warning" />}
           bottomIcon={<TrendingUp className="text-warning" />}
-          label="Total Trainer"
-          subLabel="Personal Trainer"
+          label="Total Trainers"
+          subLabel="Personal Trainers"
           value={24}
         />
         <CardStats
           topIcon={<ShieldCheck className="text-success" />}
           bottomIcon={<TrendingUp className="text-success" />}
           label="Total Staff"
-          subLabel="Tim Operasional"
+          subLabel="Operations Team"
           value={12}
         />
+        {isAdmin && (
+          <CardStats
+            topIcon={<Wallet className="text-primary" />}
+            bottomIcon={<TrendingUp className="text-primary" />}
+            label="Total Transactions"
+            subLabel="Revenue"
+            value="Rp 184,5M"
+          />
+        )}
       </div>
 
       <Card className="flex flex-col gap-5 p-5 sm:p-6">
         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-text-primary text-base font-bold sm:text-lg">Grafik Total Pengunjung Harian</h2>
+              <h2 className="text-text-primary text-base font-bold sm:text-lg">Daily Visitor Traffic</h2>
               <span className="border-primary/30 bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-0.5 text-[11px] font-semibold">
                 <Activity className="h-3.5 w-3.5" />
                 Live Turnstile Data
               </span>
             </div>
             <p className="text-text-muted text-[12px] sm:text-[13px]">
-              Tren volume check-in pengunjung per jam (06:00 - 22:00) &amp; estimasi kapasitas lantai
+              Hourly visitor check-in trends (06:00 - 22:00) &amp; estimated floor capacity
             </p>
           </div>
 
           <div className="border-border/60 bg-background/60 flex flex-wrap items-center gap-4 rounded-xl border px-4 py-2.5">
             <div className="flex flex-col">
-              <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">RATA-RATA/HARI</span>
-              <span className="text-text-primary text-sm font-bold">420 Member</span>
+              <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">DAILY AVERAGE</span>
+              <span className="text-text-primary text-sm font-bold">420 Members</span>
             </div>
             <div className="bg-border h-7 w-px" />
             <div className="flex flex-col">
-              <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">JAM SIBUK</span>
+              <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">PEAK HOURS</span>
               <span className="text-primary text-sm font-bold">17:00 - 20:00</span>
             </div>
           </div>
@@ -225,15 +225,15 @@ export default function Dashboard() {
           <div className="flex flex-wrap items-center gap-4">
             <div className="text-text-primary flex items-center gap-2">
               <span className="bg-primary h-2.5 w-2.5 rounded-sm" />
-              <span>Pengunjung Hari Ini (382 Check-in)</span>
+              <span>Today's Visitors (382 Check-ins)</span>
             </div>
             <div className="text-text-secondary flex items-center gap-2">
               <span className="bg-info h-2.5 w-2.5 rounded-sm" />
-              <span>Rata-rata Historis (7 Hari)</span>
+              <span>Historical Average (7 Days)</span>
             </div>
           </div>
           <div className="text-text-muted text-[12px]">
-            Puncak Beban: <strong className="text-secondary">96 Orang</strong> <span className="text-border">|</span>{" "}
+            Peak Load: <strong className="text-secondary">96 People</strong> <span className="text-border">|</span>{" "}
             <strong className="text-text-primary">18:00</strong>
           </div>
         </div>
@@ -340,10 +340,8 @@ export default function Dashboard() {
             <div className="flex items-start gap-2.5">
               <span className="bg-primary mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" />
               <div className="flex flex-col gap-0.5">
-                <h3 className="text-text-primary text-[16px] font-bold sm:text-[17px]">Summary Kehadiran</h3>
-                <p className="text-text-muted text-[12px] sm:text-[13px]">
-                  Log ringkasan check-in &amp; check-out member hari ini (Live Gate System)
-                </p>
+                <h3 className="text-text-primary text-[16px] font-bold sm:text-[17px]">Attendance Summary</h3>
+                <p className="text-text-muted text-[12px] sm:text-[13px]">Today's member check-in &amp; check-out log (Live Gate System)</p>
               </div>
             </div>
 
@@ -366,7 +364,7 @@ export default function Dashboard() {
                   <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">CHECK-OUT</div>
                 </TableTH>
                 <TableTH>
-                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">METODE</div>
+                  <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">METHOD</div>
                 </TableTH>
                 <TableTH>
                   <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS</div>
@@ -436,7 +434,7 @@ export default function Dashboard() {
                       ) : (
                         <span className="bg-success/15 text-success inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold whitespace-nowrap">
                           <span className="bg-success h-1.5 w-1.5 rounded-full" />
-                          Selesai
+                          Completed
                         </span>
                       )}
                     </TableTD>
@@ -451,8 +449,8 @@ export default function Dashboard() {
           <Card className="flex min-w-0 flex-col gap-4 p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex flex-col gap-0.5">
-                <h3 className="text-text-primary text-[16px] font-bold sm:text-[17px]">Summary Transaksi</h3>
-                <p className="text-text-muted text-[12px] sm:text-[13px]">Ringkasan mutasi &amp; settlement transaksi kas per hari ini</p>
+                <h3 className="text-text-primary text-[16px] font-bold sm:text-[17px]">Transaction Summary</h3>
+                <p className="text-text-muted text-[12px] sm:text-[13px]">Today's cash transaction activity &amp; settlement summary</p>
               </div>
 
               <span className="border-border bg-card text-text-secondary inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold">
@@ -468,13 +466,13 @@ export default function Dashboard() {
                     <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">ID TRX &amp; MEMBER</div>
                   </TableTH>
                   <TableTH>
-                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">TIPE TRANSAKSI</div>
+                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">TRANSACTION TYPE</div>
                   </TableTH>
                   <TableTH>
-                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">NOMINAL</div>
+                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">AMOUNT</div>
                   </TableTH>
                   <TableTH>
-                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS PEMBAYARAN</div>
+                    <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">PAYMENT STATUS</div>
                   </TableTH>
                 </TableTR>
               </TableHead>

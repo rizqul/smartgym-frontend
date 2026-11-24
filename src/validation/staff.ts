@@ -4,7 +4,7 @@ import * as rules from "./zodRules"
 export const CreateStaffValidation = z.object({
   name: rules.name,
   email: rules.email,
-  phoneNumber: z.string().min(10, "Nomor telepon wajib diisi (min. 10 angka)"),
+  phoneNumber: z.string().min(10, "Phone number is required (min. 10 digits)"),
   password: rules.password
 })
 
@@ -16,7 +16,7 @@ export const UpdateStaffValidation = z.object({
     .string()
     .trim()
     .refine((val) => val === "" || val.length >= 8, {
-      message: "Kata sandi minimal harus 8 karakter."
+      message: "Password must contain at least 8 characters."
     })
     .optional()
 })

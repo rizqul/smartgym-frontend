@@ -1,11 +1,11 @@
-import { Award, Briefcase, Clock, Loader2, Phone } from "lucide-react"
+import { Award, Briefcase, Clock, Loader2, Phone, Plus, RotateCcw } from "lucide-react"
 
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/Card"
 import LocalDate from "~/components/ui/LocalDate"
 import { getAvatarUrl } from "~/utils/avatar"
 import { useGetTrainerSlotsQuery } from "~/services/trainer"
 import type { TrainerItem, TrainerSlotItem } from "~/types/trainer"
-import { getSlotStatusBadgeStyle } from "../../../utils/scheduleHelpers"
+import { formatDateValue, getSlotStatusBadgeStyle } from "../../../utils/scheduleHelpers"
 
 const MAX_VISIBLE_SLOTS = 3
 
@@ -25,15 +25,19 @@ export default function TrainerScheduleCard({
   selectedDate,
   isSelected,
   selectedSlotId,
+  isAdmin,
   onSelectTrainer,
-  onSelectSlot
+  onSelectSlot,
+  onOpenCreateModal
 }: TrainerScheduleCardProps) {
-  const { data: slotsRes, isLoading } = useGetTrainerSlotsQuery({
+  const { currentData, isFetching, isError, refetch } = useGetTrainerSlotsQuery({
     trainerId: trainer.id,
     date: selectedDate
   })
 
-  const slots = slotsRes?.data ?? []
+  const slots = currentData?.data ?? []
+  const isInitialDateLoad = isFetching && !currentData
+  const isToday = selectedDate === formatDateValue(new Date())
   const visibleSlots = slots.slice(0, MAX_VISIBLE_SLOTS)
   const remainingSlotsCount = Math.max(0, slots.length - MAX_VISIBLE_SLOTS)
 
@@ -57,17 +61,17 @@ export default function TrainerScheduleCard({
               />
               <div className="min-w-0">
                 <h4 className="truncate text-sm font-bold text-white">{trainer.name}</h4>
-                <p className="text-text-muted truncate text-[11px] uppercase">{trainer.specialization.replace(/_/g, " ")}</p>
+                <p className="text-text-muted truncate text-[11px] uppercase">{trainer.specialization?.replace(/_/g, " ") || "-"}</p>
               </div>
             </div>
 
-            {isSelected && <span className="bg-primary shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-bold text-black">Dipilih</span>}
+            {isSelected && <span className="bg-primary shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-bold text-black">Selected</span>}
           </div>
 
           <div className="text-text-muted flex flex-wrap items-center gap-2 border-b border-white/5 pb-3 text-[11px]">
             <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 font-semibold text-amber-300">
               <Briefcase className="h-3 w-3" />
-              Pengalaman {trainer.experience} Thn
+              {trainer.experience ?? 0} Years of Experience
             </span>
             <span className="inline-flex items-center gap-1">
               <Phone className="h-3 w-3 text-sky-400" />
@@ -78,24 +82,54 @@ export default function TrainerScheduleCard({
 
         <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-4 pt-0 sm:p-4 sm:pt-0">
           <div className="flex items-center justify-between">
-            <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">JADWAL SESI HARI INI</span>
+            <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">
+              {isToday ? "TODAY'S SESSION SCHEDULE" : "SESSION SCHEDULE"}
+            </span>
             <span className="text-text-muted inline-flex items-center gap-1 text-[10px] font-medium">
               <Award className="text-primary h-3 w-3" />
-              {slots.length} Sesi
+              {isInitialDateLoad ? "..." : `${slots.length} Sessions`}
             </span>
           </div>
 
-          {isLoading ? (
+          {isInitialDateLoad ? (
             <div className="text-text-muted flex flex-1 items-center justify-center gap-2 text-xs">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Memuat jadwal...
+              Loading schedule...
+            </div>
+          ) : isError ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 px-3 text-center">
+              <span className="text-[11px] text-red-400">Failed to load slots</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  refetch()
+                }}
+                className="inline-flex cursor-pointer items-center gap-1 rounded-md bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-white/10"
+              >
+                <RotateCcw className="h-3 w-3" />
+                Retry
+              </button>
             </div>
           ) : !slots.length ? (
-            <div className="text-text-muted flex flex-1 items-center justify-center rounded-xl border border-dashed border-white/10 bg-[#0B0C10]/40 px-3 text-center text-[11px]">
-              Belum ada slot di tanggal ini
+            <div className="text-text-muted flex flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 bg-[#0B0C10]/40 px-3 text-center text-[11px]">
+              <span>No slots available on this date</span>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onOpenCreateModal(trainer.id)
+                  }}
+                  className="text-primary inline-flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold transition-colors hover:bg-white/5"
+                >
+                  <Plus className="h-3 w-3" />
+                  Add Slot
+                </button>
+              )}
             </div>
           ) : (
-            <div className="flex flex-col gap-1.5">
+            <div className={`flex flex-col gap-1.5 transition-opacity ${isFetching ? "opacity-60" : "opacity-100"}`}>
               {visibleSlots.map((slot) => {
                 const isSlotActive = selectedSlotId === slot.id
                 return (
@@ -140,7 +174,7 @@ export default function TrainerScheduleCard({
 
               {remainingSlotsCount > 0 && (
                 <div className="text-text-muted flex justify-center pt-0.5 text-[11px] font-medium">
-                  <span>+{remainingSlotsCount} slot lainnya</span>
+                  <span>+{remainingSlotsCount} more slots</span>
                 </div>
               )}
             </div>
@@ -149,8 +183,10 @@ export default function TrainerScheduleCard({
       </div>
 
       <CardFooter className="justify-between border-t border-white/5 p-4 pt-3 text-[11px] sm:p-4 sm:pt-3">
-        <span className="font-medium text-sky-400">{slots.length > 0 ? `${slots.length} Slot Terjadwal` : "Slot Kosong"}</span>
-        <span className="text-text-muted text-[10px]">Klik untuk lihat detail</span>
+        <span className="font-medium text-sky-400">
+          {isInitialDateLoad ? "Checking slots..." : slots.length > 0 ? `${slots.length} Scheduled Slots` : "No Slots"}
+        </span>
+        <span className="text-text-muted text-[10px]">Click to view details</span>
       </CardFooter>
     </Card>
   )

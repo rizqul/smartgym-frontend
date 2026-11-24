@@ -1,12 +1,14 @@
 import { useState } from "react"
 import { Link, useLocation } from "react-router"
-import { LogOut, ChevronDown, ChevronRight, X } from "lucide-react"
+import { ChevronDown, ChevronRight, X } from "lucide-react"
+
+import { LogOut } from "lucide-react"
 
 import useAuth from "~/hooks/useAuth"
-import { Alert } from "../../utils/alert"
+import { Alert } from "~/utils/alert"
 import { navigationMenu, type UserRole } from "../../config/navigation"
 import logoGym from "../../assets/logo.png"
-import { getAvatarUrl } from "~/utils/avatar"
+import { SidebarClock } from "../ui/SidebarClock"
 
 interface SidebarProps {
   isOpen: boolean
@@ -20,7 +22,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const userRole = user?.role?.toLowerCase() as UserRole
 
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
-    "Manajemen User": true
+    "User Management": true
   })
 
   const isActive = (path: string) => location.pathname === path
@@ -68,9 +70,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const handleLogout = async () => {
     const result = await Alert.confirm({
-      title: "Keluar dari Portal?",
-      text: "Anda harus login kembali untuk mengakses sistem.",
-      confirmText: "Ya, Keluar",
+      title: "Log out of the portal?",
+      text: "You will need to log in again to access the system.",
+      confirmText: "Yes, Log Out",
       isDanger: true
     })
 
@@ -181,32 +183,19 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           ))}
         </div>
 
-        <div className="border-primary/25 shrink-0 border-t p-4">
-          <div className="bg-primary flex items-center justify-between rounded-xl p-2 transition-colors">
-            <div className="flex items-center gap-3 pl-1">
-              <div className="relative">
-                <img
-                  src={getAvatarUrl(user?.name ?? "Guest", user?.profileUrl)}
-                  alt={user?.name ?? "User"}
-                  className="size-9 rounded-full border border-white/10 object-cover shadow-sm"
-                />
-                <div className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-[#1C1F26] bg-[#FACC15]"></div>
-              </div>
-
-              <div className="flex flex-col justify-center">
-                <span className="w-28 truncate text-[13px] leading-tight font-bold text-white">{user?.name ?? "Guest User"}</span>
-                <span className="mt-0.5 text-[10px] font-semibold tracking-wider text-white/80">{user?.role ?? "Administrator"}</span>
-              </div>
-            </div>
-
-            <button
-              title="Keluar"
-              onClick={handleLogout}
-              className="hover:text-primary flex h-9 w-9 items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-amber-50"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
+        <div className="flex w-full items-center justify-between gap-2 border-t border-white/10 px-4 py-3.5">
+          <div className="min-w-0 flex-1">
+            <SidebarClock />
           </div>
+          <button
+            type="button"
+            title="Log out"
+            aria-label="Log out"
+            onClick={handleLogout}
+            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/80 transition-colors hover:bg-red-500/20 hover:text-red-400"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </aside>
     </>

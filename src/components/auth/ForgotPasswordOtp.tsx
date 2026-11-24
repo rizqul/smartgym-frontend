@@ -52,12 +52,12 @@ export function ForgotPasswordOtp({ email, onSuccess, onBack }: Props) {
     try {
       setIsResending(true)
       await requestPasswordReset({ email })
-      toast.success("Kode OTP baru telah dikirim!")
+      toast.success("A new OTP code has been sent!")
       setTimeLeft(300)
       setOtpValues(["", "", "", "", "", ""])
       setValue("code", "")
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error("Failed to resend the code. Please try again.")
     } finally {
       setIsResending(false)
     }
@@ -90,7 +90,7 @@ export function ForgotPasswordOtp({ email, onSuccess, onBack }: Props) {
       await verifyOtp({ email, code: data.code })
       onSuccess(data.code)
     } catch (error: any) {
-      setError("code", { type: "server", message: error.message })
+      setError("code", { type: "server", message: "We couldn't verify the code. Please check it and try again." })
     }
   }
 
@@ -104,8 +104,8 @@ export function ForgotPasswordOtp({ email, onSuccess, onBack }: Props) {
             className="h-8 w-8 object-contain drop-shadow-md"
           />
         </div>
-        <h1 className="mb-2 text-xl font-bold text-white sm:text-2xl">Verifikasi OTP</h1>
-        <p className="text-text-secondary text-[13px] sm:text-[14px]">Masukkan kode 6 digit yang kami kirimkan ke email Anda.</p>
+        <h1 className="mb-2 text-xl font-bold text-white sm:text-2xl">Verify OTP</h1>
+        <p className="text-text-secondary text-[13px] sm:text-[14px]">Enter the 6-digit code we sent to your email.</p>
 
         <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[12px] sm:text-[13px]">
           <div className="text-text-secondary flex items-center gap-1.5">
@@ -122,7 +122,7 @@ export function ForgotPasswordOtp({ email, onSuccess, onBack }: Props) {
               timeLeft > 0 ? "text-text-muted cursor-not-allowed" : "text-primary hover:text-primary-hover font-semibold transition-colors"
             }`}
           >
-            {isResending ? "Mengirim..." : "Kirim Ulang"}
+            {isResending ? "Sending..." : "Resend Code"}
           </button>
         </div>
       </CardHeader>
@@ -134,9 +134,9 @@ export function ForgotPasswordOtp({ email, onSuccess, onBack }: Props) {
         >
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <label className="text-text-muted text-[10px] font-bold tracking-wider uppercase sm:text-[11px]">Kode OTP</label>
+              <label className="text-text-muted text-[10px] font-bold tracking-wider uppercase sm:text-[11px]">OTP Code</label>
               <span className={`text-[10px] font-semibold sm:text-[11px] ${timeLeft > 0 ? "text-primary" : "text-danger"}`}>
-                {timeLeft > 0 ? `Tersisa ${formatTime(timeLeft)}` : "Waktu habis"}
+                {timeLeft > 0 ? `${formatTime(timeLeft)} remaining` : "Time expired"}
               </span>
             </div>
 
@@ -171,7 +171,7 @@ export function ForgotPasswordOtp({ email, onSuccess, onBack }: Props) {
             disabled={timeLeft === 0 || otpValues.join("").length < 6}
             isLoading={isSubmitting}
           >
-            {isSubmitting ? "Memverifikasi..." : "Lanjutkan"}
+            {isSubmitting ? "Verifying..." : "Continue"}
           </Button>
 
           <div className="pt-2 text-center">
@@ -181,7 +181,7 @@ export function ForgotPasswordOtp({ email, onSuccess, onBack }: Props) {
               className="text-text-secondary inline-flex items-center gap-2 text-[12px] font-medium transition-colors hover:text-white sm:text-[13px]"
             >
               <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              Ganti Alamat Email
+              Change Email Address
             </button>
           </div>
         </form>

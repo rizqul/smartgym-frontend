@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Calendar, ChevronLeft, ChevronRight, Plus, Search, Users, X } from "lucide-react"
 import toast from "react-hot-toast"
 
@@ -29,13 +29,11 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
   const [modalTrainerId, setModalTrainerId] = useState<string | undefined>(undefined)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
+  const [prevInitialTrainerId, setPrevInitialTrainerId] = useState(initialTrainerId)
+  if (initialTrainerId !== prevInitialTrainerId) {
+    setPrevInitialTrainerId(initialTrainerId)
     if (initialTrainerId) setSelectedTrainerId(initialTrainerId)
-  }, [initialTrainerId])
-
-  useEffect(() => {
-    setSelectedSlot(null)
-  }, [selectedDate])
+  }
 
   const [createTrainerSlot, { isLoading: isCreatingSlot }] = useCreateTrainerSlotMutation()
 
@@ -46,21 +44,26 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
     const keyword = searchTrainer.trim().toLowerCase()
     if (!keyword) return trainers
     return trainers.filter(
-      (t) => t.name.toLowerCase().includes(keyword) || t.specialization.toLowerCase().replace(/_/g, " ").includes(keyword)
+      (t) => t.name.toLowerCase().includes(keyword) || (t.specialization?.toLowerCase().replace(/_/g, " ") ?? "").includes(keyword)
     )
   }, [trainers, searchTrainer])
 
   const activeTrainer = useMemo(() => trainers.find((t) => t.id === selectedTrainerId), [trainers, selectedTrainerId])
-
   const hasSelectedDetail = Boolean(activeTrainer)
+
+  const handleDateChange = (nextDate: string) => {
+    if (!nextDate || nextDate === selectedDate) return
+    setSelectedDate(nextDate)
+    setSelectedSlot(null)
+  }
 
   const handleShiftDate = (days: number) => {
     const current = new Date(`${selectedDate}T00:00:00`)
     current.setDate(current.getDate() + days)
-    setSelectedDate(formatDateValue(current))
+    handleDateChange(formatDateValue(current))
   }
 
-  const handleToday = () => setSelectedDate(todayStr)
+  const handleToday = () => handleDateChange(todayStr)
 
   const handleCloseDetail = () => {
     setSelectedTrainerId("")
@@ -74,14 +77,14 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
 
   const handleCreateSlot = async (payload: CreateTrainerSlotRequest) => {
     try {
-      const res = await createTrainerSlot(payload).unwrap()
+      await createTrainerSlot(payload).unwrap()
       setSelectedTrainerId(payload.trainerId)
-      setSelectedDate(payload.slotDate)
+      handleDateChange(payload.slotDate)
       setIsModalOpen(false)
-      toast.success(res?.message || "Berhasil menambahkan jadwal trainer!")
-    } catch (err: unknown) {
-      const apiErr = err as { data?: { message?: string }; message?: string }
-      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal menambahkan jadwal trainer.")
+      toast.success("Trainer schedule added successfully!")
+    } catch (error: unknown) {
+      const apiErr = error as { data?: { message?: string }; message?: string }
+      toast.error(apiErr?.data?.message || apiErr?.message || "Failed to add trainer schedule.")
     }
   }
 
@@ -94,7 +97,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
               <button
                 type="button"
                 onClick={() => handleShiftDate(-1)}
-                aria-label="Hari sebelumnya"
+                aria-label="Previous day"
                 className="text-text-muted cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-white/5 hover:text-white"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -106,12 +109,12 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
                   isToday ? "bg-primary/15 text-primary" : "text-white hover:bg-white/5"
                 }`}
               >
-                Hari Ini
+                Today
               </button>
               <button
                 type="button"
                 onClick={() => handleShiftDate(1)}
-                aria-label="Hari berikutnya"
+                aria-label="Next day"
                 className="text-text-muted cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-white/5 hover:text-white"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -130,8 +133,8 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
-              aria-label="Pilih tanggal"
+              onChange={(e) => handleDateChange(e.target.value)}
+              aria-label="Select date"
               className="focus:border-primary rounded-xl border border-white/10 bg-[#0B0C10] px-3 py-1.5 text-xs text-white scheme-dark focus:outline-none"
             />
           </div>
@@ -142,9 +145,10 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
               variant="primary"
               leftIcon={<Plus className="h-4 w-4" />}
               onClick={() => handleOpenCreateModal(activeTrainer?.id)}
+              disabled={!trainers.length}
               className="w-full shrink-0 sm:w-auto"
             >
-              Tambah Slot Jadwal
+              Add Schedule Slot
             </Button>
           )}
         </div>
@@ -154,7 +158,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
             <Input
               type="text"
               icon={Search}
-              placeholder="Cari nama trainer atau spesialisasi..."
+              placeholder="Search trainer name or specialization..."
               value={searchTrainer}
               onChange={(e) => setSearchTrainer(e.target.value)}
               className="py-2 text-[13px]"
@@ -163,7 +167,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
                   <button
                     type="button"
                     onClick={() => setSearchTrainer("")}
-                    aria-label="Hapus pencarian"
+                    aria-label="Clear search"
                     className="text-text-muted cursor-pointer rounded-md p-0.5 hover:bg-white/10 hover:text-white"
                   >
                     <X className="h-4 w-4" />
@@ -192,7 +196,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
             <h3 className="flex items-center gap-2 text-sm font-bold text-white sm:text-[15px]">
               <Users className="text-primary h-4 w-4" />
               <span>
-                Daftar Trainer Bertugas (
+                Trainers on Duty (
                 <LocalDate
                   date={selectedDate}
                   variant="short"
@@ -200,18 +204,18 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
                 )
               </span>
             </h3>
-            <span className="text-text-muted text-xs">{filteredTrainers.length} Trainer Ditampilkan</span>
+            <span className="text-text-muted text-xs">{filteredTrainers.length} Trainers Shown</span>
           </div>
 
           {!filteredTrainers.length ? (
             <div className="text-text-muted flex min-h-60 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 text-sm">
-              <span>Tidak ada trainer ditemukan</span>
+              <span>No trainers found</span>
               {hasSearch && (
                 <Button
                   variant="secondary"
                   onClick={() => setSearchTrainer("")}
                 >
-                  Reset Pencarian
+                  Reset Search
                 </Button>
               )}
             </div>
@@ -267,7 +271,6 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
 
       {isAdmin && (
         <CreateTrainerSlotModal
-          key={`${modalTrainerId ?? activeTrainer?.id ?? "none"}-${selectedDate}-${isModalOpen}`}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           trainers={trainers}

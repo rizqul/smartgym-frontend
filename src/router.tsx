@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/guard/ProtectedRoute"
 
 import AuthLayout from "./layouts/AuthLayout"
 import AppLayout from "./layouts/AppLayout"
+import LandingLayout from "./layouts/LandingLayout"
 
 import Login from "./app/auth/Login"
 import ForgotPassword from "./app/auth/ForgotPassword"
@@ -28,7 +29,6 @@ import Trainers from "./app/trainers/Trainers"
 import NotFound from "./app/NotFound"
 import CreateTrainer from "./app/trainers/CreateTrainer"
 import LandingPage from "./app/LandingPage"
-import LandingLayout from "./layouts/LandingLayout"
 
 export const router = createBrowserRouter([
   {
@@ -110,10 +110,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, Component: ManageMembers },
               { path: "create", Component: CreateMember },
-              {
-                element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
-                children: [{ path: ":id/edit", Component: EditMember }]
-              }
+              { path: ":id/edit", Component: EditMember }
             ]
           },
           {

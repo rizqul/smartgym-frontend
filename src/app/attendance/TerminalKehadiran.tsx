@@ -1,9 +1,10 @@
 import { useState } from "react"
-import { Clock, Users, CheckCircle2, XCircle, ScanLine, QrCode, Loader2, LogOut, RefreshCw } from "lucide-react"
+import { Clock, Users, CheckCircle2, XCircle, ScanLine, QrCode, Loader2, LogOut, RefreshCw, ChevronDown } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Card } from "~/components/ui/Card"
 import { Button } from "~/components/ui/Button"
+import { Select } from "~/components/ui/Select"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import Avatar from "~/components/ui/Avatar"
 import LocalDate from "~/components/ui/LocalDate"
@@ -11,6 +12,7 @@ import { Table, TableHead, TableTR, TableTH, TableBody, TableTD } from "~/compon
 import LiveTokenGenerator from "~/components/attendance/LiveTokenGenerator"
 import { Alert } from "~/utils/alert"
 import { useCheckOutMemberMutation, useGetCheckinSummaryQuery, useGetRecentCheckinsQuery } from "~/services/checkin"
+import type { CheckinStatus } from "~/types/checkin"
 
 const CHECKIN_LIMIT = 5
 const POLLING_OPTIONS = {
@@ -20,8 +22,14 @@ const POLLING_OPTIONS = {
 
 export default function TerminalKehadiran() {
   const [checkingOutId, setCheckingOutId] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<CheckinStatus | "">("")
 
-  const { data: summaryRes, isLoading: isLoadingSummary, refetch: refetchSummary } = useGetCheckinSummaryQuery(undefined, POLLING_OPTIONS)
+  const {
+    data: summaryRes,
+    isLoading: isLoadingSummary,
+    isFetching: isFetchingSummary,
+    refetch: refetchSummary
+  } = useGetCheckinSummaryQuery(undefined, POLLING_OPTIONS)
 
   const {
     data: checkinsRes,
@@ -35,7 +43,9 @@ export default function TerminalKehadiran() {
 
   const summary = summaryRes?.data
   const checkins = checkinsRes?.data ?? []
+  const filteredCheckins = statusFilter ? checkins.filter((item) => item.status === statusFilter) : checkins
   const latestValidations = checkins.slice(0, 2)
+  const isSyncing = isFetchingCheckins || isFetchingSummary
 
   const handleRefreshAll = () => {
     refetchSummary()
@@ -43,10 +53,12 @@ export default function TerminalKehadiran() {
   }
 
   const handleCheckOut = async (memberId: string, memberName: string) => {
+    if (!memberId) return
+
     const result = await Alert.confirm({
-      title: "Check-out Member?",
-      text: `Konfirmasi check-out untuk member "${memberName}" dari area gym?`,
-      confirmText: "Ya, Check-out"
+      title: "Confirm Member Check-out?",
+      text: `Confirm check-out for member "${memberName}" from the gym?`,
+      confirmText: "Yes"
     })
 
     if (!result.isConfirmed) return
@@ -54,10 +66,11 @@ export default function TerminalKehadiran() {
     setCheckingOutId(memberId)
     try {
       const res = await checkOutMember(memberId).unwrap()
-      toast.success(res?.message || `${memberName} berhasil check-out!`)
+      toast.success(res?.message || `${memberName} checked out successfully!`)
+      refetchSummary()
     } catch (err: unknown) {
       const apiErr = err as { data?: { message?: string }; message?: string }
-      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal melakukan check-out member.")
+      toast.error(apiErr?.data?.message || apiErr?.message || "Failed to check out member.")
     } finally {
       setCheckingOutId(null)
     }
@@ -78,9 +91,9 @@ export default function TerminalKehadiran() {
     <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-2xl font-bold text-white">Terminal Kehadiran & QR Station</h2>
+          <h2 className="text-2xl font-bold text-white">Attendance Terminal &amp; QR Scanner</h2>
           <p className="text-text-muted max-w-2xl text-[14px]">
-            Terminal pemantauan akses masuk dan keluar member secara real-time menggunakan validasi QR dinamis.
+            Live monitoring terminal for member entry and exit using dynamic QR validation.
           </p>
         </div>
 
@@ -92,9 +105,9 @@ export default function TerminalKehadiran() {
               </div>
               <div className="flex min-w-0 flex-col">
                 <span className="text-text-muted text-[10px] font-medium uppercase sm:text-[11px] sm:whitespace-nowrap">
-                  Status Terminal
+                  Terminal Status
                 </span>
-                <span className="truncate text-[13px] font-bold text-white sm:text-[14px]">Live QR Station</span>
+                <span className="truncate text-[13px] font-bold text-white sm:text-[14px]">Live QR Code Center</span>
               </div>
             </div>
 
@@ -104,9 +117,9 @@ export default function TerminalKehadiran() {
               </div>
               <div className="flex min-w-0 flex-col">
                 <span className="text-text-muted text-[10px] font-medium uppercase sm:text-[11px] sm:whitespace-nowrap">
-                  Riwayat Kehadiran
+                  Attendance History
                 </span>
-                <strong className="text-base leading-tight text-white sm:text-lg">
+                <strong className="text-base leading-tight text-white tabular-nums sm:text-lg">
                   {(summary?.historyCount ?? 0).toLocaleString("id-ID")}
                 </strong>
               </div>
@@ -118,13 +131,13 @@ export default function TerminalKehadiran() {
               </div>
               <div className="flex min-w-0 flex-col">
                 <span className="text-text-muted text-[10px] font-medium uppercase sm:text-[11px] sm:whitespace-nowrap">
-                  Sedang Berlatih
+                  Currently Training
                 </span>
                 <div className="flex items-baseline gap-1.5">
-                  <strong className="text-base leading-tight text-yellow-400 sm:text-lg">
-                    {(summary?.onFloor ?? 0).toLocaleString("id-ID")}
+                  <strong className="text-base leading-tight text-yellow-400 tabular-nums sm:text-lg">
+                    {(summary?.activeNow ?? 0).toLocaleString("id-ID")}
                   </strong>
-                  <span className="text-text-muted text-[10px] sm:text-[11px]">member</span>
+                  <span className="text-text-muted text-[10px] sm:text-[11px]">members</span>
                 </div>
               </div>
             </div>
@@ -135,9 +148,9 @@ export default function TerminalKehadiran() {
               </div>
               <div className="flex min-w-0 flex-col">
                 <span className="text-text-muted text-[10px] font-medium uppercase sm:text-[11px] sm:whitespace-nowrap">
-                  Riwayat Hari Ini
+                  Today&apos;s Check-ins
                 </span>
-                <strong className="text-base leading-tight text-white sm:text-lg">
+                <strong className="text-base leading-tight text-white tabular-nums sm:text-lg">
                   {(summary?.checkinsToday ?? 0).toLocaleString("id-ID")}
                 </strong>
               </div>
@@ -156,23 +169,23 @@ export default function TerminalKehadiran() {
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <ScanLine className="text-text-muted h-4 w-4 shrink-0" />
-                <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">HASIL VALIDASI TERAKHIR</span>
+                <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">Latest 2 Validation Results</span>
               </div>
 
               <div className="flex items-center gap-2.5">
-                {isFetchingCheckins && (
+                {isSyncing && (
                   <span className="text-text-muted hidden items-center gap-1.5 text-[11px] sm:inline-flex">
                     <Loader2 className="h-3 w-3 animate-spin" />
-                    Sinkronisasi...
+                    Syncing...
                   </span>
                 )}
                 <button
                   type="button"
                   onClick={handleRefreshAll}
-                  disabled={isFetchingCheckins}
+                  disabled={isSyncing}
                   className="text-text-muted inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
                 >
-                  <RefreshCw className={`h-3 w-3 ${isFetchingCheckins ? "animate-spin" : ""}`} />
+                  <RefreshCw className={`h-3 w-3 ${isSyncing ? "animate-spin" : ""}`} />
                   Refresh
                 </button>
               </div>
@@ -180,10 +193,12 @@ export default function TerminalKehadiran() {
 
             {!latestValidations.length ? (
               <Card className="flex min-h-28 items-center justify-center p-4 text-center">
-                <span className="text-text-muted text-[13px]">Belum ada aktivitas check-in terbaru.</span>
+                <span className="text-text-muted text-[13px]">No recent check-in activity.</span>
               </Card>
             ) : (
               latestValidations.map((item) => {
+                const memberName = item.member?.name || "Member"
+                const memberId = item.member?.id
                 const isDenied = item.status === "DENIED"
                 const isOnFloor = !isDenied && !item.checkOutAt
 
@@ -197,7 +212,8 @@ export default function TerminalKehadiran() {
                     <div className="flex min-w-0 flex-1 items-center gap-3.5">
                       <div className="relative shrink-0">
                         <Avatar
-                          name={item.memberName}
+                          src={item.member?.profileUrl}
+                          name={memberName}
                           className={`h-12 w-12 rounded-full border-2 sm:h-13 sm:w-13 ${
                             isDenied ? "border-[#E58383] grayscale" : isOnFloor ? "border-[#D4B34A]" : "border-white/20"
                           }`}
@@ -219,15 +235,15 @@ export default function TerminalKehadiran() {
 
                       <div className="flex min-w-0 flex-col gap-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="truncate text-[15px] font-bold text-white sm:text-[16px]">{item.memberName}</h4>
+                          <h4 className="truncate text-[15px] font-bold text-white sm:text-[16px]">{memberName}</h4>
                           <span className="text-text-muted shrink-0 rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px]">
-                            #{item.memberId.slice(0, 8)}
+                            #{memberId?.slice(0, 8) ?? "-"}
                           </span>
                         </div>
 
                         {isDenied ? (
                           <p className="line-clamp-2 text-[12px] leading-snug text-[#EAA1A1]">
-                            Alasan: {item.denialReason || "Akses ditolak oleh sistem."}
+                            Reason: {item.denialReason || "Access denied by the system."}
                           </p>
                         ) : (
                           <div className="text-text-muted flex flex-col gap-0.5 text-[12px] xl:flex-row xl:items-center xl:gap-2">
@@ -236,15 +252,15 @@ export default function TerminalKehadiran() {
                                 isOnFloor ? "font-semibold text-[#D4B34A]" : "font-semibold text-emerald-400"
                               }`}
                             >
-                              {isOnFloor ? "Sedang Berlatih" : "Sudah Check-out"}
+                              {isOnFloor ? "Currently Training" : "Checked Out"}
                             </span>
-                            {item.membershipExpiresAt && (
+                            {item.member?.membershipExpiresAt && (
                               <>
                                 <span className="hidden xl:inline">•</span>
                                 <span className="whitespace-nowrap">
-                                  Exp:{" "}
+                                  Until:{" "}
                                   <LocalDate
-                                    date={item.membershipExpiresAt}
+                                    date={item.member.membershipExpiresAt}
                                     variant="short"
                                   />
                                 </span>
@@ -272,7 +288,7 @@ export default function TerminalKehadiran() {
                         ) : (
                           <LogOut className="h-3.5 w-3.5 shrink-0" />
                         )}
-                        {isDenied ? "ACCESS DENIED" : isOnFloor ? "ON FLOOR" : "CHECKED OUT"}
+                        {isDenied ? "ACCESS DENIED" : isOnFloor ? "ON SITE" : "CHECKED OUT"}
                       </div>
 
                       <div
@@ -281,7 +297,7 @@ export default function TerminalKehadiran() {
                         }`}
                       >
                         <span>
-                          In:{" "}
+                          Check-in:{" "}
                           <LocalDate
                             date={item.checkInAt}
                             variant="hour"
@@ -291,7 +307,7 @@ export default function TerminalKehadiran() {
                           <>
                             <span>•</span>
                             <span className="text-emerald-400/90">
-                              Out:{" "}
+                              Check-out:{" "}
                               <LocalDate
                                 date={item.checkOutAt}
                                 variant="hour"
@@ -308,140 +324,179 @@ export default function TerminalKehadiran() {
           </div>
 
           <Card className="flex min-w-0 flex-col gap-4 p-4 sm:p-5">
-            <div className="flex flex-col gap-0.5">
-              <h3 className="text-[16px] font-bold text-white sm:text-[17px]">Live Gate Validation Stream</h3>
-              <p className="text-text-muted text-[12px] sm:text-[13px]">
-                Menampilkan {CHECKIN_LIMIT} transaksi otentikasi gerbang teranyar secara real-time
-              </p>
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-0.5">
+                <h3 className="text-[16px] font-bold text-white sm:text-[17px]">Live Gate Validation Monitor</h3>
+                <p className="text-text-muted text-[12px] sm:text-[13px]">
+                  Showing the {CHECKIN_LIMIT} most recent live gate authentication transactions
+                </p>
+              </div>
+
+              <div className="relative w-full sm:w-40">
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as CheckinStatus | "")}
+                  className="focus:border-primary focus:ring-primary w-full appearance-none rounded-xl border border-white/10 bg-[#0B0C10] py-2 pr-9 pl-3.5 text-[12px] text-white transition-all focus:ring-1 focus:outline-none"
+                >
+                  <option
+                    value=""
+                    className="bg-[#16181D]"
+                  >
+                    All Statuses
+                  </option>
+                  <option
+                    value="GRANTED"
+                    className="bg-[#16181D]"
+                  >
+                    Granted
+                  </option>
+                  <option
+                    value="DENIED"
+                    className="bg-[#16181D]"
+                  >
+                    Denied
+                  </option>
+                </Select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                  <ChevronDown className="text-text-muted h-3.5 w-3.5" />
+                </div>
+              </div>
             </div>
 
             {isError ? (
               <div className="flex min-h-48 flex-col items-center justify-center gap-3 text-center">
-                <p className="text-sm text-red-400">Gagal memuat riwayat check-in.</p>
+                <p className="text-sm text-red-400">Failed to load check-in history.</p>
                 <Button
                   variant="secondary"
                   onClick={refetchCheckins}
                 >
-                  Coba Lagi
+                  Try Again
                 </Button>
               </div>
             ) : (
-              <Table>
-                <TableHead>
-                  <TableTR isHeader={true}>
-                    <TableTH>
-                      <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">WAKTU</div>
-                    </TableTH>
-                    <TableTH>
-                      <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">MEMBER</div>
-                    </TableTH>
-                    <TableTH>
-                      <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">METODE</div>
-                    </TableTH>
-                    <TableTH>
-                      <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">STATUS</div>
-                    </TableTH>
-                    <TableTH>
-                      <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">CATATAN / KELUAR</div>
-                    </TableTH>
-                  </TableTR>
-                </TableHead>
-                <TableBody>
-                  {!checkins.length ? (
-                    <TableTR>
-                      <TableTD colSpan={5}>
-                        <div className="text-text-muted flex min-h-48 items-center justify-center text-sm">Belum ada riwayat check-in.</div>
-                      </TableTD>
+              <div className={`transition-opacity duration-200 ${isFetchingCheckins ? "opacity-60" : "opacity-100"}`}>
+                <Table>
+                  <TableHead>
+                    <TableTR isHeader={true}>
+                      <TableTH>
+                        <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">TIME</div>
+                      </TableTH>
+                      <TableTH>
+                        <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">MEMBER</div>
+                      </TableTH>
+                      <TableTH>
+                        <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">METHOD</div>
+                      </TableTH>
+                      <TableTH>
+                        <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">STATUS</div>
+                      </TableTH>
+                      <TableTH>
+                        <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">NOTES / CHECK-OUT</div>
+                      </TableTH>
                     </TableTR>
-                  ) : (
-                    checkins.map((stream, index) => {
-                      const isDenied = stream.status === "DENIED"
-                      const isOnFloor = !isDenied && !stream.checkOutAt
-                      const isProcessing = checkingOutId === stream.memberId
+                  </TableHead>
+                  <TableBody>
+                    {!filteredCheckins.length ? ( 
+                      <TableTR hideRowNumber>
+                        <TableTD colSpan={6}>
+                          <div className="text-text-muted flex min-h-48 items-center justify-center text-sm">
+                            {statusFilter ? "No check-in history matches this status." : "No check-in history yet."}
+                          </div>
+                        </TableTD>
+                      </TableTR>
+                    ) : (
+                      filteredCheckins.map((stream, index) => {
+                        const memberName = stream.member?.name || "Member"
+                        const memberId = stream.member?.id || ""
+                        const isDenied = stream.status === "DENIED"
+                        const isOnFloor = !isDenied && !stream.checkOutAt
+                        const isProcessing = checkingOutId === memberId
 
-                      return (
-                        <TableTR
-                          key={stream.id}
-                          className={isDenied ? "bg-red-950/30" : index % 2 === 0 ? "bg-transparent" : "bg-white/5"}
-                        >
-                          <TableTD>
-                            <span className="text-text-muted font-mono text-[13px] whitespace-nowrap">
-                              <LocalDate
-                                date={stream.checkInAt}
-                                variant="hour"
-                              />
-                            </span>
-                          </TableTD>
-
-                          <TableTD>
-                            <div className="flex items-center gap-2.5">
-                              <Avatar
-                                name={stream.memberName}
-                                className="h-8 w-8 shrink-0 rounded-full sm:h-9 sm:w-9"
-                              />
-                              <span
-                                className={`truncate text-[13px] font-bold sm:text-[14px] ${isDenied ? "text-[#EAA1A1]" : "text-white"}`}
-                              >
-                                {stream.memberName}
-                              </span>
-                            </div>
-                          </TableTD>
-
-                          <TableTD>
-                            <div className="text-text-muted flex items-center gap-1.5 whitespace-nowrap">
-                              <QrCode className="h-4 w-4 shrink-0" />
-                              <span className="text-[13px]">{stream.method}</span>
-                            </div>
-                          </TableTD>
-
-                          <TableTD>
-                            <div
-                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wider whitespace-nowrap uppercase ${
-                                isDenied
-                                  ? "bg-[#3B1D20] text-[#E58383]"
-                                  : isOnFloor
-                                    ? "bg-[#332A15] text-[#D4B34A]"
-                                    : "bg-emerald-500/15 text-emerald-400"
-                              }`}
-                            >
-                              <div
-                                className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                                  isDenied ? "bg-[#E58383]" : isOnFloor ? "bg-[#D4B34A]" : "bg-emerald-400"
-                                }`}
-                              />
-                              {isDenied ? "DENIED" : isOnFloor ? "ON FLOOR" : "SELESAI"}
-                            </div>
-                          </TableTD>
-
-                          <TableTD>
-                            {isDenied ? (
-                              <span className="text-[13px] text-[#EAA1A1]">{stream.denialReason || "Akses ditolak"}</span>
-                            ) : stream.checkOutAt ? (
-                              <span className="text-text-muted font-mono text-[12px] whitespace-nowrap">
-                                Keluar:{" "}
+                        return (
+                          <TableTR
+                            key={stream.id}
+                            className={isDenied ? "bg-red-950/30" : index % 2 === 0 ? "bg-transparent" : "bg-white/5"}
+                          >
+                            <TableTD>
+                              <span className="text-text-muted font-mono text-[13px] whitespace-nowrap">
                                 <LocalDate
-                                  date={stream.checkOutAt}
+                                  date={stream.checkInAt}
                                   variant="hour"
                                 />
                               </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => handleCheckOut(stream.memberId, stream.memberName)}
-                                disabled={isProcessing}
-                                className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[12px] font-semibold whitespace-nowrap text-white transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+                            </TableTD>
+
+                            <TableTD>
+                              <div className="flex items-center gap-2.5">
+                                <Avatar
+                                  src={stream.member?.profileUrl}
+                                  name={memberName}
+                                  className="h-8 w-8 shrink-0 rounded-full sm:h-9 sm:w-9"
+                                />
+                                <span
+                                  className={`truncate text-[13px] font-bold sm:text-[14px] ${isDenied ? "text-[#EAA1A1]" : "text-white"}`}
+                                >
+                                  {memberName}
+                                </span>
+                              </div>
+                            </TableTD>
+
+                            <TableTD>
+                              <div className="text-text-muted flex items-center gap-1.5 whitespace-nowrap">
+                                <QrCode className="h-4 w-4 shrink-0" />
+                                <span className="text-[13px]">{stream.method}</span>
+                              </div>
+                            </TableTD>
+
+                            <TableTD>
+                              <div
+                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wider whitespace-nowrap uppercase ${
+                                  isDenied
+                                    ? "bg-[#3B1D20] text-[#E58383]"
+                                    : isOnFloor
+                                      ? "bg-[#332A15] text-[#D4B34A]"
+                                      : "bg-emerald-500/15 text-emerald-400"
+                                }`}
                               >
-                                {isProcessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
-                                Check-out
-                              </button>
-                            )}
-                          </TableTD>
-                        </TableTR>
-                      )
-                    })
-                  )}
-                </TableBody>
-              </Table>
+                                <div
+                                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                                    isDenied ? "bg-[#E58383]" : isOnFloor ? "bg-[#D4B34A]" : "bg-emerald-400"
+                                  }`}
+                                />
+                                {isDenied ? "DENIED" : isOnFloor ? "ON SITE" : "COMPLETE"}
+                              </div>
+                            </TableTD>
+
+                            <TableTD>
+                              {isDenied ? (
+                                <span className="text-[13px] text-[#EAA1A1]">{stream.denialReason || "Access denied"}</span>
+                              ) : stream.checkOutAt ? (
+                                <span className="text-text-muted font-mono text-[12px] whitespace-nowrap">
+                                  Check-out:{" "}
+                                  <LocalDate
+                                    date={stream.checkOutAt}
+                                    variant="hour"
+                                  />
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleCheckOut(memberId, memberName)}
+                                  disabled={isProcessing || !memberId}
+                                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[12px] font-semibold whitespace-nowrap text-white transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {isProcessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
+                                  Check Out
+                                </button>
+                              )}
+                            </TableTD>
+                          </TableTR>
+                        )
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </Card>
         </div>

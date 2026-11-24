@@ -4,28 +4,28 @@ export const getTransactionStatusMeta = (status?: string) => {
     case "PAID":
     case "SETTLEMENT":
       return {
-        label: "Berhasil",
+        label: "Success",
         className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
       }
     case "PROCESS":
       return {
-        label: "Diproses",
+        label: "Process",
         className: "border-sky-500/20 bg-sky-500/10 text-sky-400"
       }
     case "PENDING":
       return {
-        label: "Menunggu",
+        label: "Pending",
         className: "border-amber-500/20 bg-amber-500/10 text-amber-300"
       }
     case "EXPIRED":
       return {
-        label: "Kedaluwarsa",
+        label: "Expired",
         className: "border-orange-500/20 bg-orange-500/10 text-orange-400"
       }
     case "CANCELLED":
     case "FAILED":
       return {
-        label: "Dibatalkan",
+        label: "Canceled",
         className: "border-red-500/20 bg-red-500/10 text-red-400"
       }
     default:

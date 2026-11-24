@@ -36,19 +36,19 @@ const loadStoredQr = (): StoredQrToken | null => {
 function MemberAccessGuide() {
   return (
     <>
-      <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">PANDUAN AKSES MEMBER</span>
+      <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">MEMBER ACCESS GUIDE</span>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <div className="bg-primary flex flex-col gap-1.5 rounded-xl p-3">
           <span className="flex items-center gap-1.5 border-b border-white/40 pb-1.5 text-[12px] font-bold text-white">
-            <Smartphone className="h-4 w-4 shrink-0 text-white" /> Langkah 1 & 2
+            <Smartphone className="h-4 w-4 shrink-0 text-white" /> Step 1 & 2
           </span>
-          <span className="text-[12px] leading-snug text-white">Buka aplikasi SmartGym, lalu masuk menu Scan Gate.</span>
+          <span className="text-[12px] leading-snug text-white">Open the SmartGym app, then enter the Access Scanner menu.</span>
         </div>
         <div className="bg-primary flex flex-col gap-1.5 rounded-xl p-3">
           <span className="flex items-center gap-1.5 border-b border-white/40 pb-1.5 text-[12px] font-bold text-white">
-            <ScanLine className="h-4 w-4 shrink-0 text-white" /> Langkah 3
+            <ScanLine className="h-4 w-4 shrink-0 text-white" /> Step 3
           </span>
-          <span className="text-[12px] leading-snug text-white">Arahkan kamera ke layar QR ini.</span>
+          <span className="text-[12px] leading-snug text-white">Point the camera at this QR screen.</span>
         </div>
       </div>
     </>
@@ -84,12 +84,11 @@ export default function LiveTokenGenerator() {
           setRemainingSeconds(Math.max(0, Math.floor((targetExpiresAtMs - Date.now()) / 1000)))
 
           if (showToast) {
-            toast.success(res.message || "QR token berhasil diperbarui!")
+            toast.success("QR token updated successfully!")
           }
         }
       } catch (err: unknown) {
-        const apiErr = err as { data?: { message?: string }; message?: string }
-        toast.error(apiErr?.data?.message || apiErr?.message || "Gagal membuat QR token.")
+        toast.error("Failed to generate QR token. Please try again.")
       }
     },
     [generateQrToken]
@@ -123,17 +122,17 @@ export default function LiveTokenGenerator() {
     : ""
 
   return (
-    <Card className="relative flex flex-col gap-5 overflow-visible p-5 sm:p-6">
+    <Card className="relative flex flex-col gap-5 overflow-visible p-5 sm:p-6 lg:min-h-176 lg:justify-between">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className={`h-2 w-2 rounded-full ${isExpired ? "bg-red-500" : "bg-primary/85 animate-pulse"}`} />
-          <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">LIVE TOKEN GENERATOR</span>
+          <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">Live Token Generator</span>
         </div>
 
         <div className="group relative hidden xl:block">
           <button
             type="button"
-            aria-label="Panduan Akses Member"
+            aria-label="Member Access Guide"
             className="text-text-muted hover:border-primary/40 hover:bg-primary/10 hover:text-primary flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors"
           >
             <HelpCircle className="h-4 w-4" />
@@ -145,58 +144,60 @@ export default function LiveTokenGenerator() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-6 md:flex-row md:items-center xl:flex-col xl:items-stretch">
-        <div className="relative mx-auto flex aspect-square w-full max-w-60 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-4 md:mx-0 md:w-56 xl:mx-auto xl:w-full xl:max-w-64">
-          <div className="border-primary/85 absolute top-0 left-0 z-10 h-8 w-8 rounded-tl-2xl border-t-4 border-l-4" />
-          <div className="border-primary/85 absolute top-0 right-0 z-10 h-8 w-8 rounded-tr-2xl border-t-4 border-r-4" />
-          <div className="border-primary/85 absolute bottom-0 left-0 z-10 h-8 w-8 rounded-bl-2xl border-b-4 border-l-4" />
-          <div className="border-primary/85 absolute right-0 bottom-0 z-10 h-8 w-8 rounded-br-2xl border-r-4 border-b-4" />
+      <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center lg:my-auto lg:flex-1 lg:flex-col lg:justify-center lg:gap-7 lg:py-2">
+        <div className="flex w-full items-center justify-center sm:w-1/2 lg:w-full">
+          <div className="relative flex aspect-square w-full max-w-56 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-4 sm:max-w-none lg:max-w-68">
+            <div className="border-primary/85 absolute top-0 left-0 z-10 h-8 w-8 rounded-tl-2xl border-t-4 border-l-4" />
+            <div className="border-primary/85 absolute top-0 right-0 z-10 h-8 w-8 rounded-tr-2xl border-t-4 border-r-4" />
+            <div className="border-primary/85 absolute bottom-0 left-0 z-10 h-8 w-8 rounded-bl-2xl border-b-4 border-l-4" />
+            <div className="border-primary/85 absolute right-0 bottom-0 z-10 h-8 w-8 rounded-br-2xl border-r-4 border-b-4" />
 
-          {isLoading || !qrUrl ? (
-            <div className="flex flex-col items-center gap-2 text-gray-500">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="text-xs font-medium">Membuat QR...</span>
-            </div>
-          ) : (
-            <>
-              <img
-                src={qrUrl}
-                alt="QR Code Check-in"
-                className={`h-full w-full object-contain transition-all duration-300 ${
-                  isExpired ? "pointer-events-none scale-95 opacity-35 blur-md select-none" : ""
-                }`}
-              />
+            {isLoading || !qrUrl ? (
+              <div className="flex flex-col items-center gap-2 text-gray-500">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="text-xs font-medium">Generating QR...</span>
+              </div>
+            ) : (
+              <>
+                <img
+                  src={qrUrl}
+                  alt="QR Code Check-in"
+                  className={`h-full w-full object-contain transition-all duration-300 ${
+                    isExpired ? "pointer-events-none scale-95 opacity-35 blur-md select-none" : ""
+                  }`}
+                />
 
-              {isExpired && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 p-4 text-center backdrop-blur-[2px]">
-                  <span className="text-sm font-bold text-white">QR Kedaluwarsa</span>
-                  <span className="text-[11px] text-white/80">Klik tombol refresh untuk membuat QR baru.</span>
-                </div>
-              )}
-            </>
-          )}
+                {isExpired && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/55 p-4 text-center backdrop-blur-[2px]">
+                    <span className="text-sm font-bold text-white">QR Code Expired</span>
+                    <span className="text-[11px] text-white/80">Click the refresh button to generate a new QR code.</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
-        <div className="flex w-full flex-1 flex-col gap-3">
-          <div className="text-text-muted flex items-center text-[12px] font-medium">
+        <div className="flex w-full flex-col gap-3 sm:w-1/2 lg:w-full lg:gap-4">
+          <div className="text-text-muted flex items-center text-[12px] font-medium mt-2">
             <span className={`flex items-center gap-1.5 font-mono ${isExpired ? "text-red-400" : "text-primary"}`}>
               <Clock className="h-3.5 w-3.5" />
-              {isExpired ? "Token kedaluwarsa" : `Token valid: ${formatCountdown(remainingSeconds)}`}
+              {isExpired ? "Token expired" : `Token valid for: ${formatCountdown(remainingSeconds)}`}
             </span>
           </div>
-          <p className="text-text-muted text-[12px] leading-relaxed">
-            Tampilan QR aktif selama 10 menit. Setelah waktu habis, QR akan diburamkan hingga diperbarui kembali.
+          <p className="text-text-muted text-[12px] leading-relaxed mt-4">
+            The QR code stays active for 10 minutes. After it expires, it will be blurred until refreshed.
           </p>
           <button
             type="button"
             onClick={() => handleGenerate(true)}
             disabled={isLoading}
-            className={`mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-3 text-[13px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-3 text-[13px] font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 lg:py-3.5 ${
               isExpired ? "bg-primary hover:bg-primary/90" : "bg-white/5 hover:bg-white/10"
             }`}
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            {isLoading ? "Memperbarui Token..." : "Refresh Token Sekarang"}
+            {isLoading ? "Refreshing Token..." : "Refresh Token Now"}
           </button>
 
           <div className="mt-2 border-t border-white/5 pt-4 xl:hidden">

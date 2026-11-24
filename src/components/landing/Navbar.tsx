@@ -1,11 +1,19 @@
 import { useState } from "react"
 import { Link } from "react-router"
-import { Menu, X } from "lucide-react"
+import { Menu, Smartphone, X } from "lucide-react"
 import { landingNavigationMenu } from "~/config/navigation"
 import logoGym from "../../assets/logo.png"
 
 export default function LandingNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  const handleGetApp = () => {
+    setMobileOpen(false)
+    window.dispatchEvent(new CustomEvent("smartgym:open-app-qr"))
+
+    const target = document.getElementById("alur-pendaftaran")
+    target?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   return (
     <header className="bg-background/90 border-border/40 sticky top-0 z-50 w-full border-b backdrop-blur-md">
@@ -25,7 +33,6 @@ export default function LandingNavbar() {
             <span className="text-text-primary text-lg font-extrabold tracking-wide uppercase">
               SMART<span className="text-primary">GYM</span>
             </span>
-            <span className="text-text-secondary mt-1 text-[10px] font-semibold tracking-[0.2em] uppercase">CLUB &amp; SYSTEM</span>
           </div>
         </Link>
 
@@ -43,12 +50,14 @@ export default function LandingNavbar() {
 
         {/* Desktop Action */}
         <div className="hidden items-center lg:flex">
-          <Link
-            to="/auth/login"
-            className="bg-primary hover:bg-primary-hover text-text-primary shadow-primary/20 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg transition-colors"
+          <button
+            type="button"
+            onClick={handleGetApp}
+            className="bg-primary hover:bg-primary-hover text-text-primary shadow-primary/20 inline-flex cursor-pointer items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg transition-colors"
           >
-            Masuk Portal
-          </Link>
+            <Smartphone className="h-4 w-4" />
+            <span>Get App</span>
+          </button>
         </div>
 
         <button
@@ -77,13 +86,14 @@ export default function LandingNavbar() {
           </nav>
 
           <div className="border-border/60 mt-4 border-t pt-4">
-            <Link
-              to="/auth/login"
-              onClick={() => setMobileOpen(false)}
-              className="bg-primary hover:bg-primary-hover text-text-primary block w-full rounded-xl py-2.5 text-center text-sm font-semibold transition-colors"
+            <button
+              type="button"
+              onClick={handleGetApp}
+              className="bg-primary hover:bg-primary-hover text-text-primary inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition-colors"
             >
-              Masuk Portal
-            </Link>
+              <Smartphone className="h-4 w-4" />
+              <span>Get App</span>
+            </button>
           </div>
         </div>
       )}

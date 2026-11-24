@@ -2,37 +2,37 @@ import { Calendar, CheckCircle2, QrCode, RefreshCw, ShieldCheck, SlidersHorizont
 
 const ABOUT_STATS = [
   {
-    value: "2.500",
+    value: "2,500",
     suffix: "+",
-    valueClass: "text-primary",
-    suffixClass: "text-primary text-lg font-bold",
-    label: "Member Aktif",
-    desc: "Komunitas latihan konsisten & suportif"
+    valueClass: "text-primary text-2xl sm:text-3xl",
+    suffixClass: "text-primary text-base sm:text-lg font-bold",
+    label: "Active Members",
+    desc: "Consistent & supportive community"
   },
   {
     value: "99.8",
     suffix: "%",
-    valueClass: "text-secondary",
-    suffixClass: "text-secondary text-lg font-bold",
+    valueClass: "text-secondary text-2xl sm:text-3xl",
+    suffixClass: "text-secondary text-base sm:text-lg font-bold",
     label: "Gate & App Uptime",
-    desc: "Tanpa hambatan sistem masuk gym"
+    desc: "Seamless, uninterrupted gym entry"
   },
   {
     value: "18",
-    suffix: "Coach",
-    valueClass: "text-info",
-    suffixClass: "text-info text-sm font-bold italic",
-    label: "Pelatih Bersertifikasi",
-    desc: "Standar NASM, CSCS, & ACE"
+    suffix: "Coaches",
+    valueClass: "text-info text-2xl sm:text-3xl",
+    suffixClass: "text-info text-xs sm:text-sm font-bold italic",
+    label: "Certified Trainers",
+    desc: "NASM, CSCS, & ACE standards"
   },
   {
-    value: "06.00 - 21.00",
+    value: "06:00 – 21:00",
     suffix: null,
-    valueClass: "text-text-primary text-2xl sm:text-[26px]",
+    valueClass: "text-text-primary text-lg sm:text-2xl whitespace-nowrap",
     suffixClass: "",
-    label: "OPEN",
-    labelClass: "text-primary text-[11px] font-extrabold tracking-wider uppercase",
-    desc: "Buka 365 hari termasuk hari libur"
+    label: "OPEN DAILY",
+    labelClass: "text-primary text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase",
+    desc: "Open daily except public holidays"
   }
 ]
 
@@ -43,9 +43,9 @@ const ADVANTAGES = [
     accentText: "text-primary",
     accentBg: "bg-primary/10 border-primary/20",
     footerBg: "bg-primary/10 text-primary",
-    title: "Akses Otomatis QR 24/7",
-    desc: "Scan kode dinamis dari smartphone di turnstile gerbang tanpa antre resepsionis dan tanpa kartu fisik yang mudah hilang.",
-    footerLabel: "Teknologi Anti-Sharing"
+    title: "Automated Access",
+    desc: "Scan dynamic QR codes directly from your smartphone for instant, contactless gate entry.",
+    footerLabel: "Anti-Sharing Technology"
   },
   {
     icon: Calendar,
@@ -53,9 +53,9 @@ const ADVANTAGES = [
     accentText: "text-secondary",
     accentBg: "bg-secondary/10 border-secondary/20",
     footerBg: "bg-secondary/10 text-secondary",
-    title: "Booking Sesi Trainer Instan",
-    desc: "Pilih coach bersertifikasi, cek kalender latihan realtime, dan kunci jadwal latihan privat 1-on-1 langsung dari aplikasi.",
-    footerLabel: "Sinkronisasi Google Calendar"
+    title: "Instant Trainer Booking",
+    desc: "Choose certified coaches, check real-time schedules, and lock in 1-on-1 private sessions directly from the app.",
+    footerLabel: "Real-Time Slot Availability"
   },
   {
     icon: SlidersHorizontal,
@@ -63,9 +63,9 @@ const ADVANTAGES = [
     accentText: "text-info",
     accentBg: "bg-info/10 border-info/20",
     footerBg: "bg-info/10 text-info",
-    title: "Alat Biomekanik Terbaik",
-    desc: "Rangkaian beban komersial premium dari Life Fitness, Rogue, & Eleiko dengan kalibrasi rutin untuk mencegah cedera sendi.",
-    footerLabel: "Maintenance Terjadwal"
+    title: "Premium Equipment",
+    desc: "Commercial-grade strength and cardio machines, routinely calibrated to maximize results and prevent joint injury.",
+    footerLabel: "Scheduled Maintenance"
   },
   {
     icon: TrendingUp,
@@ -73,9 +73,9 @@ const ADVANTAGES = [
     accentText: "text-primary",
     accentBg: "bg-primary/10 border-primary/20",
     footerBg: "bg-primary/10 text-primary",
-    title: "InBody & Smart Tracking",
-    desc: "Pantau persentase lemak tubuh, massa otot murni, dan status metabolisme berkala yang terhubung otomatis ke dashboard member.",
-    footerLabel: "Grafik Evaluasi Bulanan"
+    title: "AI Trainer",
+    desc: "Get personalized workout recommendations and adaptive training plans tailored to your body goals and progress.",
+    footerLabel: "Personalized Workout Plans"
   }
 ]
 
@@ -83,23 +83,23 @@ export default function AboutSection() {
   return (
     <section
       id="fitur"
-      className="relative py-14 sm:py-20"
+      className="relative mt-2 py-14 sm:py-20"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {ABOUT_STATS.map((stat) => (
             <div
               key={stat.label}
-              className="bg-surface/80 border-border/50 flex flex-col justify-between rounded-2xl border p-5"
+              className="bg-surface/80 border-border/50 flex flex-col justify-between rounded-2xl border p-4 sm:p-5"
             >
-              <div className="flex items-baseline gap-1.5">
-                <span className={`text-3xl font-extrabold tracking-tight ${stat.valueClass}`}>{stat.value}</span>
+              <div className="flex flex-wrap items-baseline gap-1">
+                <span className={`font-extrabold tracking-tight tabular-nums ${stat.valueClass}`}>{stat.value}</span>
                 {stat.suffix && <span className={stat.suffixClass}>{stat.suffix}</span>}
               </div>
 
-              <div className="mt-2 flex flex-col gap-0.5">
+              <div className="mt-2.5 flex flex-col gap-0.5">
                 <span className={stat.labelClass ?? "text-text-primary text-xs font-bold"}>{stat.label}</span>
-                <span className="text-text-muted text-[11.5px] leading-snug">{stat.desc}</span>
+                <span className="text-text-muted text-[11px] leading-snug sm:text-[11.5px]">{stat.desc}</span>
               </div>
             </div>
           ))}
@@ -110,16 +110,13 @@ export default function AboutSection() {
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <span className="bg-surface border-border/70 text-text-secondary inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[11px] font-bold tracking-wider uppercase">
             <Zap className="text-primary h-3.5 w-3.5 fill-current" />
-            EVOLUSI KEBUGARAN MODERN
+            MODERN FITNESS EVOLUTION
           </span>
 
-          <h2 className="text-text-primary mt-5 text-2xl leading-tight font-extrabold tracking-tight sm:text-4xl">
-            Mengapa SmartGym Berbeda Dari Gym Tradisional?
-          </h2>
+          <h2 className="text-text-primary mt-5 text-2xl leading-tight font-extrabold tracking-tight sm:text-4xl">Why Choose SmartGym?</h2>
 
           <p className="text-text-secondary mt-3.5 text-sm leading-relaxed">
-            Kami memangkas birokrasi pendaftaran usang dan menggantinya dengan ekosistem digital otomatis, higienis, serta alat presisi
-            tinggi untuk hasil terukur.
+            We eliminate outdated registration bureaucracy and replace it with a seamless digital fitness ecosystem.
           </p>
         </div>
 

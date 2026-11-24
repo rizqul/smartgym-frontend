@@ -8,7 +8,9 @@ import {
   API_ADMIN_CHECKIN_QR_TOKEN,
   API_ADMIN_CHECKIN_SUMMARY,
   API_STAFF_CHECKIN_CHECKOUT,
-  API_STAFF_CHECKIN_QR_TOKEN
+  API_STAFF_CHECKIN_LIST,
+  API_STAFF_CHECKIN_QR_TOKEN,
+  API_STAFF_CHECKIN_SUMMARY
 } from "~/utils/endpoints"
 
 export const checkinServiceApi = createApi({
@@ -18,7 +20,7 @@ export const checkinServiceApi = createApi({
   endpoints: (build) => ({
     getRecentCheckins: build.query<CheckinListApi, number | void>({
       query: (limit = 5) => ({
-        url: API_ADMIN_CHECKIN_LIST,
+        url: (isStaff) => (isStaff ? API_STAFF_CHECKIN_LIST : API_ADMIN_CHECKIN_LIST),
         method: "GET",
         params: { limit }
       }),
@@ -26,7 +28,7 @@ export const checkinServiceApi = createApi({
     }),
     getCheckinSummary: build.query<CheckinSummaryApi, void>({
       query: () => ({
-        url: API_ADMIN_CHECKIN_SUMMARY,
+        url: (isStaff) => (isStaff ? API_STAFF_CHECKIN_SUMMARY : API_ADMIN_CHECKIN_SUMMARY),
         method: "GET"
       }),
       providesTags: ["CheckinSummary"]

@@ -57,26 +57,26 @@ export default function CreateMember() {
 
     const isEmailValid = await trigger(["email"])
     if (!isEmailValid) {
-      toast.error("Isi Email dengan benar sebelum meminta OTP.")
+      toast.error("Enter a valid email address before requesting an OTP.")
       return
     }
 
     try {
       await requestMemberOtp({ email: getValues("email") }).unwrap()
       setCountdown(300)
-      toast.success("Kode OTP berhasil dikirim ke Email member!")
+      toast.success("The OTP was successfully sent to the member's email!")
     } catch {
-      toast.error("Gagal mengirim OTP. Silakan coba lagi.")
+      toast.error("Failed to send the OTP. Please try again.")
     }
   }
 
   const onSubmit = async (data: CreateMemberData) => {
     try {
       await createMember(data).unwrap()
-      toast.success("Member baru berhasil didaftarkan!")
+      toast.success("New member registered successfully!")
       navigate("/dashboard/members")
     } catch {
-      toast.error("Gagal mendaftarkan member. Periksa kembali OTP atau data Anda.")
+      toast.error("Failed to register the member. Please check the OTP or your information.")
     }
   }
 
@@ -88,21 +88,21 @@ export default function CreateMember() {
         <button
           type="button"
           onClick={() => navigate("/dashboard/members")}
-          aria-label="Kembali ke daftar member"
+          aria-label="Back to the member list"
           className="text-text-muted flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-white/5 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-white">Tambah Member Baru</h1>
-          <p className="text-text-secondary mt-1 text-[13px]">Daftarkan akun member baru ke dalam sistem operasional SmartGym.</p>
+          <h1 className="text-2xl font-bold text-white">Add New Member</h1>
+          <p className="text-text-secondary mt-1 text-[13px]">Register a new member account in the SmartGym operations system.</p>
         </div>
       </div>
 
       <Card className="shadow-2xl">
         <CardHeader className="border-b border-white/5 pb-4">
-          <h2 className="text-[16px] font-bold text-white">Informasi Dasar Member</h2>
-          <p className="text-text-secondary text-[12px]">Pastikan alamat Email aktif untuk menerima kode OTP.</p>
+          <h2 className="text-[16px] font-bold text-white">Basic Member Information</h2>
+          <p className="text-text-secondary text-[12px]">Make sure the email address is active to receive the OTP.</p>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -113,8 +113,8 @@ export default function CreateMember() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input
-                  label="Nama Lengkap"
-                  placeholder="Masukkan nama sesuai identitas"
+                  label="Full Name"
+                  placeholder="Enter the name as shown on the member's ID"
                   icon={User}
                   error={errors.name?.message}
                   {...register("name")}
@@ -122,7 +122,7 @@ export default function CreateMember() {
               </div>
 
               <Input
-                label="Alamat Email"
+                label="Email Address"
                 type="email"
                 placeholder="email@contoh.com"
                 icon={Mail}
@@ -131,7 +131,7 @@ export default function CreateMember() {
               />
 
               <Input
-                label="Nomor WhatsApp / Telepon"
+                label="WhatsApp / Phone Number"
                 inputMode="numeric"
                 type="tel"
                 placeholder="081234567890"
@@ -144,8 +144,8 @@ export default function CreateMember() {
               />
 
               <Input
-                label="Kode Verifikasi (OTP)"
-                placeholder="6 Digit OTP"
+                label="Verification Code (OTP)"
+                placeholder="6-digit OTP"
                 icon={Hash}
                 maxLength={6}
                 inputMode="numeric"
@@ -162,13 +162,13 @@ export default function CreateMember() {
                     className="bg-primary/10 text-primary hover:bg-primary/20 flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-[11px] font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isSendingOtp ? (
-                      "Mengirim..."
+                      "Sending..."
                     ) : countdown > 0 ? (
-                      `Kirim ulang (${formatTime(countdown)})`
+                      `Resend (${formatTime(countdown)})`
                     ) : (
                       <>
                         <Send className="h-3 w-3" />
-                        Minta OTP
+                        Request OTP
                       </>
                     )}
                   </button>
@@ -176,8 +176,9 @@ export default function CreateMember() {
               />
 
               <Input
-                label="Kata Sandi Awal"
+                label="Initial Password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="password"
                 placeholder="Min. 8 karakter"
                 icon={Lock}
                 error={errors.password?.message}
@@ -198,10 +199,10 @@ export default function CreateMember() {
             <div className="bg-primary/10 border-primary/20 flex items-start gap-3 rounded-xl border p-4">
               <Info className="text-primary mt-0.5 h-5 w-5 shrink-0" />
               <div className="flex flex-col">
-                <span className="text-primary text-[13px] font-semibold">Alur Pendaftaran (OTP)</span>
+                <span className="text-primary text-[13px] font-semibold">Registration Process (OTP)</span>
                 <span className="text-primary/80 mt-1 text-[12px]">
-                  Isi alamat Email terlebih dahulu, lalu klik <strong>&quot;Minta OTP&quot;</strong>. Sistem akan mengirimkan kode 6 digit
-                  ke email calon member untuk dimasukkan ke dalam form sebelum disimpan.
+                  Enter the email address first, then click <strong>&quot;Request OTP&quot;</strong>. The system will send a 6-digit code
+                  to the prospective member's email. Enter it in the form before saving.
                 </span>
               </div>
             </div>
@@ -213,7 +214,7 @@ export default function CreateMember() {
                 onClick={() => navigate("/dashboard/members")}
                 disabled={isBusy}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -222,7 +223,7 @@ export default function CreateMember() {
                 leftIcon={!isBusy && <Save className="h-4 w-4" />}
                 className="font-bold"
               >
-                {isBusy ? "Menyimpan..." : "Simpan Data Member"}
+                {isBusy ? "Saving..." : "Save Member"}
               </Button>
             </div>
           </form>

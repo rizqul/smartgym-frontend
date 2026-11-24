@@ -35,7 +35,7 @@ export default function CreateMembership() {
   const onSubmit = async (data: CreateMembershipPackageData) => {
     try {
       const featuresArray = data.features.split("\n").filter((f) => f.trim() !== "")
-      const combinedDescription = `${data.description} \n\nFasilitas:\n- ${featuresArray.join("\n- ")}`
+      const combinedDescription = `${data.description} \n\nFacilities:\n- ${featuresArray.join("\n- ")}`
 
       const payload = {
         type: data.type,
@@ -48,10 +48,10 @@ export default function CreateMembership() {
       await createPackage(payload as any)
       if (error) throw Error
 
-      toast.success("Paket membership baru berhasil ditambahkan!")
+      toast.success("New membership package added successfully!")
       navigate("/dashboard/membership")
     } catch {
-      toast.error("Gagal menambahkan paket. Silakan periksa kembali form Anda.")
+      toast.error("Failed to add package. Please check the form and try again.")
     }
   }
 
@@ -65,15 +65,15 @@ export default function CreateMembership() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-white">Tambah Paket Baru</h1>
-          <p className="text-text-secondary mt-1 text-[13px]">Buat katalog paket membership baru untuk ditawarkan kepada member.</p>
+          <h1 className="text-2xl font-bold text-white">Add New Package</h1>
+          <p className="text-text-secondary mt-1 text-[13px]">Create a new membership package to offer to members.</p>
         </div>
       </div>
 
       <Card className="shadow-2xl">
         <CardHeader className="border-b border-white/5 pb-4">
-          <h2 className="text-[16px] font-bold text-white">Detail Paket Membership</h2>
-          <p className="text-text-secondary text-[12px]">Lengkapi informasi harga, fasilitas, dan masa aktif paket.</p>
+          <h2 className="text-[16px] font-bold text-white">Membership Package Details</h2>
+          <p className="text-text-secondary text-[12px]">Enter the package price, features, and duration.</p>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -83,15 +83,15 @@ export default function CreateMembership() {
           >
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-text-secondary text-[13px] font-medium">Kategori Tipe (Wajib)</label>
+                <label className="text-text-secondary text-[13px] font-medium">Package Type (Required)</label>
                 <div className="relative">
                   <Select
                     {...register("type")}
                     className="pl-10"
                   >
-                    <option value="WEEKLY">Mingguan</option>
-                    <option value="MONTHLY">Bulanan</option>
-                    <option value="YEARLY">Tahunan</option>
+                    <option value="WEEKLY">Weekly</option>
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="YEARLY">Yearly</option>
                   </Select>
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <Tag className="text-text-muted h-4 w-4" />
@@ -101,8 +101,8 @@ export default function CreateMembership() {
               </div>
 
               <Input
-                label="Nama Paket"
-                placeholder="Cth: Year Pro VIP"
+                label="Package Name"
+                placeholder="E.g., Year Pro VIP"
                 icon={Package}
                 error={errors.name?.message}
                 {...register("name")}
@@ -110,8 +110,8 @@ export default function CreateMembership() {
 
               <div className="sm:col-span-2">
                 <Input
-                  label="Deskripsi Singkat"
-                  placeholder="Penjelasan singkat mengenai paket ini..."
+                  label="Short Description"
+                  placeholder="A brief description of this package..."
                   icon={Info}
                   error={errors.description?.message}
                   {...register("description")}
@@ -119,25 +119,25 @@ export default function CreateMembership() {
               </div>
 
               <Input
-                label="Harga Paket (Rp)"
+                label="Package Price (IDR)"
                 type="number"
-                placeholder="Cth: 4200000"
+                placeholder="E.g., 4200000"
                 icon={CreditCard}
                 error={errors.price?.message}
                 {...register("price", { valueAsNumber: true })}
               />
 
               <Input
-                label="Durasi Aktif (Total Hari)"
+                label="Duration (Days)"
                 type="number"
-                placeholder="Cth: 365"
+                placeholder="E.g., 365"
                 icon={Clock}
                 error={errors.duration?.message}
                 {...register("duration", { valueAsNumber: true })}
               />
 
               <div className="space-y-1 sm:col-span-2">
-                <label className="text-text-secondary text-[13px] font-medium">Fasilitas Termasuk (Pisahkan dengan Enter)</label>
+                <label className="text-text-secondary text-[13px] font-medium">Included Features (Separate each with a new line)</label>
                 <textarea
                   {...register("features")}
                   rows={5}
@@ -146,7 +146,7 @@ export default function CreateMembership() {
                       ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                       : "focus:border-primary focus:ring-primary border-white/10"
                   }`}
-                  placeholder="Akses Gym 24 jam penuh&#10;Free Locker & Shower room&#10;Diskon 10% SmartGym Cafe"
+                  placeholder="24-hour gym access&#10;Free locker and shower room&#10;10% discount at SmartGym Cafe"
                 />
                 {errors.features && <p className="mt-1 text-[12px] text-red-500">{errors.features.message}</p>}
               </div>
@@ -159,7 +159,7 @@ export default function CreateMembership() {
                 onClick={() => navigate("/dashboard/membership")}
                 disabled={isSubmitting}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -168,7 +168,7 @@ export default function CreateMembership() {
                 leftIcon={!isSubmitting && <Save className="h-4 w-4" />}
                 className="font-bold"
               >
-                {isSubmitting ? "Menyimpan..." : "Simpan Paket"}
+                {isSubmitting ? "Saving..." : "Save Package"}
               </Button>
             </div>
           </form>

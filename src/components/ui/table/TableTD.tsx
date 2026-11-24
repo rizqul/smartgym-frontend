@@ -1,15 +1,14 @@
-import { type ReactNode } from "react"
+import { type ReactNode, type TdHTMLAttributes } from "react"
 
-export interface TableTDProps {
+export interface TableTDProps extends TdHTMLAttributes<HTMLTableCellElement> {
   children: ReactNode
-  colSpan?: number
 }
 
-export default function TableTD({ children, colSpan }: TableTDProps) {
+export default function TableTD({ children, className = "", ...props }: TableTDProps) {
   return (
     <td
-      colSpan={colSpan}
-      className="px-4 py-3"
+      className={`px-4 py-3 ${className}`}
+      {...props}
     >
       {children}
     </td>

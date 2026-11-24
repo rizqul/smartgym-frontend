@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiResponsePaginate } from "./common"
+import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "./common"
 
 export type UserRole = "ADMIN" | "STAFF" | "MEMBER"
 
@@ -14,16 +14,13 @@ export type User = {
   updatedAt: string
 }
 
-export type MemberSearchQuery = {
-  page?: number
-  size?: number
-  name?: string
+export type MemberSearchQuery = PaginationQuery & {
+  search?: string
+  membership?: boolean
 }
 
-export type StaffSearchQuery = {
-  page?: number
-  size?: number
-  name?: string
+export type StaffSearchQuery = PaginationQuery & {
+  search?: string
 }
 
 export type UpdateProfileRequest = {
@@ -38,13 +35,14 @@ export type UpdatePasswordRequest = {
   newPassword: string
 }
 
+export interface UpdateMemberPayload {
+  id: string
+  data: FormData
+}
+
 export interface UpdateStaffPayload {
   id: string
-  name?: string
-  email?: string
-  phoneNumber?: string
-  password?: string
-  profileUrl?: string
+  data: FormData
 }
 
 export interface MemberCount {

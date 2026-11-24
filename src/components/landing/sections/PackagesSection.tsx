@@ -1,29 +1,29 @@
 import { Check, Headset, Store, type LucideIcon } from "lucide-react"
 
-interface MembershipPackage {
+export interface MembershipPackage {
+  id?: string
   name: string
   badge: string
-  badgeClass: string
+  badgeClass?: string
   desc: string
   price: string
   period: string
-  popular?: boolean
   features: string[]
-  ctaLabel: string
-  ctaIcon: LucideIcon
-  ctaHref: string
+  ctaLabel?: string
+  ctaIcon?: LucideIcon
+  ctaHref?: string
 }
 
-const MEMBERSHIP_PACKAGES: MembershipPackage[] = [
+const DEFAULT_MEMBERSHIP_PACKAGES: MembershipPackage[] = [
   {
     name: "Basic",
     badge: "Off-Peak",
     badgeClass: "bg-card text-text-secondary",
-    desc: "Ideal untuk latihan jam tenang siang hari.",
+    desc: "Ideal for quiet daytime training sessions.",
     price: "350.000",
-    period: "/ bln",
-    features: ["Akses 09:00 - 16:00 WIB", "1 Cabang Gym Terdaftar", "Loker Harian & Shower Panas"],
-    ctaLabel: "Daftar di Front-Desk",
+    period: "/ mo",
+    features: ["Access 09:00 – 16:00 WIB", "1 Registered Gym Branch", "Daily Locker & Hot Shower"],
+    ctaLabel: "Register at Receptionist",
     ctaIcon: Store,
     ctaHref: "#alur-pendaftaran"
   },
@@ -31,12 +31,11 @@ const MEMBERSHIP_PACKAGES: MembershipPackage[] = [
     name: "All-Access Pro",
     badge: "24/7",
     badgeClass: "bg-primary/15 text-primary",
-    desc: "Akses tanpa batas ke seluruh fasilitas gym.",
+    desc: "Unlimited access to all gym facilities.",
     price: "550.000",
-    period: "/ bln",
-    popular: true,
-    features: ["Akses 24/7 di Semua Cabang", "2x Sesi Personal Trainer", "InBody Scan Setiap Bulan", "Sauna & Recovery Zone"],
-    ctaLabel: "Daftar di Front-Desk",
+    period: "/ mo",
+    features: ["24/7 Access at All Branches", "2x Personal Trainer Sessions", "Monthly InBody Scan", "Sauna & Recovery Zone"],
+    ctaLabel: "Register at Receptionist",
     ctaIcon: Store,
     ctaHref: "#alur-pendaftaran"
   },
@@ -44,17 +43,23 @@ const MEMBERSHIP_PACKAGES: MembershipPackage[] = [
     name: "VIP Elite",
     badge: "All-In",
     badgeClass: "bg-secondary/15 text-secondary",
-    desc: "Fasilitas privat & kenyamanan maksimal.",
+    desc: "Private facilities & maximum comfort.",
     price: "950.000",
-    period: "/ bln",
-    features: ["Semua Benefit All-Access Pro", "Akses VIP Athletes Lounge", "Laundry Seragam Harian Gratis", "Reservasi Parkir Prioritas"],
-    ctaLabel: "Konsultasi Paket VIP",
+    period: "/ mo",
+    features: ["All All-Access Pro Benefits", "VIP Athletes Lounge Access", "Free Daily Workout Laundry", "Priority Parking Reservation"],
+    ctaLabel: "Consult VIP Plan",
     ctaIcon: Headset,
     ctaHref: "#kontak"
   }
 ]
 
-export default function PackagesSection() {
+interface PackagesSectionProps {
+  packages?: MembershipPackage[]
+}
+
+export default function PackagesSection({ packages = DEFAULT_MEMBERSHIP_PACKAGES }: PackagesSectionProps) {
+  const visiblePackages = packages.slice(0, 3)
+
   return (
     <section
       id="paket"
@@ -64,22 +69,23 @@ export default function PackagesSection() {
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           <span className="text-primary text-xs font-extrabold tracking-[0.2em] uppercase">MEMBERSHIP</span>
 
-          <h2 className="text-text-primary mt-2 text-2xl leading-tight font-extrabold tracking-tight sm:text-4xl">Pilihan Membership</h2>
+          <h2 className="text-text-primary mt-2 text-2xl leading-tight font-extrabold tracking-tight sm:text-4xl">Membership Plans</h2>
 
           <p className="text-text-secondary mt-3 text-sm leading-relaxed">
-            Pilih paket favorit Anda. Pendaftaran &amp; pembayaran diproses langsung oleh staf gym di front-desk, lalu aktivasi otomatis via
-            Aplikasi Member SmartGym.
+            Choose your favorite plan. Registration &amp; payment are processed directly by our staff at the Receptionist, followed by
+            automatic activation via the SmartGym Member App.
           </p>
         </div>
 
         <div className="mt-14 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
-          {MEMBERSHIP_PACKAGES.map((pkg) => {
-            const CtaIcon = pkg.ctaIcon
-            const isPopular = Boolean(pkg.popular)
+          {visiblePackages.map((pkg, index) => {
+            const CtaIcon = pkg.ctaIcon ?? Store
+            const isPopular = visiblePackages.length === 3 && index === 1
+            const badgeClass = pkg.badgeClass ?? (isPopular ? "bg-primary/15 text-primary" : "bg-card text-text-secondary")
 
             return (
               <div
-                key={pkg.name}
+                key={pkg.id ?? pkg.name}
                 className={`relative flex flex-col rounded-2xl border p-6 transition-all sm:p-7 ${
                   isPopular
                     ? "bg-surface border-primary/40 shadow-[0_0_45px_rgba(255,107,0,0.14)] lg:-translate-y-2"
@@ -88,13 +94,13 @@ export default function PackagesSection() {
               >
                 {isPopular && (
                   <span className="bg-primary text-background absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full px-4 py-1 text-[11px] font-extrabold tracking-wider uppercase shadow-[0_0_16px_rgba(255,107,0,0.45)]">
-                    POPULER
+                    POPULAR
                   </span>
                 )}
 
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="text-text-primary text-xl font-bold">{pkg.name}</h3>
-                  <span className={`rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${pkg.badgeClass}`}>{pkg.badge}</span>
+                  <span className={`rounded-md px-2.5 py-1 text-[11px] font-bold whitespace-nowrap ${badgeClass}`}>{pkg.badge}</span>
                 </div>
 
                 <p className="text-text-muted mt-1.5 text-xs sm:text-[13px]">{pkg.desc}</p>
@@ -102,7 +108,9 @@ export default function PackagesSection() {
                 <div className="mt-6 flex items-baseline gap-1.5">
                   <span className="text-text-muted text-xs font-semibold">Rp</span>
                   <span
-                    className={`text-3xl font-extrabold tracking-tight sm:text-4xl ${isPopular ? "text-primary" : "text-text-primary"}`}
+                    className={`text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl ${
+                      isPopular ? "text-primary" : "text-text-primary"
+                    }`}
                   >
                     {pkg.price}
                   </span>
@@ -122,7 +130,7 @@ export default function PackagesSection() {
                 </ul>
 
                 <a
-                  href={pkg.ctaHref}
+                  href={pkg.ctaHref ?? "#alur-pendaftaran"}
                   className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold transition-colors sm:text-sm ${
                     isPopular
                       ? "bg-primary hover:bg-primary-hover text-background shadow-[0_0_20px_rgba(255,107,0,0.3)]"
@@ -130,7 +138,7 @@ export default function PackagesSection() {
                   }`}
                 >
                   <CtaIcon className="h-4 w-4 shrink-0" />
-                  <span>{pkg.ctaLabel}</span>
+                  <span>{pkg.ctaLabel ?? "Register at Receptionist"}</span>
                 </a>
               </div>
             )

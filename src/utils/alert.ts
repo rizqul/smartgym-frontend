@@ -1,18 +1,20 @@
-import Swal from "sweetalert2"
+import Swal, { type SweetAlertIcon } from "sweetalert2"
 
 const baseCustomClass = {
+  container: "inset-0! lg:top-16! lg:left-64! z-99999 backdrop-blur-sm",
   popup: "border border-white/10 rounded-2xl shadow-2xl bg-[#1C1F26]",
   title: "text-xl font-bold text-white",
   htmlContainer: "text-text-secondary text-[14px] mt-2",
   actions: "w-full flex justify-center gap-3 mt-6",
   confirmButton:
-    "inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1C1F26]",
+    "inline-flex cursor-pointer items-center justify-center rounded-lg px-5 py-2.5 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1C1F26]",
   cancelButton:
-    "inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium transition-colors bg-[#2A2D35] text-text-secondary hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-border focus:ring-offset-2 focus:ring-offset-[#1C1F26]"
+    "inline-flex cursor-pointer items-center justify-center rounded-lg px-5 py-2.5 font-medium transition-colors bg-[#2A2D35] text-text-secondary hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-border focus-visible:ring-offset-2 focus-visible:ring-offset-[#1C1F26]"
 }
 
 const GymSwal = Swal.mixin({
   background: "#1C1F26",
+  backdrop: "rgba(0, 0, 0, 0.75)",
   color: "#ffffff",
   buttonsStyling: false,
   customClass: baseCustomClass
@@ -26,7 +28,7 @@ export const Alert = {
       text,
       customClass: {
         ...baseCustomClass,
-        confirmButton: `${baseCustomClass.confirmButton} bg-primary text-white hover:bg-primary-hover focus:ring-primary`
+        confirmButton: `${baseCustomClass.confirmButton} bg-primary text-white hover:bg-primary-hover focus-visible:ring-primary`
       }
     })
   },
@@ -38,7 +40,7 @@ export const Alert = {
       text,
       customClass: {
         ...baseCustomClass,
-        confirmButton: `${baseCustomClass.confirmButton} bg-danger text-white hover:bg-danger/90 focus:ring-danger`
+        confirmButton: `${baseCustomClass.confirmButton} bg-danger text-white hover:bg-danger/90 focus-visible:ring-danger`
       }
     })
   },
@@ -46,20 +48,24 @@ export const Alert = {
   confirm: ({
     title,
     text,
-    confirmText = "Ya, Lanjutkan",
-    cancelText = "Batal",
+    html,
+    icon = "warning",
+    confirmText = "Yes, Continue",
+    cancelText = "Cancel",
     isDanger = false
   }: {
     title: string
-    text: string
+    text?: string
+    html?: string
+    icon?: SweetAlertIcon
     confirmText?: string
     cancelText?: string
     isDanger?: boolean
   }) => {
     return GymSwal.fire({
-      icon: "warning",
+      icon,
       title,
-      text,
+      ...(html ? { html } : { text }),
       showCancelButton: true,
       reverseButtons: true,
       confirmButtonText: confirmText,
@@ -68,8 +74,8 @@ export const Alert = {
         ...baseCustomClass,
         confirmButton: `${baseCustomClass.confirmButton} ${
           isDanger
-            ? "bg-danger text-white hover:bg-danger/90 focus:ring-danger"
-            : "bg-primary text-white hover:bg-primary-hover focus:ring-primary"
+            ? "bg-danger text-white hover:bg-danger/90 focus-visible:ring-danger"
+            : "bg-primary text-white hover:bg-primary-hover focus-visible:ring-primary"
         }`
       }
     })
