@@ -28,6 +28,7 @@ import Avatar from "~/components/ui/Avatar"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Alert } from "~/utils/alert"
 import { useDebounce } from "~/hooks/useDebounce"
+import { usePagination } from "~/hooks/usePagination"
 import { useGetAllMemberQuery, useDeleteMemberMutation, useGetMemberCountQuery } from "~/services/member"
 
 type StatusFilter = "all" | "active" | "expired"
@@ -39,8 +40,9 @@ export default function Member() {
 
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
-  const [currentPage, setCurrentPage] = useState(1)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const { page, size, setPage, handlePageChange, handlePageSizeChange, resetPage } = usePagination(5)
 
   const debouncedSearch = useDebounce(searchQuery, 500)
   const trimmedSearch = debouncedSearch.trim()
@@ -51,10 +53,10 @@ export default function Member() {
 
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey)
-    setCurrentPage(1)
+    resetPage()
   }
 
-  const effectivePage = filterKey !== prevFilterKey ? 1 : currentPage
+  const effectivePage = filterKey !== prevFilterKey ? 1 : page
 
   const [deleteMember] = useDeleteMemberMutation()
   const { data: countRes, refetch: refetchCount } = useGetMemberCountQuery()
@@ -64,7 +66,8 @@ export default function Member() {
   const { data, isLoading, isFetching, isError, refetch } = useGetAllMemberQuery({
     search: trimmedSearch || undefined,
     membership: membershipParam,
-    page: effectivePage
+    page: effectivePage,
+    size
   })
 
   const members = data?.data ?? []
@@ -87,19 +90,7 @@ export default function Member() {
   const handleResetFilters = () => {
     setSearchQuery("")
     setStatusFilter("all")
-    setCurrentPage(1)
-  }
-
-  const handlePageChange = (url: string) => {
-    try {
-      const urlObj = new URL(url, window.location.origin)
-      const pageParam = Number(urlObj.searchParams.get("page"))
-      if (Number.isInteger(pageParam) && pageParam >= 1 && pageParam !== effectivePage) {
-        setCurrentPage(pageParam)
-      }
-    } catch (e) {
-      console.error("Failed to read pagination URL", e)
-    }
+    resetPage()
   }
 
   const handleDelete = async (id: string, name: string) => {
@@ -119,7 +110,7 @@ export default function Member() {
       refetchCount()
 
       if (members.length === 1 && effectivePage > 1) {
-        setCurrentPage(effectivePage - 1)
+        setPage(effectivePage - 1)
       }
     } catch (error: unknown) {
       const apiErr = error as { data?: { message?: string }; message?: string }
@@ -272,6 +263,7 @@ export default function Member() {
             <Table
               meta={data?.paginate}
               onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
               entityName="members"
             >
               <TableHead>

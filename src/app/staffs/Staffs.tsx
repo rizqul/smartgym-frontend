@@ -11,14 +11,16 @@ import Avatar from "~/components/ui/Avatar"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Alert } from "~/utils/alert"
 import { useDebounce } from "~/hooks/useDebounce"
+import { usePagination } from "~/hooks/usePagination"
 import { useGetAllStaffQuery, useGetStaffCountQuery, useDeleteStaffMutation } from "~/services/staff"
 
 export default function Staff() {
   const navigate = useNavigate()
 
   const [searchQuery, setSearchQuery] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const { page, size, setPage, handlePageChange, handlePageSizeChange, resetPage } = usePagination(5)
 
   const debouncedSearch = useDebounce(searchQuery, 500)
   const trimmedSearch = debouncedSearch.trim()
@@ -27,16 +29,17 @@ export default function Staff() {
   const [prevSearch, setPrevSearch] = useState(trimmedSearch)
   if (trimmedSearch !== prevSearch) {
     setPrevSearch(trimmedSearch)
-    setCurrentPage(1)
+    resetPage()
   }
 
-  const effectivePage = trimmedSearch !== prevSearch ? 1 : currentPage
+  const effectivePage = trimmedSearch !== prevSearch ? 1 : page
 
   const [deleteStaff] = useDeleteStaffMutation()
   const { data: countRes, refetch: refetchCount } = useGetStaffCountQuery()
   const { data, isLoading, isFetching, isError, refetch } = useGetAllStaffQuery({
     search: trimmedSearch || undefined,
-    page: effectivePage
+    page: effectivePage,
+    size
   })
 
   const staffs = data?.data ?? []
@@ -55,16 +58,9 @@ export default function Staff() {
     )
   }
 
-  const handlePageChange = (url: string) => {
-    try {
-      const urlObj = new URL(url, window.location.origin)
-      const pageParam = Number(urlObj.searchParams.get("page"))
-      if (Number.isInteger(pageParam) && pageParam >= 1 && pageParam !== effectivePage) {
-        setCurrentPage(pageParam)
-      }
-    } catch (e) {
-      console.error("Failed to parse pagination URL", e)
-    }
+  const handleResetSearch = () => {
+    setSearchQuery("")
+    resetPage()
   }
 
   const handleDelete = async (id: string, name: string) => {
@@ -84,7 +80,7 @@ export default function Staff() {
       refetchCount()
 
       if (staffs.length === 1 && effectivePage > 1) {
-        setCurrentPage(effectivePage - 1)
+        setPage(effectivePage - 1)
       }
     } catch (error: unknown) {
       const apiErr = error as { data?: { message?: string }; message?: string }
@@ -171,10 +167,7 @@ export default function Staff() {
               {hasSearch && (
                 <Button
                   variant="secondary"
-                  onClick={() => {
-                    setSearchQuery("")
-                    setCurrentPage(1)
-                  }}
+                  onClick={handleResetSearch}
                 >
                   Reset Search
                 </Button>
@@ -186,6 +179,7 @@ export default function Staff() {
             <Table
               meta={data?.paginate}
               onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
               entityName="staff"
             >
               <TableHead>
@@ -215,10 +209,7 @@ export default function Staff() {
                         {hasSearch && (
                           <Button
                             variant="secondary"
-                            onClick={() => {
-                              setSearchQuery("")
-                              setCurrentPage(1)
-                            }}
+                            onClick={handleResetSearch}
                           >
                             Reset Search
                           </Button>

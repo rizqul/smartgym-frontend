@@ -10,14 +10,16 @@ import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Table, TableHead, TableBody, TableTR, TableTH, TableTD } from "~/components/ui/table"
 import TransactionTableRow from "~/components/transactions/TransactionTableRow"
 import { useDebounce } from "~/hooks/useDebounce"
+import { usePagination } from "~/hooks/usePagination"
 import { useGetAllTransactionsQuery, useGetTransactionCountQuery } from "~/services/transaction"
 import { formatRupiah } from "~/utils/format"
 
 export default function Transaction() {
-  const [page, setPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
+
+  const { page, size, handlePageChange, handlePageSizeChange, resetPage } = usePagination(5)
 
   const currentYear = new Date().getFullYear()
   const debouncedSearch = useDebounce(searchQuery, 500)
@@ -29,7 +31,7 @@ export default function Transaction() {
 
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey)
-    setPage(1)
+    resetPage()
   }
 
   const effectivePage = filterKey !== prevFilterKey ? 1 : page
@@ -45,7 +47,8 @@ export default function Transaction() {
     search: trimmedSearch || undefined,
     type: typeFilter || undefined,
     status: statusFilter || undefined,
-    page: effectivePage
+    page: effectivePage,
+    size
   })
 
   const txStats = countRes?.data
@@ -54,23 +57,11 @@ export default function Transaction() {
   const hasActiveFilter = Boolean(searchQuery.trim() || typeFilter || statusFilter)
   const isTableUpdating = isFetching || isDebouncing
 
-  const handlePageChange = (url: string) => {
-    try {
-      const parsedUrl = new URL(url, window.location.origin)
-      const nextPage = Number(parsedUrl.searchParams.get("page"))
-      if (Number.isInteger(nextPage) && nextPage >= 1 && nextPage !== effectivePage) {
-        setPage(nextPage)
-      }
-    } catch (e) {
-      console.error("Failed to read pagination URL", e)
-    }
-  }
-
   const handleResetFilters = () => {
     setSearchQuery("")
     setTypeFilter("")
     setStatusFilter("")
-    setPage(1)
+    resetPage()
   }
 
   if (isLoading && !transactionsRes) {
@@ -291,6 +282,7 @@ export default function Transaction() {
               <Table
                 meta={pagination}
                 onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
                 entityName="transactions"
               >
                 <TableHead>

@@ -1,3 +1,8 @@
+export type PaginationQuery = {
+  page?: number
+  size?: number
+}
+
 export type PaginationMeta = {
   paginate: {
     size: number

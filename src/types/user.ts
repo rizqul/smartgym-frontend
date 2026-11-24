@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiResponsePaginate } from "./common"
+import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "./common"
 
 export type UserRole = "ADMIN" | "STAFF" | "MEMBER"
 
@@ -14,16 +14,12 @@ export type User = {
   updatedAt: string
 }
 
-export type MemberSearchQuery = {
+export type MemberSearchQuery = PaginationQuery & {
   search?: string
   membership?: boolean
-  size?: number
-  page?: number
 }
 
-export type StaffSearchQuery = {
-  page?: number
-  size?: number
+export type StaffSearchQuery = PaginationQuery & {
   search?: string
 }
 

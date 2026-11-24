@@ -1,17 +1,33 @@
-import { useMemo, type ReactNode } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useId, useMemo, type ReactNode } from "react"
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import type { PaginationMeta } from "~/types/common"
 import { TableContext } from "./context"
+
+const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 25, 50, 100]
 
 export interface TableProps {
   children: ReactNode
   meta?: PaginationMeta["paginate"]
   onPageChange?: (url: string) => void
+  onPageSizeChange?: (size: number) => void
+  pageSizeOptions?: number[]
+  pageSizeParamName?: string
   showRowNumber?: boolean
   entityName?: string
 }
 
-export default function Table({ children, meta, onPageChange, showRowNumber = true, entityName = "items" }: TableProps) {
+export default function Table({
+  children,
+  meta,
+  onPageChange,
+  onPageSizeChange,
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
+  pageSizeParamName = "size",
+  showRowNumber = true,
+  entityName = "items"
+}: TableProps) {
+  const pageSizeId = useId()
+
   const currentPage = Number(meta?.currentPage ?? 1)
   const totalPages = Number(meta?.totalPages ?? 0)
   const size = Number(meta?.size ?? 10)
@@ -23,25 +39,33 @@ export default function Table({ children, meta, onPageChange, showRowNumber = tr
   const buildPageUrl = useMemo(() => {
     const sampleUrl = meta?.links?.find((l) => l.url)?.url || meta?.nextUrl || meta?.prevUrl || ""
 
-    return (page: number): string => {
-      if (!sampleUrl) return `?page=${page}`
+    return (page: number, newSize?: number): string => {
+      if (!sampleUrl) {
+        const params = new URLSearchParams({ page: String(page) })
+        if (newSize !== undefined) params.set(pageSizeParamName, String(newSize))
+        return `?${params.toString()}`
+      }
 
       if (/^https?:\/\//i.test(sampleUrl)) {
         try {
           const url = new URL(sampleUrl)
           url.searchParams.set("page", String(page))
+          if (newSize !== undefined) url.searchParams.set(pageSizeParamName, String(newSize))
           return url.toString()
         } catch {
-          return `?page=${page}`
+          const params = new URLSearchParams({ page: String(page) })
+          if (newSize !== undefined) params.set(pageSizeParamName, String(newSize))
+          return `?${params.toString()}`
         }
       }
 
       const [path, query = ""] = sampleUrl.split("?")
       const params = new URLSearchParams(query)
       params.set("page", String(page))
+      if (newSize !== undefined) params.set(pageSizeParamName, String(newSize))
       return `${path}?${params.toString()}`
     }
-  }, [meta?.links, meta?.nextUrl, meta?.prevUrl])
+  }, [meta?.links, meta?.nextUrl, meta?.prevUrl, pageSizeParamName])
 
   const visibleLinks = useMemo(() => {
     if (!meta || totalPages <= 0) return []
@@ -71,10 +95,20 @@ export default function Table({ children, meta, onPageChange, showRowNumber = tr
 
   const canGoPrev = currentPage > 1
   const canGoNext = currentPage < totalPages
+  const canChangePageSize = Boolean(onPageSizeChange || onPageChange)
 
   const handleGoToPage = (page: number) => {
     if (page < 1 || page > totalPages || page === currentPage) return
     onPageChange?.(buildPageUrl(page))
+  }
+
+  const handlePageSizeChange = (newSize: number) => {
+    if (newSize === size) return
+    if (onPageSizeChange) {
+      onPageSizeChange(newSize)
+    } else {
+      onPageChange?.(buildPageUrl(1, newSize))
+    }
   }
 
   return (
@@ -86,11 +120,47 @@ export default function Table({ children, meta, onPageChange, showRowNumber = tr
 
         {meta && totalData > 0 && (
           <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-white/5 pt-4 sm:flex-row">
-            <p className="text-text-secondary text-[13px]">
-              Showing <span className="font-medium text-white">{startData}</span> –{" "}
-              <span className="font-medium text-white">{endData}</span> of <span className="font-medium text-white">{totalData}</span>{" "}
-              {entityName}
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+              <p className="text-text-secondary text-[13px]">
+                Showing <span className="font-medium text-white">{startData}</span> –{" "}
+                <span className="font-medium text-white">{endData}</span> of <span className="font-medium text-white">{totalData}</span>{" "}
+                {entityName}
+              </p>
+
+              {canChangePageSize && (
+                <div className="flex items-center gap-2">
+                  <span className="hidden h-3.5 w-px bg-white/10 sm:inline-block" />
+                  <label
+                    htmlFor={pageSizeId}
+                    className="text-text-secondary text-[13px]"
+                  >
+                    Show
+                  </label>
+                  <div className="relative">
+                    <select
+                      id={pageSizeId}
+                      value={size}
+                      onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                      className="focus:border-primary h-8 cursor-pointer appearance-none rounded-lg border border-white/10 bg-[#111318] pr-7 pl-2.5 text-[13px] font-medium text-white tabular-nums transition-colors hover:bg-white/10 focus:outline-none"
+                    >
+                      {pageSizeOptions.map((option) => (
+                        <option
+                          key={option}
+                          value={option}
+                          className="bg-[#16181D] text-white"
+                        >
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      size={14}
+                      className="text-text-secondary pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
 
             <nav
               aria-label="Pagination"

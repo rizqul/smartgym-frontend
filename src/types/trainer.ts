@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiResponsePaginate } from "~/types/common"
+import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "~/types/common"
 
 export type TrainerSpecialization =
   | "GENERAL_FITNESS"
@@ -25,10 +25,8 @@ export type TrainerItem = {
   updatedAt?: string
 }
 
-export type TrainerSearchQuery = {
+export type TrainerSearchQuery  = PaginationQuery & {
   search?: string
-  size?: number
-  page?: number
 }
 
 export interface TrainerSlotItem {

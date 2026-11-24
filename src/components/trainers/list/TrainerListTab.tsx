@@ -19,6 +19,7 @@ interface TrainerListTabProps {
   searchQuery: string
   onSearchChange: (value: string) => void
   onPageChange: (url: string) => void
+  onPageSizeChange: (size: number) => void
   isFetching: boolean
   isError: boolean
   onRefetch: () => void
@@ -34,6 +35,7 @@ export default function TrainerListTab({
   searchQuery,
   onSearchChange,
   onPageChange,
+  onPageSizeChange,
   isFetching,
   isError,
   onRefetch,
@@ -114,6 +116,7 @@ export default function TrainerListTab({
               <Table
                 meta={pagination}
                 onPageChange={onPageChange}
+                onPageSizeChange={onPageSizeChange}
                 entityName="trainers"
               >
                 <TableHead>

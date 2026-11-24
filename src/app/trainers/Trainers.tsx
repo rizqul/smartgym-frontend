@@ -22,6 +22,7 @@ import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import TrainerListTab from "~/components/trainers/list/TrainerListTab"
 import TrainerScheduleTab from "~/components/trainers/list/TrainerScheduleTab"
 import { useDebounce } from "~/hooks/useDebounce"
+import { usePagination } from "~/hooks/usePagination"
 import { useGetAllTrainerQuery, useGetTrainerCountQuery } from "~/services/trainer"
 import { useAppSelector } from "~/store/hooks"
 import { formatRupiah } from "~/utils/format"
@@ -36,8 +37,9 @@ export default function Trainers() {
 
   const [activeTab, setActiveTab] = useState<TabType>("trainers")
   const [searchQuery, setSearchQuery] = useState("")
-  const [page, setPage] = useState(1)
   const [trainerToDelete, setTrainerToDelete] = useState<TrainerItem | null>(null)
+
+  const { page, size, handlePageChange, handlePageSizeChange, resetPage } = usePagination(5)
 
   const debouncedSearch = useDebounce(searchQuery, 500)
   const trimmedSearch = debouncedSearch.trim()
@@ -46,7 +48,7 @@ export default function Trainers() {
   const [prevSearch, setPrevSearch] = useState(trimmedSearch)
   if (trimmedSearch !== prevSearch) {
     setPrevSearch(trimmedSearch)
-    setPage(1)
+    resetPage()
   }
 
   const effectivePage = trimmedSearch !== prevSearch ? 1 : page
@@ -61,7 +63,8 @@ export default function Trainers() {
     refetch
   } = useGetAllTrainerQuery({
     search: trimmedSearch || undefined,
-    page: effectivePage
+    page: effectivePage,
+    size
   })
 
   const { data: scheduleTrainersRes } = useGetAllTrainerQuery({ page: 1, size: 50 }, { skip: activeTab !== "schedule" })
@@ -70,18 +73,6 @@ export default function Trainers() {
   const scheduleTrainers = scheduleTrainersRes?.data ?? trainers
   const trainerStats = countRes?.data
   const isTableUpdating = isFetching || isDebouncing
-
-  const handlePageChange = (url: string) => {
-    try {
-      const parsedUrl = new URL(url, window.location.origin)
-      const nextPage = Number(parsedUrl.searchParams.get("page"))
-      if (Number.isInteger(nextPage) && nextPage >= 1 && nextPage !== effectivePage) {
-        setPage(nextPage)
-      }
-    } catch (e) {
-      console.error("Failed to read pagination URL", e)
-    }
-  }
 
   if (isLoading && !trainersRes) {
     return (
@@ -192,6 +183,7 @@ export default function Trainers() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
           isFetching={isTableUpdating}
           isError={isError}
           onRefetch={refetch}
@@ -248,7 +240,7 @@ export default function Trainers() {
               <Button
                 type="button"
                 variant="primary"
-                onClick={() => setTrainerToDelete(null)} 
+                onClick={() => setTrainerToDelete(null)}
                 className="bg-red-600 hover:bg-red-700"
               >
                 Yes, Delete

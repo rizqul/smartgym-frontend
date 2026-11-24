@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiResponsePaginate } from "~/types/common"
+import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "~/types/common"
 
 export interface UserTransactionResponse {
   id?: string
@@ -21,12 +21,10 @@ export interface TransactionItem {
   updatedAt: string
 }
 
-export interface TransactionSearchQuery {
+export type TransactionSearchQuery = PaginationQuery &  {
   search?: string
   type?: string
   status?: string
-  page?: number
-  size?: number
 }
 
 export interface TransactionCount {
