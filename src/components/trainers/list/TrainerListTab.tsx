@@ -85,10 +85,6 @@ export default function TrainerListTab({
                 </span>
               )}
             </div>
-
-            <span className="text-text-muted text-[12px]">
-              Total Trainers: <strong className="text-white tabular-nums">{pagination?.totalData ?? trainers.length}</strong>
-            </span>
           </div>
         </CardHeader>
 
