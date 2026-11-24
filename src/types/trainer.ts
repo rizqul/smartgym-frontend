@@ -26,7 +26,7 @@ export type TrainerItem = {
 }
 
 export type TrainerSearchQuery = {
-  name?: string
+  search?: string
   size?: number
   page?: number
 }
@@ -68,3 +68,6 @@ export type TrainerSlotsApi = ApiResponse & {
   data: TrainerSlotItem[]
 }
 export type TrainerCountApi = ApiResponse & { data: TrainerCount }
+export type CreateTrainerSlotApi = ApiResponse & {
+  data: TrainerSlotItem
+}

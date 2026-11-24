@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { X, CalendarCheck, CheckCircle2, Info, ChevronDown, UserCheck, Clock } from "lucide-react"
@@ -51,6 +51,11 @@ export default function CreateTrainerSlotModal({
   isSubmitting = false,
   onSubmit
 }: CreateTrainerSlotModalProps) {
+  const trainersRef = useRef(trainers)
+  trainersRef.current = trainers
+
+  const prevOpenRef = useRef(false)
+
   const todayWIB = getTodayWIB()
   const initialDate = defaultDate && defaultDate >= todayWIB ? defaultDate : todayWIB
   const initialHours = getDefaultHours(initialDate)
@@ -73,21 +78,39 @@ export default function CreateTrainerSlotModal({
   })
 
   useEffect(() => {
-    if (isOpen) {
+    const justOpened = isOpen && !prevOpenRef.current
+    prevOpenRef.current = isOpen
+
+    if (justOpened) {
       const today = getTodayWIB()
       const validDate = defaultDate && defaultDate >= today ? defaultDate : today
       const { startHour, endHour } = getDefaultHours(validDate)
+      const list = trainersRef.current
 
       reset({
-        trainerId: defaultTrainerId || trainers[0]?.id || "",
+        trainerId: defaultTrainerId || list[0]?.id || "",
         slotDate: validDate,
         startHour,
         endHour,
         description: ""
       })
     }
-  }, [isOpen, defaultTrainerId, defaultDate, trainers, reset])
+  }, [isOpen, defaultTrainerId, defaultDate, reset])
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !isSubmitting) {
+        onClose()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isOpen, isSubmitting, onClose])
+
+  const slotDate = watch("slotDate")
   const startHour = watch("startHour")
   const endHour = watch("endHour")
 
@@ -95,10 +118,15 @@ export default function CreateTrainerSlotModal({
     if (!startHour || !endHour) return 0
     const [sh, sm] = startHour.split(":").map(Number)
     const [eh, em] = endHour.split(":").map(Number)
+    if ([sh, sm, eh, em].some(Number.isNaN)) return 0
     return eh * 60 + em - (sh * 60 + sm)
   }, [startHour, endHour])
 
   if (!isOpen) return null
+
+  const isTodaySlot = slotDate === todayWIB
+  const minStartTime = isTodaySlot ? `${String(Math.min(Math.max(getCurrentHourWIB(), 0), 23)).padStart(2, "0")}:00` : undefined
+  const isFormBlocked = isSubmitting || trainers.length === 0 || durationMinutes <= 0
 
   const handleValidSubmit = (data: CreateTrainerSlotData) => {
     onSubmit({
@@ -106,7 +134,7 @@ export default function CreateTrainerSlotModal({
       slotDate: data.slotDate,
       startTime: data.startHour,
       endTime: data.endHour,
-      description: data.description ?? ""
+      description: data.description?.trim() ?? ""
     })
   }
 
@@ -116,13 +144,21 @@ export default function CreateTrainerSlotModal({
       onClick={() => !isSubmitting && onClose()}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-slot-modal-title"
         className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#16181D] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/5 px-6 py-5">
           <div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <h3 className="text-lg font-bold text-white">Add Trainer Schedule Slot</h3>
+              <h3
+                id="create-slot-modal-title"
+                className="text-lg font-bold text-white"
+              >
+                Add Trainer Schedule Slot
+              </h3>
               <span className="bg-primary/15 text-primary rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
                 Trainer Slot
               </span>
@@ -159,7 +195,7 @@ export default function CreateTrainerSlotModal({
                 value=""
                 className="bg-[#16181D]"
               >
-                -- Select Trainer --
+                {trainers.length ? "-- Select Trainer --" : "No trainers available"}
               </option>
               {trainers.map((t) => (
                 <option
@@ -167,7 +203,7 @@ export default function CreateTrainerSlotModal({
                   value={t.id}
                   className="bg-[#16181D]"
                 >
-                  {t.name} — {t.specialization.replace(/_/g, " ")}
+                  {t.name} — {t.specialization?.replace(/_/g, " ") || "-"}
                 </option>
               ))}
             </Select>
@@ -185,6 +221,7 @@ export default function CreateTrainerSlotModal({
                 <Input
                   label="Start Time"
                   type="time"
+                  min={minStartTime}
                   error={errors.startHour?.message}
                   {...register("startHour")}
                   className="scheme-dark"
@@ -213,15 +250,21 @@ export default function CreateTrainerSlotModal({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-text-muted block text-[11px] font-bold tracking-wider uppercase">Session Notes / Description</label>
+                <label
+                  htmlFor="slot-description"
+                  className="text-text-muted block text-[11px] font-bold tracking-wider uppercase"
+                >
+                  Session Notes / Description
+                </label>
                 <span className="text-text-muted text-[11px]">Optional</span>
               </div>
               <textarea
+                id="slot-description"
                 rows={3}
                 {...register("description")}
                 placeholder="Example: Squat form correction and hip mobility session. Ask the member to prepare a lifting belt..."
                 className={`placeholder:text-text-muted focus:border-primary focus:ring-primary block w-full resize-none rounded-xl border bg-[#0B0C10] p-3.5 text-[14px] text-white transition-all focus:ring-1 focus:outline-none ${
-                  errors.description ? "border-danger focus:border-danger focus:ring-danger" : "border-white/4"
+                  errors.description ? "border-danger focus:border-danger focus:ring-danger" : "border-white/10"
                 }`}
               />
               {errors.description && <p className="text-danger mt-1 text-xs font-medium">{errors.description.message}</p>}
@@ -262,6 +305,7 @@ export default function CreateTrainerSlotModal({
               <Button
                 type="submit"
                 variant="primary"
+                disabled={isFormBlocked}
                 isLoading={isSubmitting}
                 leftIcon={!isSubmitting && <CheckCircle2 className="h-4 w-4" />}
               >

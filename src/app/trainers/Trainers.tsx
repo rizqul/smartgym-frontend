@@ -1,12 +1,27 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router"
-import { UserPlus, Dumbbell, Wallet, Calendar, CalendarCheck, CalendarClock, Users, Trash2, X, Whistle, LayoutGrid, ListChecks, Banknote } from "lucide-react"
+import {
+  UserPlus,
+  Dumbbell,
+  Wallet,
+  Calendar,
+  CalendarCheck,
+  CalendarClock,
+  Users,
+  Trash2,
+  X,
+  Whistle,
+  LayoutGrid,
+  ListChecks,
+  Banknote
+} from "lucide-react"
 
 import { Button } from "~/components/ui/Button"
 import { CardStats } from "~/components/ui/CardStats"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import TrainerListTab from "~/components/trainers/list/TrainerListTab"
 import TrainerScheduleTab from "~/components/trainers/list/TrainerScheduleTab"
+import { useDebounce } from "~/hooks/useDebounce"
 import { useGetAllTrainerQuery, useGetTrainerCountQuery } from "~/services/trainer"
 import { useAppSelector } from "~/store/hooks"
 import { formatRupiah } from "~/utils/format"
@@ -21,19 +36,23 @@ export default function Trainers() {
 
   const [activeTab, setActiveTab] = useState<TabType>("trainers")
   const [searchQuery, setSearchQuery] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [page, setPage] = useState(1)
   const [trainerToDelete, setTrainerToDelete] = useState<TrainerItem | null>(null)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery.trim())
-      setPage(1)
-    }, 400)
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+  const debouncedSearch = useDebounce(searchQuery, 500)
+  const trimmedSearch = debouncedSearch.trim()
+  const isDebouncing = searchQuery.trim() !== trimmedSearch
 
-  const { data: countRes, isLoading: isLoadingCount } = useGetTrainerCountQuery()
+  const [prevSearch, setPrevSearch] = useState(trimmedSearch)
+  if (trimmedSearch !== prevSearch) {
+    setPrevSearch(trimmedSearch)
+    setPage(1)
+  }
+
+  const effectivePage = trimmedSearch !== prevSearch ? 1 : page
+
+  const { data: countRes } = useGetTrainerCountQuery()
+
   const {
     data: trainersRes,
     isLoading,
@@ -41,22 +60,30 @@ export default function Trainers() {
     isError,
     refetch
   } = useGetAllTrainerQuery({
-    name: debouncedSearch,
-    page
+    search: trimmedSearch || undefined,
+    page: effectivePage
   })
 
+  const { data: scheduleTrainersRes } = useGetAllTrainerQuery({ page: 1, size: 50 }, { skip: activeTab !== "schedule" })
+
   const trainers = trainersRes?.data ?? []
+  const scheduleTrainers = scheduleTrainersRes?.data ?? trainers
   const trainerStats = countRes?.data
+  const isTableUpdating = isFetching || isDebouncing
 
   const handlePageChange = (url: string) => {
-    const parsedUrl = new URL(url, window.location.origin)
-    const nextPage = Number(parsedUrl.searchParams.get("page"))
-    if (nextPage && nextPage !== page) {
-      setPage(nextPage)
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+      const nextPage = Number(parsedUrl.searchParams.get("page"))
+      if (Number.isInteger(nextPage) && nextPage >= 1 && nextPage !== effectivePage) {
+        setPage(nextPage)
+      }
+    } catch (e) {
+      console.error("Failed to read pagination URL", e)
     }
   }
 
-  if (isLoading || isLoadingCount) {
+  if (isLoading && !trainersRes) {
     return (
       <div className="w-full p-4 lg:p-6">
         <PageSkeleton
@@ -165,15 +192,16 @@ export default function Trainers() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onPageChange={handlePageChange}
-          isFetching={isFetching}
+          isFetching={isTableUpdating}
           isError={isError}
           onRefetch={refetch}
+          onEdit={(trainer) => navigate(`/dashboard/trainers/${trainer.id}/edit`, { state: { trainer } })}
           onDelete={(trainer) => setTrainerToDelete(trainer)}
           isAdmin={isAdmin}
         />
       ) : (
         <TrainerScheduleTab
-          trainers={trainers}
+          trainers={scheduleTrainers}
           isAdmin={isAdmin}
         />
       )}
@@ -181,7 +209,7 @@ export default function Trainers() {
       {trainerToDelete && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm lg:left-64"
-          // onClick={() => !isDeleting && setTrainerToDelete(null)}
+          onClick={() => setTrainerToDelete(null)}
         >
           <div
             className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#16181D] shadow-2xl"
@@ -197,7 +225,6 @@ export default function Trainers() {
               <button
                 type="button"
                 onClick={() => setTrainerToDelete(null)}
-                // disabled={isDeleting}
                 aria-label="Close modal"
                 className="text-text-muted cursor-pointer rounded-lg p-1 transition-colors hover:bg-white/5 hover:text-white"
               >
@@ -206,8 +233,8 @@ export default function Trainers() {
             </div>
 
             <div className="px-5 py-4 text-sm leading-relaxed text-white/80">
-              Are you sure you want to delete trainer <strong className="text-white">{trainerToDelete.name}</strong>? This action
-              cannot be undone.
+              Are you sure you want to delete trainer <strong className="text-white">{trainerToDelete.name}</strong>? This action cannot be
+              undone.
             </div>
 
             <div className="flex items-center justify-end gap-2.5 border-t border-white/5 bg-[#121419] px-5 py-3.5">
@@ -215,18 +242,16 @@ export default function Trainers() {
                 type="button"
                 variant="secondary"
                 onClick={() => setTrainerToDelete(null)}
-                // disabled={isDeleting}
               >
                 Cancel
               </Button>
               <Button
                 type="button"
                 variant="primary"
-                // isLoading={isDeleting}
-                // onClick={handleConfirmDelete}
+                onClick={() => setTrainerToDelete(null)} 
                 className="bg-red-600 hover:bg-red-700"
               >
-                {/* {isDeleting ? "Deleting..." : "Yes, Delete"} */}
+                Yes, Delete
               </Button>
             </div>
           </div>

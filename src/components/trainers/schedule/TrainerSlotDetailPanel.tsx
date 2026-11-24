@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ChevronDown, Clock, FileText, Loader2, Plus, X } from "lucide-react"
+import { ChevronDown, Clock, FileText, Loader2, Plus, RotateCcw, X } from "lucide-react"
 
 import { Button } from "~/components/ui/Button"
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/Card"
@@ -7,7 +7,7 @@ import LocalDate from "~/components/ui/LocalDate"
 import { useGetTrainerSlotsQuery } from "~/services/trainer"
 import { getAvatarUrl } from "~/utils/avatar"
 import type { TrainerItem, TrainerSlotItem } from "~/types/trainer"
-import { getSlotStatusBadgeStyle } from "../../../utils/scheduleHelpers"
+import { formatDateValue, getSlotStatusBadgeStyle } from "../../../utils/scheduleHelpers"
 
 interface TrainerSlotDetailPanelProps {
   trainer: TrainerItem
@@ -28,24 +28,50 @@ export default function TrainerSlotDetailPanel({
   onClose,
   onOpenCreateModal
 }: TrainerSlotDetailPanelProps) {
-  const { data: slotsRes, isLoading } = useGetTrainerSlotsQuery({
+  const { currentData, isFetching, isError, refetch } = useGetTrainerSlotsQuery({
     trainerId: trainer.id,
     date: selectedDate
   })
 
-  const slots = slotsRes?.data ?? []
+  const slots = currentData?.data ?? []
+  const isInitialDateLoad = isFetching && !currentData
+  const isToday = selectedDate === formatDateValue(new Date())
+
+  const selectionKey = `${trainer.id}|${selectedDate}|${selectedSlot?.id ?? ""}`
+  const [prevSelectionKey, setPrevSelectionKey] = useState(selectionKey)
   const [expandedSlotId, setExpandedSlotId] = useState<string | null>(selectedSlot?.id ?? null)
+
+  if (selectionKey !== prevSelectionKey) {
+    setPrevSelectionKey(selectionKey)
+    setExpandedSlotId(selectedSlot?.id ?? null)
+  }
 
   const toggleNote = (slotId: string) => {
     setExpandedSlotId((prev) => (prev === slotId ? null : slotId))
   }
 
   const renderSlotList = (maxHeightClass: string) => {
-    if (isLoading) {
+    if (isInitialDateLoad) {
       return (
         <div className="text-text-muted flex items-center justify-center gap-2 py-6 text-xs">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading slots...
+        </div>
+      )
+    }
+
+    if (isError) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-center">
+          <span className="text-xs text-red-400">Failed to load schedule slots.</span>
+          <Button
+            type="button"
+            variant="secondary"
+            leftIcon={<RotateCcw className="h-3.5 w-3.5" />}
+            onClick={refetch}
+          >
+            Try Again
+          </Button>
         </div>
       )
     }
@@ -59,7 +85,9 @@ export default function TrainerSlotDetailPanel({
     }
 
     return (
-      <div className={`flex flex-col gap-2 overflow-y-auto pr-1 ${maxHeightClass}`}>
+      <div
+        className={`flex flex-col gap-2 overflow-y-auto pr-1 transition-opacity ${isFetching ? "opacity-60" : "opacity-100"} ${maxHeightClass}`}
+      >
         {slots.map((slot) => {
           const hasDescription = Boolean(slot.description?.trim())
           const isExpanded = expandedSlotId === slot.id
@@ -153,21 +181,21 @@ export default function TrainerSlotDetailPanel({
             />
             <div className="min-w-0">
               <h4 className="truncate text-base font-bold text-white">{trainer.name}</h4>
-              <p className="text-primary truncate text-xs font-medium uppercase">{trainer.specialization.replace(/_/g, " ")}</p>
+              <p className="text-primary truncate text-xs font-medium uppercase">{trainer.specialization?.replace(/_/g, " ") || "-"}</p>
               <div className="text-text-muted mt-0.5 flex flex-wrap items-center gap-2 text-[11px]">
-                <span className="inline-flex items-center gap-1 text-amber-300">
-                  {trainer.experience} years of experience
-                </span>
+                <span className="inline-flex items-center gap-1 text-amber-300">{trainer.experience ?? 0} years of experience</span>
                 <span>•</span>
-                <span>{trainer.phoneNumber || trainer.email}</span>
+                <span>{trainer.phoneNumber || trainer.email || "-"}</span>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-2.5 border-t border-white/5 pt-4">
             <div className="flex items-center justify-between">
-              <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">ALL SLOTS TODAY</span>
-              <span className="text-xs font-semibold text-sky-400">{slots.length} Sessions</span>
+              <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">
+                {isToday ? "ALL SLOTS TODAY" : "SCHEDULED SLOTS"}
+              </span>
+              <span className="text-xs font-semibold text-sky-400">{isInitialDateLoad ? "..." : `${slots.length} Sessions`}</span>
             </div>
 
             {renderSlotList("max-h-80")}
@@ -205,11 +233,11 @@ export default function TrainerSlotDetailPanel({
               <div className="flex flex-wrap items-center gap-2">
                 <h4 className="truncate text-sm font-bold text-white">{trainer.name}</h4>
                 <span className="rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
-                  {trainer.experience} years of experience
+                  {trainer.experience ?? 0} years of experience
                 </span>
               </div>
               <p className="text-text-muted mt-0.5 text-xs">
-                Total <strong className="text-white">{slots.length} slots</strong> on{" "}
+                Total <strong className="text-white">{isInitialDateLoad ? "..." : `${slots.length} slots`}</strong> on{" "}
                 <LocalDate
                   date={selectedDate}
                   variant="short"

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Calendar, ChevronLeft, ChevronRight, Plus, Search, Users, X } from "lucide-react"
 import toast from "react-hot-toast"
 
@@ -29,13 +29,11 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
   const [modalTrainerId, setModalTrainerId] = useState<string | undefined>(undefined)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
+  const [prevInitialTrainerId, setPrevInitialTrainerId] = useState(initialTrainerId)
+  if (initialTrainerId !== prevInitialTrainerId) {
+    setPrevInitialTrainerId(initialTrainerId)
     if (initialTrainerId) setSelectedTrainerId(initialTrainerId)
-  }, [initialTrainerId])
-
-  useEffect(() => {
-    setSelectedSlot(null)
-  }, [selectedDate])
+  }
 
   const [createTrainerSlot, { isLoading: isCreatingSlot }] = useCreateTrainerSlotMutation()
 
@@ -46,21 +44,26 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
     const keyword = searchTrainer.trim().toLowerCase()
     if (!keyword) return trainers
     return trainers.filter(
-      (t) => t.name.toLowerCase().includes(keyword) || t.specialization.toLowerCase().replace(/_/g, " ").includes(keyword)
+      (t) => t.name.toLowerCase().includes(keyword) || (t.specialization?.toLowerCase().replace(/_/g, " ") ?? "").includes(keyword)
     )
   }, [trainers, searchTrainer])
 
   const activeTrainer = useMemo(() => trainers.find((t) => t.id === selectedTrainerId), [trainers, selectedTrainerId])
-
   const hasSelectedDetail = Boolean(activeTrainer)
+
+  const handleDateChange = (nextDate: string) => {
+    if (!nextDate || nextDate === selectedDate) return
+    setSelectedDate(nextDate)
+    setSelectedSlot(null)
+  }
 
   const handleShiftDate = (days: number) => {
     const current = new Date(`${selectedDate}T00:00:00`)
     current.setDate(current.getDate() + days)
-    setSelectedDate(formatDateValue(current))
+    handleDateChange(formatDateValue(current))
   }
 
-  const handleToday = () => setSelectedDate(todayStr)
+  const handleToday = () => handleDateChange(todayStr)
 
   const handleCloseDetail = () => {
     setSelectedTrainerId("")
@@ -76,11 +79,12 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
     try {
       await createTrainerSlot(payload).unwrap()
       setSelectedTrainerId(payload.trainerId)
-      setSelectedDate(payload.slotDate)
+      handleDateChange(payload.slotDate)
       setIsModalOpen(false)
       toast.success("Trainer schedule added successfully!")
-    } catch (err: unknown) {
-      toast.error("Failed to add trainer schedule.")
+    } catch (error: unknown) {
+      const apiErr = error as { data?: { message?: string }; message?: string }
+      toast.error(apiErr?.data?.message || apiErr?.message || "Failed to add trainer schedule.")
     }
   }
 
@@ -129,7 +133,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+              onChange={(e) => handleDateChange(e.target.value)}
               aria-label="Select date"
               className="focus:border-primary rounded-xl border border-white/10 bg-[#0B0C10] px-3 py-1.5 text-xs text-white scheme-dark focus:outline-none"
             />
@@ -141,6 +145,7 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
               variant="primary"
               leftIcon={<Plus className="h-4 w-4" />}
               onClick={() => handleOpenCreateModal(activeTrainer?.id)}
+              disabled={!trainers.length}
               className="w-full shrink-0 sm:w-auto"
             >
               Add Schedule Slot
@@ -266,7 +271,6 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
 
       {isAdmin && (
         <CreateTrainerSlotModal
-          key={`${modalTrainerId ?? activeTrainer?.id ?? "none"}-${selectedDate}-${isModalOpen}`}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           trainers={trainers}

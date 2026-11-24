@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 import type { ApiResponse } from "~/types/common"
 import type {
+  CreateTrainerSlotApi,
   CreateTrainerSlotRequest,
   GetTrainerSlotsParams,
   TrainerCountApi,
@@ -26,48 +27,65 @@ export const trainerServiceApi = createApi({
   baseQuery: axiosBaseQuery(),
   tagTypes: ["Trainers", "TrainerSlots", "TrainerCount"],
   endpoints: (build) => ({
-    getAllTrainer: build.query<TrainersApi, TrainerSearchQuery>({
-      query: ({ name = "", size = 10, page = 1 }) => ({
-        url: (isStaff) => (isStaff ? API_STAFF_TRAINERS_LIST : API_ADMIN_TRAINERS_LIST),
-        method: "GET",
-        params: {
-          name,
-          size,
-          page
+    getAllTrainer: build.query<TrainersApi, TrainerSearchQuery | void>({
+      query: (arg) => {
+        const { search, size = 10, page = 1 } = arg ?? {}
+        const trimmedSearch = search?.trim()
+
+        return {
+          url: (isStaff) => (isStaff ? API_STAFF_TRAINERS_LIST : API_ADMIN_TRAINERS_LIST),
+          method: "GET",
+          params: {
+            size,
+            page,
+            ...(trimmedSearch ? { search: trimmedSearch } : {})
+          }
         }
-      }),
-      providesTags: ["Trainers"]
+      },
+      providesTags: (result) =>
+        result?.data
+          ? [...result.data.map(({ id }) => ({ type: "Trainers" as const, id })), { type: "Trainers", id: "LIST" }]
+          : [{ type: "Trainers", id: "LIST" }]
     }),
-    createTrainer: build.mutation<ApiResponse, CreateTrainerData>({
-      query: (data) => ({
+
+    createTrainer: build.mutation<ApiResponse, CreateTrainerData | FormData>({
+      query: (body) => ({
         url: API_ADMIN_TRAINERS_CREATE,
-        data,
-        method: "POST"
-      }),
-      invalidatesTags: ["Trainers", "TrainerCount"]
-    }),
-    getTrainerSlots: build.query<TrainerSlotsApi, GetTrainerSlotsParams>({
-      query: ({ trainerId, date }) => ({
-        url: (isStaff) => (isStaff ? API_STAFF_TRAINERS_SLOT_LIST(trainerId) : API_ADMIN_TRAINERS_SLOT_LIST(trainerId)),
-        method: "GET",
-        params: date ? { date } : undefined
-      }),
-      providesTags: (_result, _error, { trainerId }) => [{ type: "TrainerSlots", id: trainerId }]
-    }),
-    createTrainerSlot: build.mutation<ApiResponse, CreateTrainerSlotRequest>({
-      query: ({ trainerId, ...data }) => ({
-        url: API_ADMIN_TRAINERS_SLOT_CREATE(trainerId),
         method: "POST",
-        data
+        data: body
       }),
-      invalidatesTags: (_result, _error, { trainerId }) => [{ type: "TrainerSlots", id: trainerId }, "TrainerCount"]
+      invalidatesTags: [{ type: "Trainers", id: "LIST" }, "TrainerCount"]
     }),
+
     getTrainerCount: build.query<TrainerCountApi, void>({
       query: () => ({
         url: (isStaff) => (isStaff ? API_STAFF_TRAINERS_COUNT : API_ADMIN_TRAINERS_COUNT),
         method: "GET"
       }),
       providesTags: ["TrainerCount"]
+    }),
+
+    getTrainerSlots: build.query<TrainerSlotsApi, GetTrainerSlotsParams>({
+      query: ({ trainerId, date }) => ({
+        url: (isStaff) => (isStaff ? API_STAFF_TRAINERS_SLOT_LIST(trainerId) : API_ADMIN_TRAINERS_SLOT_LIST(trainerId)),
+        method: "GET",
+        params: {
+          ...(date ? { date } : {})
+        }
+      }),
+      providesTags: (_result, _error, { trainerId, date }) => [
+        { type: "TrainerSlots", id: trainerId },
+        { type: "TrainerSlots", id: `${trainerId}-${date ?? "today"}` }
+      ]
+    }),
+
+    createTrainerSlot: build.mutation<CreateTrainerSlotApi, CreateTrainerSlotRequest>({
+      query: ({ trainerId, ...data }) => ({
+        url: API_ADMIN_TRAINERS_SLOT_CREATE(trainerId),
+        method: "POST",
+        data
+      }),
+      invalidatesTags: (_result, _error, { trainerId }) => [{ type: "TrainerSlots", id: trainerId }, "TrainerCount"]
     })
   })
 })
