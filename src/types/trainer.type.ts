@@ -79,6 +79,15 @@ export type TrainerBookingSearchQuery = PaginationQuery & {
   date?: string
 }
 
+export interface UpdateTrainerSlotRequest {
+  slotId: string
+  trainerId: string
+  slotDate: string
+  startTime: string
+  endTime: string
+  description?: string
+}
+
 export type TrainersApi = ApiResponsePaginate & {
   data: TrainerItem[]
 }

@@ -227,15 +227,10 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
                   trainer={trainer}
                   selectedDate={selectedDate}
                   isSelected={activeTrainer?.id === trainer.id}
-                  selectedSlotId={selectedSlot?.id}
                   isAdmin={isAdmin}
                   onSelectTrainer={(t, firstSlot) => {
                     setSelectedTrainerId(t.id)
                     setSelectedSlot(firstSlot ?? null)
-                  }}
-                  onSelectSlot={(t, slot) => {
-                    setSelectedTrainerId(t.id)
-                    setSelectedSlot(slot)
                   }}
                   onOpenCreateModal={(id) => handleOpenCreateModal(id)}
                 />

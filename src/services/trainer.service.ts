@@ -10,7 +10,8 @@ import type {
   TrainerCountApi,
   TrainersApi,
   TrainerSearchQuery,
-  TrainerSlotsApi
+  TrainerSlotsApi,
+  UpdateTrainerSlotRequest
 } from "~/types/trainer.type"
 import {
   API_ADMIN_TRAINERS_BOOKING_LIST,
@@ -19,6 +20,7 @@ import {
   API_ADMIN_TRAINERS_LIST,
   API_ADMIN_TRAINERS_SLOT_CREATE,
   API_ADMIN_TRAINERS_SLOT_LIST,
+  API_ADMIN_TRAINERS_SLOT_UPDATE,
   API_STAFF_TRAINERS_COUNT,
   API_STAFF_TRAINERS_LIST,
   API_STAFF_TRAINERS_SLOT_LIST
@@ -103,6 +105,15 @@ export const trainerServiceApi = createApi({
         }
       }),
       providesTags: ["Trainers", "TrainerSlots"]
+    }),
+
+    updateTrainerSlot: build.mutation<ApiResponse, UpdateTrainerSlotRequest>({
+      query: ({ slotId, trainerId: _trainerId, ...data }) => ({
+        url: API_ADMIN_TRAINERS_SLOT_UPDATE(slotId),
+        method: "PATCH",
+        data
+      }),
+      invalidatesTags: (_result, _error, { trainerId }) => [{ type: "TrainerSlots", id: trainerId }, "TrainerCount"]
     })
   })
 })
@@ -113,5 +124,6 @@ export const {
   useGetTrainerSlotsQuery,
   useCreateTrainerSlotMutation,
   useGetTrainerCountQuery,
-  useGetTrainerBookingsQuery
+  useGetTrainerBookingsQuery,
+  useUpdateTrainerSlotMutation
 } = trainerServiceApi
