@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "~/types/common"
+import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "~/types/common.type"
 
 export interface UserTransactionResponse {
   id?: string

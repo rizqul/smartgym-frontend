@@ -1,6 +1,6 @@
 import { useId, useMemo, type ReactNode } from "react"
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
-import type { PaginationMeta } from "~/types/common"
+import type { PaginationMeta } from "~/types/common.type"
 import { TableContext } from "./context"
 
 const DEFAULT_PAGE_SIZE_OPTIONS = [5, 10, 25, 50, 100]

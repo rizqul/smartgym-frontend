@@ -8,7 +8,7 @@ import { Card, CardHeader, CardContent } from "~/components/ui/Card"
 import { Input } from "~/components/ui/Input"
 import { Select } from "~/components/ui/Select"
 import { Button } from "~/components/ui/Button"
-import { useCreateTrainerMutation } from "~/services/trainer"
+import { useCreateTrainerMutation } from "~/services/trainer.service"
 import { CreateTrainerValidation, type CreateTrainerData } from "~/validation/trainer"
 
 const SPECIALIZATION_OPTIONS = [

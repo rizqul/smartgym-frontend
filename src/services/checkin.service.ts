@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
 
-import type { CheckinDetailApi, CheckinListApi, CheckinSummaryApi, CheckinTokenApi } from "~/types/checkin"
+import type { CheckinDetailApi, CheckinListApi, CheckinSummaryApi, CheckinTokenApi } from "~/types/checkin.type"
 import {
   API_ADMIN_CHECKIN_CHECKOUT,
   API_ADMIN_CHECKIN_LIST,

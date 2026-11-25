@@ -11,8 +11,8 @@ import LocalDate from "~/components/ui/LocalDate"
 import { Table, TableHead, TableTR, TableTH, TableBody, TableTD } from "~/components/ui/table"
 import LiveTokenGenerator from "~/components/attendance/LiveTokenGenerator"
 import { Alert } from "~/utils/alert"
-import { useCheckOutMemberMutation, useGetCheckinSummaryQuery, useGetRecentCheckinsQuery } from "~/services/checkin"
-import type { CheckinStatus } from "~/types/checkin"
+import { useCheckOutMemberMutation, useGetCheckinSummaryQuery, useGetRecentCheckinsQuery } from "~/services/checkin.service"
+import type { CheckinStatus } from "~/types/checkin.type"
 
 const CHECKIN_LIMIT = 5
 const POLLING_OPTIONS = {
@@ -297,7 +297,7 @@ export default function TerminalKehadiran() {
                         }`}
                       >
                         <span>
-                          Check-in:{" "}
+                          in:{" "}
                           <LocalDate
                             date={item.checkInAt}
                             variant="hour"
@@ -307,7 +307,7 @@ export default function TerminalKehadiran() {
                           <>
                             <span>•</span>
                             <span className="text-emerald-400/90">
-                              Check-out:{" "}
+                              out:{" "}
                               <LocalDate
                                 date={item.checkOutAt}
                                 variant="hour"
@@ -379,7 +379,7 @@ export default function TerminalKehadiran() {
                   <TableHead>
                     <TableTR isHeader={true}>
                       <TableTH>
-                        <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">TIME</div>
+                        <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">DATETIME</div>
                       </TableTH>
                       <TableTH>
                         <div className="text-left text-[11px] font-bold tracking-wider text-[#A28F79] uppercase">MEMBER</div>
@@ -396,7 +396,7 @@ export default function TerminalKehadiran() {
                     </TableTR>
                   </TableHead>
                   <TableBody>
-                    {!filteredCheckins.length ? ( 
+                    {!filteredCheckins.length ? (
                       <TableTR hideRowNumber>
                         <TableTD colSpan={6}>
                           <div className="text-text-muted flex min-h-48 items-center justify-center text-sm">
@@ -418,7 +418,11 @@ export default function TerminalKehadiran() {
                             className={isDenied ? "bg-red-950/30" : index % 2 === 0 ? "bg-transparent" : "bg-white/5"}
                           >
                             <TableTD>
-                              <span className="text-text-muted font-mono text-[13px] whitespace-nowrap">
+                              <span className="text-text-muted font-mono text-[13px] whitespace-nowrap flex flex-col">
+                                  <LocalDate
+                                    date={stream.checkInAt}
+                                    variant="short"
+                                  />
                                 <LocalDate
                                   date={stream.checkInAt}
                                   variant="hour"
@@ -468,27 +472,29 @@ export default function TerminalKehadiran() {
                             </TableTD>
 
                             <TableTD>
-                              {isDenied ? (
-                                <span className="text-[13px] text-[#EAA1A1]">{stream.denialReason || "Access denied"}</span>
-                              ) : stream.checkOutAt ? (
-                                <span className="text-text-muted font-mono text-[12px] whitespace-nowrap">
-                                  Check-out:{" "}
-                                  <LocalDate
-                                    date={stream.checkOutAt}
-                                    variant="hour"
-                                  />
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => handleCheckOut(memberId, memberName)}
-                                  disabled={isProcessing || !memberId}
-                                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[12px] font-semibold whitespace-nowrap text-white transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  {isProcessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
-                                  Check Out
-                                </button>
-                              )}
+                              <div className="flex flex-col items-start gap-1">
+                                {isDenied ? (
+                                  <span className="text-[13px] text-[#EAA1A1]">{stream.denialReason || "Access denied"}</span>
+                                ) : stream.checkOutAt ? (
+                                  <span className="text-text-muted font-mono text-[12px] whitespace-nowrap">
+                                    Check-out:{" "}
+                                    <LocalDate
+                                      date={stream.checkOutAt}
+                                      variant="hour"
+                                    />
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCheckOut(memberId, memberName)}
+                                    disabled={isProcessing || !memberId}
+                                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[12px] font-semibold whitespace-nowrap text-white transition-colors hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {isProcessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5" />}
+                                    Check Out
+                                  </button>
+                                )}
+                              </div>
                             </TableTD>
                           </TableTR>
                         )

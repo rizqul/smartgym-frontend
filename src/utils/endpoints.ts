@@ -27,6 +27,7 @@ export const API_ADMIN_TRAINERS_LIST = "/admin/dashboard/trainers"
 export const API_ADMIN_TRAINERS_CREATE = "/admin/dashboard/trainers/create"
 export const API_ADMIN_TRAINERS_SLOT_LIST = (id: string) => `/admin/dashboard/trainers/slot/${id}`
 export const API_ADMIN_TRAINERS_SLOT_CREATE = (id: string) => `/admin/dashboard/trainers/slot/create/${id}`
+export const API_ADMIN_TRAINERS_BOOKING_LIST = "/admin/dashboard/trainers/booking"
 
 export const API_ADMIN_TRANSACTIONS_LIST = "/admin/dashboard/transactions"
 export const API_ADMIN_TRANSACTIONS_CSV_DATA = "/admin/dashboard/transactions/csv-data"
@@ -46,6 +47,7 @@ export const API_STAFF_MEMBERSHIP_PACKAGE_LIST = "/staff/dashboard/memberships/p
 
 export const API_STAFF_TRAINERS_LIST = "/staff/dashboard/trainers"
 export const API_STAFF_TRAINERS_SLOT_LIST = (id: string) => `/staff/dashboard/trainers/slot/${id}`
+export const API_STAFF_TRAINERS_BOOKING_LIST = "/staff/dashboard/trainers/booking"
 
 export const API_STAFF_CHECKIN_LIST = "/staff/dashboard/attendances"
 export const API_STAFF_CHECKIN_SUMMARY = "/staff/dashboard/attendances/summary"
@@ -59,3 +61,7 @@ export const API_ADMIN_TRANSACTIONS_COUNT = "/admin/dashboard/transactions/count
 export const API_ADMIN_TRAINERS_COUNT = "/admin/dashboard/trainers/count"
 export const API_STAFF_MEMBERS_COUNT = "/staff/dashboard/member/count"
 export const API_STAFF_TRAINERS_COUNT = "/staff/dashboard/trainers/count"
+
+export const API_ADMIN_DASHBOARD_COUNT = "/admin/dashboard/summary/count"
+export const API_ADMIN_DASHBOARD_CHART = "/admin/dashboard/summary/chart"
+export const API_ADMIN_DASHBOARD_RECENT = "/admin/dashboard/summary/recent"

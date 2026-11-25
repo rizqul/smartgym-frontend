@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiResponsePaginate } from "./common"
+import type { ApiResponse, ApiResponsePaginate } from "./common.type"
 
 export type CheckinStatus = "GRANTED" | "DENIED"
 export type CheckinMethod = "QR" | "RFID" | "MANUAL"

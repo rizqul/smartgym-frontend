@@ -3,7 +3,7 @@ import { Calendar, Download, Loader2, X } from "lucide-react"
 
 import { Button } from "~/components/ui/Button"
 import { Input } from "~/components/ui/Input"
-import { useLazyGetTransactionCsvDataQuery } from "~/services/transaction"
+import { useLazyGetTransactionCsvDataQuery } from "~/services/transaction.service"
 import { Alert } from "~/utils/alert"
 import { exportTransactionsToCsv } from "~/utils/exportTransactionsCsv"
 

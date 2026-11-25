@@ -1,4 +1,4 @@
-import type { TransactionItem } from "~/types/transaction"
+import type { TransactionItem } from "~/types/transaction.type"
 
 const escapeCsvValue = (value: string | number | null | undefined) => {
   const str = String(value ?? "")

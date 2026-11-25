@@ -23,10 +23,10 @@ import TrainerListTab from "~/components/trainers/list/TrainerListTab"
 import TrainerScheduleTab from "~/components/trainers/list/TrainerScheduleTab"
 import { useDebounce } from "~/hooks/useDebounce"
 import { usePagination } from "~/hooks/usePagination"
-import { useGetAllTrainerQuery, useGetTrainerCountQuery } from "~/services/trainer"
+import { useGetAllTrainerQuery, useGetTrainerCountQuery } from "~/services/trainer.service"
 import { useAppSelector } from "~/store/hooks"
 import { formatRupiah } from "~/utils/format"
-import type { TrainerItem } from "~/types/trainer"
+import type { TrainerItem } from "~/types/trainer.type"
 
 type TabType = "trainers" | "schedule"
 

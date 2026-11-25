@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "./common"
+import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "./common.type"
 
 export type UserRole = "ADMIN" | "STAFF" | "MEMBER"
 

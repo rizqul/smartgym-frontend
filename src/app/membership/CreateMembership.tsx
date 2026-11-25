@@ -10,7 +10,7 @@ import { Button } from "../../components/ui/Button"
 import { Select } from "../../components/ui/Select"
 
 import { CreateMembershipPackageValidation, type CreateMembershipPackageData } from "~/validation/membership"
-import { useCreateMembershipPackageMutation } from "~/services/membershipPackage"
+import { useCreateMembershipPackageMutation } from "~/services/membershipPackage.service"
 
 export default function CreateMembership() {
   const [createPackage, { error }] = useCreateMembershipPackageMutation()

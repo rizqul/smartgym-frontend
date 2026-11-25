@@ -1,10 +1,11 @@
+import { useMemo } from "react"
 import { Clock, FileText, Loader2, Plus, RotateCcw, X } from "lucide-react"
 
 import { Button } from "~/components/ui/Button"
 import LocalDate from "~/components/ui/LocalDate"
-import { useGetTrainerSlotsQuery } from "~/services/trainer"
+import { useGetTrainerBookingsQuery, useGetTrainerSlotsQuery } from "~/services/trainer.service"
 import { getAvatarUrl } from "~/utils/avatar"
-import type { TrainerItem, TrainerSlotItem } from "~/types/trainer"
+import type { TrainerBookingMember, TrainerItem, TrainerSlotItem } from "~/types/trainer.type"
 import { formatDateValue, getSlotStatusBadgeStyle } from "../../../utils/scheduleHelpers"
 
 interface TrainerSlotDetailPanelProps {
@@ -30,6 +31,25 @@ export default function TrainerSlotDetailPanel({
     trainerId: trainer.id,
     date: selectedDate
   })
+
+  const { data: bookingData } = useGetTrainerBookingsQuery(
+    {
+      trainerId: trainer.id,
+      date: selectedDate,
+      size: 100
+    },
+    { skip: !isAdmin }
+  )
+
+  const bookedMemberBySlotId = useMemo(() => {
+    const map = new Map<string, TrainerBookingMember>()
+    for (const booking of bookingData?.data ?? []) {
+      if (booking.slot?.id && booking.member) {
+        map.set(booking.slot.id, booking.member)
+      }
+    }
+    return map
+  }, [bookingData?.data])
 
   const slots = currentData?.data ?? []
   const isInitialDateLoad = isFetching && !currentData
@@ -74,11 +94,12 @@ export default function TrainerSlotDetailPanel({
         {slots.map((slot) => {
           const description = slot.description?.trim()
           const isHighlighted = selectedSlot?.id === slot.id
+          const bookedMember = bookedMemberBySlotId.get(slot.id)
 
           return (
             <div
               key={slot.id}
-              className={`relative flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 transition-all ${
+              className={`relative flex flex-col gap-2 rounded-xl border px-3.5 py-2.5 transition-all ${
                 isHighlighted
                   ? "border-primary/60 shadow-overlay/40 bg-background/60 pl-4 shadow-md"
                   : "border-border/60 bg-surface hover:border-border"
@@ -86,44 +107,63 @@ export default function TrainerSlotDetailPanel({
             >
               {isHighlighted && <span className="bg-primary absolute inset-y-2 left-1.5 w-1 rounded-full" />}
 
-              <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                <div className="text-text-primary flex shrink-0 items-center gap-1.5 text-xs font-bold">
-                  <Clock className={`h-3.5 w-3.5 shrink-0 ${isHighlighted ? "text-primary" : "text-text-muted"}`} />
-                  <span className="tabular-nums">
-                    <LocalDate
-                      date={slot.startTime}
-                      variant="hour"
-                    />
-                    <span className="text-text-muted mx-1">-</span>
-                    <LocalDate
-                      date={slot.endTime}
-                      variant="hour"
-                    />
-                  </span>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                  <div className="text-text-primary flex shrink-0 items-center gap-1.5 text-xs font-bold">
+                    <Clock className={`h-3.5 w-3.5 shrink-0 ${isHighlighted ? "text-primary" : "text-text-muted"}`} />
+                    <span className="tabular-nums">
+                      <LocalDate
+                        date={slot.startTime}
+                        variant="hour"
+                      />
+                      <span className="text-text-muted mx-1">-</span>
+                      <LocalDate
+                        date={slot.endTime}
+                        variant="hour"
+                      />
+                    </span>
+                  </div>
+
+                  {description && (
+                    <>
+                      <span className="bg-border h-3.5 w-px shrink-0" />
+                      <div className="group relative flex min-w-0 flex-1 items-center">
+                        <div className="text-text-secondary flex min-w-0 cursor-default items-center gap-1.5 text-xs">
+                          <FileText className="text-info h-3 w-3 shrink-0" />
+                          <span className="truncate">{description}</span>
+                        </div>
+
+                        <div className="border-border bg-overlay text-text-primary pointer-events-none invisible absolute bottom-full left-0 z-50 mb-2 w-max max-w-xs translate-y-1 rounded-lg border px-2.5 py-1.5 text-[11px] leading-snug wrap-break-word whitespace-normal opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                          {description}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                {description && (
-                  <>
-                    <span className="bg-border h-3.5 w-px shrink-0" />
-                    <div className="group relative flex min-w-0 flex-1 items-center">
-                      <div className="text-text-secondary flex min-w-0 cursor-default items-center gap-1.5 text-xs">
-                        <FileText className="text-info h-3 w-3 shrink-0" />
-                        <span className="truncate">{description}</span>
-                      </div>
-
-                      <div className="border-border bg-overlay text-text-primary pointer-events-none invisible absolute bottom-full left-0 z-50 mb-2 w-max max-w-xs translate-y-1 rounded-lg border px-2.5 py-1.5 text-[11px] leading-snug wrap-break-word whitespace-normal opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                        {description}
-                      </div>
-                    </div>
-                  </>
-                )}
+                <span
+                  className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase ${getSlotStatusBadgeStyle(slot.status)}`}
+                >
+                  {slot.status}
+                </span>
               </div>
 
-              <span
-                className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase ${getSlotStatusBadgeStyle(slot.status)}`}
-              >
-                {slot.status}
-              </span>
+              {bookedMember && (
+                <div className="border-border/50 flex items-center gap-2 border-t pt-2">
+                  <img
+                    src={getAvatarUrl(bookedMember.name, bookedMember.profileUrl)}
+                    alt={bookedMember.name}
+                    className="border-border h-5 w-5 shrink-0 rounded-full border object-cover"
+                  />
+                  <div className="flex min-w-0 flex-1 items-center gap-1.5 text-[11px]">
+                    <span className="text-text-muted shrink-0">Booked by:</span>
+                    <span className="text-text-primary truncate font-semibold">{bookedMember.name}</span>
+                    {bookedMember.phoneNumber && (
+                      <span className="text-text-muted hidden truncate sm:inline">• {bookedMember.phoneNumber}</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )
         })}

@@ -12,7 +12,7 @@ import ExportTransactionPopover from "~/components/transactions/ExportTransactio
 import TransactionTableRow from "~/components/transactions/TransactionTableRow"
 import { useDebounce } from "~/hooks/useDebounce"
 import { usePagination } from "~/hooks/usePagination"
-import { useGetAllTransactionsQuery, useGetTransactionCountQuery } from "~/services/transaction"
+import { useGetAllTransactionsQuery, useGetTransactionCountQuery } from "~/services/transaction.service"
 import { formatRupiah } from "~/utils/format"
 
 export default function Transaction() {

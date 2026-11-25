@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { TransactionCountApi, TransactionCsvApi, TransactionsApi, TransactionSearchQuery } from "~/types/transaction"
+import type { TransactionCountApi, TransactionCsvApi, TransactionsApi, TransactionSearchQuery } from "~/types/transaction.type"
 import { API_ADMIN_TRANSACTIONS_COUNT, API_ADMIN_TRANSACTIONS_CSV_DATA, API_ADMIN_TRANSACTIONS_LIST } from "~/utils/endpoints"
 
 export const transactionServiceApi = createApi({

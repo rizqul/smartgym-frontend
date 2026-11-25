@@ -1,10 +1,11 @@
+import { useMemo } from "react"
 import { Award, Briefcase, Clock, Loader2, Phone, Plus, RotateCcw } from "lucide-react"
 
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/Card"
 import LocalDate from "~/components/ui/LocalDate"
 import { getAvatarUrl } from "~/utils/avatar"
-import { useGetTrainerSlotsQuery } from "~/services/trainer"
-import type { TrainerItem, TrainerSlotItem } from "~/types/trainer"
+import { useGetTrainerBookingsQuery, useGetTrainerSlotsQuery } from "~/services/trainer.service"
+import type { TrainerBookingMember, TrainerItem, TrainerSlotItem } from "~/types/trainer.type"
 import { formatDateValue, getSlotStatusBadgeStyle } from "../../../utils/scheduleHelpers"
 
 const MAX_VISIBLE_SLOTS = 3
@@ -34,6 +35,25 @@ export default function TrainerScheduleCard({
     trainerId: trainer.id,
     date: selectedDate
   })
+
+  const { data: bookingData } = useGetTrainerBookingsQuery(
+    {
+      trainerId: trainer.id,
+      date: selectedDate,
+      size: 100
+    },
+    { skip: !isAdmin }
+  )
+
+  const bookedMemberBySlotId = useMemo(() => {
+    const map = new Map<string, TrainerBookingMember>()
+    for (const booking of bookingData?.data ?? []) {
+      if (booking.slot?.id && booking.member) {
+        map.set(booking.slot.id, booking.member)
+      }
+    }
+    return map
+  }, [bookingData?.data])
 
   const slots = currentData?.data ?? []
   const isInitialDateLoad = isFetching && !currentData
@@ -132,6 +152,8 @@ export default function TrainerScheduleCard({
             <div className={`flex flex-col gap-1.5 transition-opacity ${isFetching ? "opacity-60" : "opacity-100"}`}>
               {visibleSlots.map((slot) => {
                 const isSlotActive = selectedSlotId === slot.id
+                const bookedMember = bookedMemberBySlotId.get(slot.id)
+
                 return (
                   <button
                     key={slot.id}
@@ -148,7 +170,7 @@ export default function TrainerScheduleCard({
                   >
                     <div className="flex min-w-0 items-center gap-1.5 text-[12px] font-semibold text-white">
                       <Clock className="text-primary h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate">
+                      <span className="shrink-0 tabular-nums">
                         <LocalDate
                           date={slot.startTime}
                           variant="hour"
@@ -159,6 +181,8 @@ export default function TrainerScheduleCard({
                           variant="hour"
                         />
                       </span>
+
+                      {bookedMember && <span className="text-text-muted truncate text-[11px] font-normal">• {bookedMember.name}</span>}
                     </div>
 
                     <span

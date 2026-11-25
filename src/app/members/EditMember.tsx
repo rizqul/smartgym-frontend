@@ -9,9 +9,9 @@ import { Card, CardHeader, CardContent } from "~/components/ui/Card"
 import { Input } from "~/components/ui/Input"
 import { Button } from "~/components/ui/Button"
 import { getAvatarUrl } from "~/utils/avatar"
-import { useGetAllMemberQuery, useUpdateMemberMutation } from "~/services/member"
+import { useGetAllMemberQuery, useUpdateMemberMutation } from "~/services/member.service"
 import { UpdateMemberValidation, type UpdateMemberData } from "~/validation/member"
-import type { User as MemberUser } from "~/types/user"
+import type { User as MemberUser } from "~/types/user.type"
 
 const MAX_PHOTO_SIZE = 2 * 1024 * 1024
 const ALLOWED_PHOTO_TYPES = ["image/png", "image/jpg", "image/jpeg"]

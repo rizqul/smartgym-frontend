@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import type { User, UserApi } from "~/types/user"
+import type { User, UserApi } from "~/types/user.type"
 
 import { axiosClient } from "~/utils/axios"
 import { API_USER } from "~/utils/endpoints"

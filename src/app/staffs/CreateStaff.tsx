@@ -10,7 +10,7 @@ import { Input } from "~/components/ui/Input"
 import { Button } from "~/components/ui/Button"
 
 import { CreateStaffValidation, type CreateStaffData } from "~/validation/staff"
-import { useCreateStaffMutation } from "~/services/staff"
+import { useCreateStaffMutation } from "~/services/staff.service"
 
 export default function CreateStaff() {
   const navigate = useNavigate()

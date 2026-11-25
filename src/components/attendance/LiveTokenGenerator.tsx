@@ -3,8 +3,8 @@ import { Clock, HelpCircle, Loader2, RefreshCw, ScanLine, Smartphone } from "luc
 import toast from "react-hot-toast"
 
 import { Card } from "~/components/ui/Card"
-import { useGenerateQrTokenMutation } from "~/services/checkin"
-import type { CheckinToken } from "~/types/checkin"
+import { useGenerateQrTokenMutation } from "~/services/checkin.service"
+import type { CheckinToken } from "~/types/checkin.type"
 
 const FE_QR_LIFETIME_SECONDS = 10 * 60
 const QR_STORAGE_KEY = "smartgym_checkin_qr_token"

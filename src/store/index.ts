@@ -1,13 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit"
 
 import userReducer from "./slices/authSlice"
-import { memberServiceApi } from "~/services/member"
-import { staffServiceApi } from "~/services/staff"
-import { membershipPackageServiceApi } from "~/services/membershipPackage"
-import { userServiceApi } from "~/services/user"
-import { trainerServiceApi } from "~/services/trainer"
-import { transactionServiceApi } from "~/services/transaction"
-import { checkinServiceApi } from "~/services/checkin"
+import { memberServiceApi } from "~/services/member.service"
+import { staffServiceApi } from "~/services/staff.service"
+import { membershipPackageServiceApi } from "~/services/membershipPackage.service"
+import { userServiceApi } from "~/services/user.service"
+import { trainerServiceApi } from "~/services/trainer.service"
+import { transactionServiceApi } from "~/services/transaction.service"
+import { checkinServiceApi } from "~/services/checkin.service"
+import { dashboardServiceApi } from "~/services/dashboard.service"
 
 export const store = configureStore({
   reducer: {
@@ -18,7 +19,8 @@ export const store = configureStore({
     [userServiceApi.reducerPath]: userServiceApi.reducer,
     [trainerServiceApi.reducerPath]: trainerServiceApi.reducer,
     [transactionServiceApi.reducerPath]: transactionServiceApi.reducer,
-    [checkinServiceApi.reducerPath]: checkinServiceApi.reducer
+    [checkinServiceApi.reducerPath]: checkinServiceApi.reducer,
+    [dashboardServiceApi.reducerPath]: dashboardServiceApi.reducer
   },
   middleware: (getDefault) =>
     getDefault().concat(
@@ -28,7 +30,8 @@ export const store = configureStore({
       userServiceApi.middleware,
       trainerServiceApi.middleware,
       transactionServiceApi.middleware,
-      checkinServiceApi.middleware
+      checkinServiceApi.middleware,
+      dashboardServiceApi.middleware
     )
 })
 

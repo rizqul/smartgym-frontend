@@ -1,16 +1,19 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { ApiResponse } from "~/types/common"
+import type { ApiResponse } from "~/types/common.type"
 import type {
   CreateTrainerSlotApi,
   CreateTrainerSlotRequest,
   GetTrainerSlotsParams,
+  TrainerBookingsApi,
+  TrainerBookingSearchQuery,
   TrainerCountApi,
   TrainersApi,
   TrainerSearchQuery,
   TrainerSlotsApi
-} from "~/types/trainer"
+} from "~/types/trainer.type"
 import {
+  API_ADMIN_TRAINERS_BOOKING_LIST,
   API_ADMIN_TRAINERS_COUNT,
   API_ADMIN_TRAINERS_CREATE,
   API_ADMIN_TRAINERS_LIST,
@@ -86,6 +89,20 @@ export const trainerServiceApi = createApi({
         data
       }),
       invalidatesTags: (_result, _error, { trainerId }) => [{ type: "TrainerSlots", id: trainerId }, "TrainerCount"]
+    }),
+
+    getTrainerBookings: build.query<TrainerBookingsApi, TrainerBookingSearchQuery | void>({
+      query: (params) => ({
+        url: API_ADMIN_TRAINERS_BOOKING_LIST,
+        method: "GET",
+        params: {
+          size: params?.size ?? 100,
+          page: params?.page ?? 1,
+          ...(params?.trainerId ? { trainerId: params.trainerId } : {}),
+          ...(params?.date ? { date: params.date } : {})
+        }
+      }),
+      providesTags: ["Trainers", "TrainerSlots"]
     })
   })
 })
@@ -95,5 +112,6 @@ export const {
   useCreateTrainerMutation,
   useGetTrainerSlotsQuery,
   useCreateTrainerSlotMutation,
-  useGetTrainerCountQuery
+  useGetTrainerCountQuery,
+  useGetTrainerBookingsQuery
 } = trainerServiceApi

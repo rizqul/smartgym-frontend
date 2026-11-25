@@ -9,8 +9,8 @@ import TableTR from "~/components/ui/table/TableTR"
 import TableTH from "~/components/ui/table/TableTH"
 import TableBody from "~/components/ui/table/TableBody"
 import TableTD from "~/components/ui/table/TableTD"
-import type { TrainerItem } from "~/types/trainer"
-import type { PaginationMeta } from "~/types/common"
+import type { TrainerItem } from "~/types/trainer.type"
+import type { PaginationMeta } from "~/types/common.type"
 import TrainerTableRow from "../schedule/TrainerTableRow"
 
 interface TrainerListTabProps {

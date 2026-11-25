@@ -12,7 +12,7 @@ import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Alert } from "~/utils/alert"
 import { useDebounce } from "~/hooks/useDebounce"
 import { usePagination } from "~/hooks/usePagination"
-import { useGetAllStaffQuery, useGetStaffCountQuery, useDeleteStaffMutation } from "~/services/staff"
+import { useGetAllStaffQuery, useGetStaffCountQuery, useDeleteStaffMutation } from "~/services/staff.service"
 
 export default function Staff() {
   const navigate = useNavigate()
