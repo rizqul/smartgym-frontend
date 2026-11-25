@@ -3,23 +3,24 @@ import { Calendar, Download, Loader2, X } from "lucide-react"
 
 import { Button } from "~/components/ui/Button"
 import { Input } from "~/components/ui/Input"
+import { useLazyGetTransactionCsvDataQuery } from "~/services/transaction"
 import { Alert } from "~/utils/alert"
-import { exportTransactionsToCsv, type ExportTransactionItem } from "~/utils/exportTransactionsCsv"
+import { exportTransactionsToCsv } from "~/utils/exportTransactionsCsv"
 
 interface ExportTransactionPopoverProps {
-  currentTransactions: ExportTransactionItem[]
   typeFilter?: string
 }
 
-export default function ExportTransactionPopover({ currentTransactions, typeFilter }: ExportTransactionPopoverProps) {
+export default function ExportTransactionPopover({ typeFilter }: ExportTransactionPopoverProps) {
   const today = new Date().toISOString().split("T")[0]
   const firstDayOfMonth = `${today.slice(0, 8)}01`
 
   const [isOpen, setIsOpen] = useState(false)
   const [startDate, setStartDate] = useState(firstDayOfMonth)
   const [endDate, setEndDate] = useState(today)
-  const [isExporting, setIsExporting] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  const [triggerGetCsvData, { isFetching: isExporting }] = useLazyGetTransactionCsvDataQuery()
 
   useEffect(() => {
     if (!isOpen) return
@@ -46,30 +47,34 @@ export default function ExportTransactionPopover({ currentTransactions, typeFilt
     }
 
     try {
-      setIsExporting(true)
+      const res = await triggerGetCsvData().unwrap()
+      const allTransactions = res.data ?? []
 
-      // TODO: Hubungkan dengan lazy query endpoint export BE jika sudah tersedia:
-      // const res = await triggerExport({
-      //   startDate,
-      //   endDate,
-      //   status: "SUCCESS",
-      //   type: typeFilter || undefined
-      // }).unwrap()
-      // const rows = res.data ?? []
+      const startTime = new Date(`${startDate}T00:00:00`).getTime()
+      const endTime = new Date(`${endDate}T23:59:59.999`).getTime()
 
-      const rows = typeFilter ? currentTransactions.filter((item) => item.type === typeFilter) : currentTransactions
+      const filteredRows = allTransactions.filter((trx) => {
+        if (trx.status !== "SUCCESS") return false
 
-      if (!rows.length) {
-        Alert.error("No Data", "No transactions found for the selected date range.")
+        const rawDate = trx.paidAt ?? trx.createdAt
+        if (!rawDate) return false
+
+        const trxTime = new Date(rawDate).getTime()
+        const inDateRange = trxTime >= startTime && trxTime <= endTime
+        const matchType = !typeFilter || trx.type === typeFilter
+
+        return inDateRange && matchType
+      })
+
+      if (!filteredRows.length) {
+        Alert.error("No Data", "No successful transactions found for the selected date range.")
         return
       }
 
-      exportTransactionsToCsv(rows, startDate, endDate)
+      exportTransactionsToCsv(filteredRows, startDate, endDate)
       setIsOpen(false)
     } catch {
       Alert.error("Export Failed", "Failed to export transaction data. Please try again.")
-    } finally {
-      setIsExporting(false)
     }
   }
 
@@ -129,6 +134,11 @@ export default function ExportTransactionPopover({ currentTransactions, typeFilt
                 className="focus:border-primary focus:ring-primary w-full rounded-xl border border-white/10 bg-[#0B0C10] px-3.5 py-2 text-[13px] text-white scheme-dark focus:ring-1 focus:outline-none"
               />
             </div>
+
+            <p className="text-text-muted text-[11px]">
+              Only <span className="font-semibold text-emerald-400">SUCCESS</span> transactions within the selected date range will be
+              exported.
+            </p>
 
             <Button
               type="button"

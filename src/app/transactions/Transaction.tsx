@@ -86,10 +86,7 @@ export default function Transaction() {
           </p>
         </div>
 
-        <ExportTransactionPopover
-          currentTransactions={transactions.map((transaction) => ({ ...transaction, name: "—" }))}
-          typeFilter={typeFilter}
-        />
+        <ExportTransactionPopover typeFilter={typeFilter} />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">

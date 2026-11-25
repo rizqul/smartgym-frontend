@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { TransactionCountApi, TransactionsApi, TransactionSearchQuery } from "~/types/transaction"
-import { API_ADMIN_TRANSACTIONS_COUNT, API_ADMIN_TRANSACTIONS_LIST } from "~/utils/endpoints"
+import type { TransactionCountApi, TransactionCsvApi, TransactionsApi, TransactionSearchQuery } from "~/types/transaction"
+import { API_ADMIN_TRANSACTIONS_COUNT, API_ADMIN_TRANSACTIONS_CSV_DATA, API_ADMIN_TRANSACTIONS_LIST } from "~/utils/endpoints"
 
 export const transactionServiceApi = createApi({
   reducerPath: "transactionApi",
@@ -29,8 +29,14 @@ export const transactionServiceApi = createApi({
         params: year ? { year } : undefined
       }),
       providesTags: ["Transactions"]
+    }),
+    getTransactionCsvData: build.query<TransactionCsvApi, void>({
+      query: () => ({
+        url: API_ADMIN_TRANSACTIONS_CSV_DATA,
+        method: "GET"
+      })
     })
   })
 })
 
-export const { useGetAllTransactionsQuery, useGetTransactionCountQuery } = transactionServiceApi
+export const { useGetAllTransactionsQuery, useGetTransactionCountQuery, useLazyGetTransactionCsvDataQuery } = transactionServiceApi

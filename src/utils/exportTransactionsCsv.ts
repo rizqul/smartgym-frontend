@@ -1,18 +1,4 @@
-export interface ExportTransactionItem {
-  orderId: string
-  paidAt: string | null
-  createdAt: string
-  member?: {
-    name?: string
-    email?: string
-    phoneNumber?: string
-  }
-  type: string
-  name: string
-  paymentType?: string | null
-  amount: number
-  status: string
-}
+import type { TransactionItem } from "~/types/transaction"
 
 const escapeCsvValue = (value: string | number | null | undefined) => {
   const str = String(value ?? "")
@@ -22,7 +8,7 @@ const escapeCsvValue = (value: string | number | null | undefined) => {
   return str
 }
 
-export function exportTransactionsToCsv(transactions: ExportTransactionItem[], startDate: string, endDate: string) {
+export function exportTransactionsToCsv(transactions: TransactionItem[], startDate: string, endDate: string) {
   const headers = [
     "Order ID",
     "Date",
@@ -55,7 +41,7 @@ export function exportTransactionsToCsv(transactions: ExportTransactionItem[], s
       trx.member?.email ?? "-",
       trx.member?.phoneNumber ?? "-",
       trx.type,
-      trx.name,
+      trx.name ?? "-",
       trx.paymentType ?? "-",
       trx.amount,
       trx.status

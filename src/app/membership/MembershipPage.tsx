@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import { Layers, Wallet, Plus, CheckCircle2, Edit, Trash2, Loader2, SquareLibrary, Banknote } from "lucide-react"
+import { Layers, Wallet, Plus, CheckCircle2, Trash2, Loader2, SquareLibrary, Banknote } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Button } from "~/components/ui/Button"
@@ -168,7 +168,7 @@ export default function MembershipPage() {
 
                   {isAdmin && (
                     <div className="flex items-center gap-1">
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => navigate(`/dashboard/membership/${pkg.id}/edit`)}
                         title="Edit Package"
@@ -176,7 +176,7 @@ export default function MembershipPage() {
                         className="text-text-muted flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
                       >
                         <Edit className="h-3.5 w-3.5" />
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         onClick={() => handleDelete(pkg.id, pkg.name)}
