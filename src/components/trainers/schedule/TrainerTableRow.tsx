@@ -1,11 +1,10 @@
 import { Briefcase, Loader2, Pencil, Trash2 } from "lucide-react"
 
-import TableTR from "~/components/ui/table/TableTR"
-import TableTD from "~/components/ui/table/TableTD"
+import { TableTR, TableTD } from "~/components/ui/table"
 import Avatar from "~/components/ui/Avatar"
 import LocalDate from "~/components/ui/LocalDate"
 import { formatRupiah } from "~/utils/format"
-import type { TrainerItem } from "~/types/trainer"
+import type { TrainerItem } from "~/types/trainer.type"
 
 interface TrainerTableRowProps {
   trainer: TrainerItem

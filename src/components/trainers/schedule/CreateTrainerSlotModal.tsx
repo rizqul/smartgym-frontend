@@ -19,7 +19,7 @@ import {
   getMinStartTime,
   isWithinOperatingHours
 } from "~/utils/slotTime"
-import type { CreateTrainerSlotRequest, TrainerItem } from "~/types/trainer"
+import type { CreateTrainerSlotRequest, TrainerItem } from "~/types/trainer.type"
 import { CreateTrainerSlotValidation, type CreateTrainerSlotData } from "~/validation/trainer"
 
 interface CreateTrainerSlotModalProps {

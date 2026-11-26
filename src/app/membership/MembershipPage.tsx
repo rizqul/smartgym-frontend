@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
-import { Layers, Wallet, Plus, CheckCircle2, Edit, Trash2, Loader2, SquareLibrary, Banknote } from "lucide-react"
+import { Layers, Wallet, Plus, CheckCircle2, Trash2, Loader2, SquareLibrary, Banknote } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Button } from "~/components/ui/Button"
@@ -11,7 +11,7 @@ import {
   useGetAllMembershipPackagesQuery,
   useGetMembershipCountQuery,
   useDeleteMembershipPackageMutation
-} from "~/services/membershipPackage"
+} from "~/services/membershipPackage.service"
 import { formatRupiah } from "~/utils/format"
 import { Alert } from "~/utils/alert"
 import { useAppSelector } from "~/store/hooks"
@@ -74,7 +74,7 @@ export default function MembershipPage() {
     try {
       await deletePackage(id).unwrap()
       toast.success(`Package ${name} was deleted successfully!`)
-    } catch (error: unknown) {
+    } catch {
       toast.error("Failed to delete the membership package.")
     } finally {
       setDeletingId(null)
@@ -87,7 +87,7 @@ export default function MembershipPage() {
         <div className="flex w-full max-w-2xl flex-col gap-1.5">
           <h2 className="text-xl font-bold text-white sm:text-2xl">Membership Management</h2>
           <p className="text-text-muted text-[13px] sm:text-[14px]">
-            Manage the membership package catalog and monitor registered members' subscription status in real time.
+            Manage the membership package catalog and monitor registered members&apos; subscription status in real time.
           </p>
         </div>
 
@@ -134,16 +134,17 @@ export default function MembershipPage() {
           />
         </div>
       )}
+
       {packagesList.length === 0 ? (
         <div className="text-text-muted flex w-full justify-center py-20 text-sm">No membership packages are currently available.</div>
       ) : (
-        <div className="mt-2 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5 xl:grid-cols-3">
           {packagesList.map((pkg) => {
             let cleanDesc = pkg.description || ""
             let featuresList: string[] = []
 
-            if (pkg.description && pkg.description.includes("Fasilitas:")) {
-              const parts = pkg.description.split("Fasilitas:")
+            if (pkg.description && /Fasilitas:|Facilities:/i.test(pkg.description)) {
+              const parts = pkg.description.split(/Fasilitas:|Facilities:/i)
               cleanDesc = parts[0].trim()
 
               featuresList = parts[1]
@@ -161,56 +162,45 @@ export default function MembershipPage() {
             return (
               <div
                 key={pkg.id}
-                className="flex h-full flex-col gap-4 rounded-xl border border-white/10 bg-[#1C1F26] p-8 shadow-lg transition-all hover:border-white/20"
+                className="flex h-100 min-w-0 flex-col gap-3.5 rounded-2xl border border-white/10 bg-[#1C1F26] p-8 shadow-lg transition-all hover:border-white/20"
               >
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex shrink-0 items-center justify-between gap-2">
                   <Badge label={pkg.type || "PACKAGE"} />
 
                   {isAdmin && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/dashboard/membership/${pkg.id}/edit`)}
-                        title="Edit Package"
-                        aria-label={`Edit ${pkg.name}`}
-                        className="text-text-muted flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors hover:bg-white/10 hover:text-white"
-                      >
-                        <Edit className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(pkg.id, pkg.name)}
-                        disabled={isDeleting}
-                        title="Delete Package"
-                        aria-label={`Hapus ${pkg.name}`}
-                        className="text-text-muted flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(pkg.id, pkg.name)}
+                      disabled={isDeleting}
+                      title="Delete Package"
+                      aria-label={`Hapus ${pkg.name}`}
+                      className="text-text-muted flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    </button>
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <h3 className="truncate text-lg font-bold text-white">{pkg.name}</h3>
-                  <p className="text-text-secondary line-clamp-2 text-[12.5px] leading-relaxed">{cleanDesc}</p>
+                <div className="flex shrink-0 flex-col gap-1">
+                  <h3 className="truncate text-base font-bold text-white">{pkg.name}</h3>
+                  <p className="text-text-secondary line-clamp-2 min-h-9 text-xs leading-relaxed">{cleanDesc || "-"}</p>
                 </div>
 
-                <div className="flex items-baseline justify-between gap-2 rounded-lg border border-white/5 bg-white/3 px-3.5 py-2.5">
-                  <div className="flex items-baseline gap-1 text-white">
-                    <span className="text-xs font-semibold">Rp</span>
-                    <span className="text-2xl font-bold tracking-tight">{formatRupiah(pkg.price)}</span>
+                <div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-2 gap-y-1 rounded-xl border border-white/5 bg-white/3 px-3.5 py-2.5">
+                  <div className="flex min-w-0 items-baseline gap-1 text-white">
+                    <span className="text-xs font-semibold text-white/70">Rp</span>
+                    <span className="truncate text-xl font-bold tracking-tight tabular-nums">{formatRupiah(pkg.price)}</span>
                   </div>
                   <span className="text-primary text-xs font-semibold whitespace-nowrap">/ {pkg.duration} days</span>
                 </div>
 
-                <div className="flex flex-1 flex-col gap-2 border-t border-white/5 pt-3">
-                  <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">INCLUDED FACILITIES</span>
-                  <ul className="flex flex-col gap-1.5">
+                <div className="flex min-h-0 flex-1 flex-col gap-2 border-t border-white/5 pt-3">
+                  <span className="text-text-muted shrink-0 text-[10px] font-bold tracking-wider uppercase">INCLUDED FACILITIES</span>
+                  <ul className="flex flex-1 flex-col gap-1.5 overflow-y-auto pr-1.5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15 [&::-webkit-scrollbar-track]:bg-transparent">
                     {featuresList.map((feat, idx) => (
                       <li
                         key={idx}
-                        className="flex items-start gap-2 text-[12.5px] text-white/90"
+                        className="flex items-start gap-2 text-xs text-white/90"
                       >
                         <CheckCircle2 className="text-primary mt-0.5 h-3.5 w-3.5 shrink-0" />
                         <span className="leading-snug">{feat}</span>

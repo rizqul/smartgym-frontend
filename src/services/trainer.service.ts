@@ -1,26 +1,33 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { ApiResponse } from "~/types/common"
+import type { ApiResponse } from "~/types/common.type"
 import type {
   CreateTrainerSlotApi,
   CreateTrainerSlotRequest,
   GetTrainerSlotsParams,
+  TrainerBookingsApi,
+  TrainerBookingSearchQuery,
   TrainerCountApi,
   TrainersApi,
   TrainerSearchQuery,
-  TrainerSlotsApi
-} from "~/types/trainer"
+  TrainerSlotsApi,
+  UpdateTrainerSlotRequest
+} from "~/types/trainer.type"
 import {
+  API_ADMIN_TRAINERS_BOOKING_LIST,
   API_ADMIN_TRAINERS_COUNT,
   API_ADMIN_TRAINERS_CREATE,
+  API_ADMIN_TRAINERS_DELETE,
   API_ADMIN_TRAINERS_LIST,
   API_ADMIN_TRAINERS_SLOT_CREATE,
   API_ADMIN_TRAINERS_SLOT_LIST,
+  API_ADMIN_TRAINERS_SLOT_UPDATE,
+  API_ADMIN_TRAINERS_UPDATE,
   API_STAFF_TRAINERS_COUNT,
   API_STAFF_TRAINERS_LIST,
   API_STAFF_TRAINERS_SLOT_LIST
 } from "~/utils/endpoints"
-import type { CreateTrainerData } from "~/validation/trainer"
+import type { CreateTrainerData, UpdateTrainerData } from "~/validation/trainer"
 
 export const trainerServiceApi = createApi({
   reducerPath: "trainerApi",
@@ -86,6 +93,46 @@ export const trainerServiceApi = createApi({
         data
       }),
       invalidatesTags: (_result, _error, { trainerId }) => [{ type: "TrainerSlots", id: trainerId }, "TrainerCount"]
+    }),
+
+    getTrainerBookings: build.query<TrainerBookingsApi, TrainerBookingSearchQuery | void>({
+      query: (params) => ({
+        url: API_ADMIN_TRAINERS_BOOKING_LIST,
+        method: "GET",
+        params: {
+          size: params?.size ?? 100,
+          page: params?.page ?? 1,
+          ...(params?.trainerId ? { trainerId: params.trainerId } : {}),
+          ...(params?.date ? { date: params.date } : {})
+        }
+      }),
+      providesTags: ["Trainers", "TrainerSlots"]
+    }),
+
+    updateTrainerSlot: build.mutation<ApiResponse, UpdateTrainerSlotRequest>({
+      query: ({ slotId, trainerId: _trainerId, ...data }) => ({
+        url: API_ADMIN_TRAINERS_SLOT_UPDATE(slotId),
+        method: "PATCH",
+        data
+      }),
+      invalidatesTags: (_result, _error, { trainerId }) => [{ type: "TrainerSlots", id: trainerId }, "TrainerCount"]
+    }),
+
+    updateTrainer: build.mutation<ApiResponse, { id: string; data: UpdateTrainerData | FormData }>({
+      query: ({ id, data }) => ({
+        url: API_ADMIN_TRAINERS_UPDATE(id),
+        method: "PUT",
+        data
+      }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: "Trainers", id }, { type: "Trainers", id: "LIST" }, "TrainerCount"]
+    }),
+
+    deleteTrainer: build.mutation<ApiResponse, string>({
+      query: (id) => ({
+        url: API_ADMIN_TRAINERS_DELETE(id),
+        method: "DELETE"
+      }),
+      invalidatesTags: [{ type: "Trainers", id: "LIST" }, "TrainerCount"]
     })
   })
 })
@@ -95,5 +142,9 @@ export const {
   useCreateTrainerMutation,
   useGetTrainerSlotsQuery,
   useCreateTrainerSlotMutation,
-  useGetTrainerCountQuery
+  useGetTrainerCountQuery,
+  useGetTrainerBookingsQuery,
+  useUpdateTrainerSlotMutation,
+  useUpdateTrainerMutation,
+  useDeleteTrainerMutation
 } = trainerServiceApi

@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "~/types/common"
+import type { ApiResponse, ApiResponsePaginate, PaginationQuery } from "~/types/common.type"
 
 export type TrainerSpecialization =
   | "GENERAL_FITNESS"
@@ -25,7 +25,7 @@ export type TrainerItem = {
   updatedAt?: string
 }
 
-export type TrainerSearchQuery  = PaginationQuery & {
+export type TrainerSearchQuery = PaginationQuery & {
   search?: string
 }
 
@@ -59,13 +59,61 @@ export interface TrainerCount {
   sumTransactionBookedTrainer: number
 }
 
+export interface TrainerBookingMember {
+  id: string
+  name: string
+  email: string
+  phoneNumber?: string | null
+  profileUrl?: string | null
+}
+
+export interface TrainerBookingItem {
+  id: string
+  member: TrainerBookingMember
+  trainer: TrainerItem
+  slot: TrainerSlotItem
+}
+
+export type TrainerBookingSearchQuery = PaginationQuery & {
+  trainerId?: string
+  date?: string
+}
+
+export interface UpdateTrainerSlotRequest {
+  slotId: string
+  trainerId: string
+  slotDate: string
+  startTime: string
+  endTime: string
+  description?: string
+}
+
+export interface UpdateTrainerRequest {
+  name: string
+  email: string
+  phoneNumber: string
+  specialization: string
+  experience: string
+  rate: string
+}
+
+export interface UpdateTrainerPayload {
+  id: string
+  data: UpdateTrainerRequest
+}
+
 export type TrainersApi = ApiResponsePaginate & {
   data: TrainerItem[]
 }
 export type TrainerSlotsApi = ApiResponse & {
   data: TrainerSlotItem[]
 }
-export type TrainerCountApi = ApiResponse & { data: TrainerCount }
+export type TrainerCountApi = ApiResponse & {
+  data: TrainerCount
+}
 export type CreateTrainerSlotApi = ApiResponse & {
   data: TrainerSlotItem
+}
+export type TrainerBookingsApi = ApiResponsePaginate & {
+  data: TrainerBookingItem[]
 }

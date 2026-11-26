@@ -10,8 +10,8 @@ import { Input } from "~/components/ui/Input"
 import { Button } from "~/components/ui/Button"
 import { getAvatarUrl } from "~/utils/avatar"
 import { UpdateStaffValidation, type UpdateStaffData } from "~/validation/staff"
-import { useUpdateStaffMutation } from "~/services/staff"
-import type { User } from "~/types/user"
+import { useUpdateStaffMutation } from "~/services/staff.service"
+import type { User } from "~/types/user.type"
 
 const MAX_PHOTO_SIZE = 2 * 1024 * 1024
 const ALLOWED_PHOTO_TYPES = ["image/png", "image/jpg", "image/jpeg"]

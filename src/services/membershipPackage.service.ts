@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { ApiResponse } from "~/types/common"
-import type { MembershipCountApi, MembershipPackagesApi } from "~/types/membership"
+import type { ApiResponse } from "~/types/common.type"
+import type { MembershipCountApi, MembershipPackagesApi } from "~/types/membership.type"
 import {
   API_ADMIN_MEMBERSHIP_COUNT,
   API_ADMIN_MEMBERSHIP_PACKAGE_CREATE,

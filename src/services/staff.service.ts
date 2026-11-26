@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { ApiResponse } from "~/types/common"
-import type { StaffCountApi, StaffsApi, StaffSearchQuery, UpdateStaffPayload } from "~/types/user"
+import type { ApiResponse } from "~/types/common.type"
+import type { StaffCountApi, StaffsApi, StaffSearchQuery, UpdateStaffPayload } from "~/types/user.type"
 import {
   API_ADMIN_STAFF_COUNT,
   API_ADMIN_STAFF_CREATE,

@@ -29,7 +29,7 @@ import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { Alert } from "~/utils/alert"
 import { useDebounce } from "~/hooks/useDebounce"
 import { usePagination } from "~/hooks/usePagination"
-import { useGetAllMemberQuery, useDeleteMemberMutation, useGetMemberCountQuery } from "~/services/member"
+import { useGetAllMemberQuery, useDeleteMemberMutation, useGetMemberCountQuery } from "~/services/member.service"
 
 type StatusFilter = "all" | "active" | "expired"
 

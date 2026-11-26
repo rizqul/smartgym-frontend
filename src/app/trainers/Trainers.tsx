@@ -8,13 +8,12 @@ import {
   CalendarCheck,
   CalendarClock,
   Users,
-  Trash2,
-  X,
   Whistle,
   LayoutGrid,
   ListChecks,
   Banknote
 } from "lucide-react"
+import toast from "react-hot-toast"
 
 import { Button } from "~/components/ui/Button"
 import { CardStats } from "~/components/ui/CardStats"
@@ -23,10 +22,11 @@ import TrainerListTab from "~/components/trainers/list/TrainerListTab"
 import TrainerScheduleTab from "~/components/trainers/list/TrainerScheduleTab"
 import { useDebounce } from "~/hooks/useDebounce"
 import { usePagination } from "~/hooks/usePagination"
-import { useGetAllTrainerQuery, useGetTrainerCountQuery } from "~/services/trainer"
+import { useDeleteTrainerMutation, useGetAllTrainerQuery, useGetTrainerCountQuery } from "~/services/trainer.service"
 import { useAppSelector } from "~/store/hooks"
+import { Alert } from "~/utils/alert"
 import { formatRupiah } from "~/utils/format"
-import type { TrainerItem } from "~/types/trainer"
+import type { TrainerItem } from "~/types/trainer.type"
 
 type TabType = "trainers" | "schedule"
 
@@ -37,7 +37,7 @@ export default function Trainers() {
 
   const [activeTab, setActiveTab] = useState<TabType>("trainers")
   const [searchQuery, setSearchQuery] = useState("")
-  const [trainerToDelete, setTrainerToDelete] = useState<TrainerItem | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const { page, size, handlePageChange, handlePageSizeChange, resetPage } = usePagination(5)
 
@@ -69,10 +69,34 @@ export default function Trainers() {
 
   const { data: scheduleTrainersRes } = useGetAllTrainerQuery({ page: 1, size: 50 }, { skip: activeTab !== "schedule" })
 
+  const [deleteTrainer] = useDeleteTrainerMutation()
+
   const trainers = trainersRes?.data ?? []
   const scheduleTrainers = scheduleTrainersRes?.data ?? trainers
   const trainerStats = countRes?.data
   const isTableUpdating = isFetching || isDebouncing
+
+  const handleDelete = async (trainer: TrainerItem) => {
+    const result = await Alert.confirm({
+      title: "Delete Trainer?",
+      text: `Are you sure you want to delete trainer "${trainer.name}"? This action cannot be undone.`,
+      confirmText: "Yes, Delete",
+      isDanger: true
+    })
+
+    if (!result.isConfirmed) return
+
+    setDeletingId(trainer.id)
+    try {
+      await deleteTrainer(trainer.id).unwrap()
+      toast.success(`Trainer ${trainer.name} deleted successfully!`)
+    } catch (err: unknown) {
+      const message = (err as { data?: { message?: string } })?.data?.message || "Failed to delete trainer."
+      toast.error(message)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   if (isLoading && !trainersRes) {
     return (
@@ -188,7 +212,8 @@ export default function Trainers() {
           isError={isError}
           onRefetch={refetch}
           onEdit={(trainer) => navigate(`/dashboard/trainers/${trainer.id}/edit`, { state: { trainer } })}
-          onDelete={(trainer) => setTrainerToDelete(trainer)}
+          onDelete={handleDelete}
+          deletingId={deletingId}
           isAdmin={isAdmin}
         />
       ) : (
@@ -196,58 +221,6 @@ export default function Trainers() {
           trainers={scheduleTrainers}
           isAdmin={isAdmin}
         />
-      )}
-
-      {trainerToDelete && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm lg:left-64"
-          onClick={() => setTrainerToDelete(null)}
-        >
-          <div
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#16181D] shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between border-b border-white/5 px-5 py-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/15 text-red-400">
-                  <Trash2 className="h-4 w-4" />
-                </div>
-                <h3 className="text-base font-bold text-white">Delete Trainer</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setTrainerToDelete(null)}
-                aria-label="Close modal"
-                className="text-text-muted cursor-pointer rounded-lg p-1 transition-colors hover:bg-white/5 hover:text-white"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="px-5 py-4 text-sm leading-relaxed text-white/80">
-              Are you sure you want to delete trainer <strong className="text-white">{trainerToDelete.name}</strong>? This action cannot be
-              undone.
-            </div>
-
-            <div className="flex items-center justify-end gap-2.5 border-t border-white/5 bg-[#121419] px-5 py-3.5">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setTrainerToDelete(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                onClick={() => setTrainerToDelete(null)}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                Yes, Delete
-              </Button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   )

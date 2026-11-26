@@ -1,4 +1,4 @@
-import type { ApiResponse } from "./common"
+import type { ApiResponse } from "./common.type"
 
 export type MembershipPackage = {
   id: string

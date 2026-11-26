@@ -6,7 +6,7 @@ import LocalDate from "~/components/ui/LocalDate"
 import { getAvatarUrl } from "~/utils/avatar"
 import { formatRupiah } from "~/utils/format"
 import { getTransactionStatusMeta, getTransactionTypeMeta } from "~/utils/transaction"
-import type { TransactionItem } from "~/types/transaction"
+import type { TransactionItem } from "~/types/transaction.type"
 
 interface TransactionTableRowProps {
   transaction: TransactionItem

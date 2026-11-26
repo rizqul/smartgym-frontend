@@ -6,8 +6,8 @@ import { Input } from "~/components/ui/Input"
 import { Button } from "~/components/ui/Button"
 import { Card } from "~/components/ui/Card"
 import LocalDate from "~/components/ui/LocalDate"
-import type { CreateTrainerSlotRequest, TrainerItem, TrainerSlotItem } from "~/types/trainer"
-import { useCreateTrainerSlotMutation } from "~/services/trainer"
+import type { CreateTrainerSlotRequest, TrainerItem, TrainerSlotItem } from "~/types/trainer.type"
+import { useCreateTrainerSlotMutation } from "~/services/trainer.service"
 import CreateTrainerSlotModal from "../schedule/CreateTrainerSlotModal"
 import TrainerScheduleCard from "../schedule/TrainerScheduleCard"
 import TrainerSlotDetailPanel from "../schedule/TrainerSlotDetailPanel"
@@ -227,15 +227,10 @@ export default function TrainerScheduleTab({ trainers, initialTrainerId, isAdmin
                   trainer={trainer}
                   selectedDate={selectedDate}
                   isSelected={activeTrainer?.id === trainer.id}
-                  selectedSlotId={selectedSlot?.id}
                   isAdmin={isAdmin}
                   onSelectTrainer={(t, firstSlot) => {
                     setSelectedTrainerId(t.id)
                     setSelectedSlot(firstSlot ?? null)
-                  }}
-                  onSelectSlot={(t, slot) => {
-                    setSelectedTrainerId(t.id)
-                    setSelectedSlot(slot)
                   }}
                   onOpenCreateModal={(id) => handleOpenCreateModal(id)}
                 />

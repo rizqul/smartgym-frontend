@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { ApiResponse } from "~/types/common"
-import type { UpdatePasswordRequest, UpdateProfileRequest, UserApi } from "~/types/user"
+import type { ApiResponse } from "~/types/common.type"
+import type { UpdatePasswordRequest, UpdateProfileRequest, UserApi } from "~/types/user.type"
 
 import { API_USER, API_USER_UPDATE_PASSWORD, API_USER_UPDATE_PROFILE } from "~/utils/endpoints"
 

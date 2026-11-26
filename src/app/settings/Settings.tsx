@@ -27,7 +27,7 @@ import LocalDate from "~/components/ui/LocalDate"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import { getAvatarUrl } from "~/utils/avatar"
 import { getCroppedImageFile } from "~/utils/cropImage"
-import { useGetProfileQuery, useUpdateProfileMutation, useUpdatePasswordMutation } from "~/services/user"
+import { useGetProfileQuery, useUpdateProfileMutation, useUpdatePasswordMutation } from "~/services/user.service"
 import { profileSchema, type ProfileFormValues } from "~/validation/profile"
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024

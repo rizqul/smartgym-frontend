@@ -1,6 +1,9 @@
 import * as z from "zod"
 import * as rules from "./zodRules"
 
+const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpg", "image/jpeg"]
+const MAX_PHOTO_SIZE = 2 * 1024 * 1024 // 2MB
+
 export const CreateTrainerValidation = z.object({
   name: rules.name,
   email: rules.email,
@@ -11,6 +14,21 @@ export const CreateTrainerValidation = z.object({
 })
 
 export type CreateTrainerData = z.infer<typeof CreateTrainerValidation>
+
+export const UpdateTrainerValidation = CreateTrainerValidation.extend({
+  photo: z
+    .instanceof(File)
+    .refine((file) => ALLOWED_IMAGE_TYPES.includes(file.type), {
+      message: "Photo must be a PNG, JPG, or JPEG file."
+    })
+    .refine((file) => file.size <= MAX_PHOTO_SIZE, {
+      message: "Photo size must not exceed 2MB."
+    })
+    .optional()
+    .nullable()
+})
+
+export type UpdateTrainerData = z.infer<typeof UpdateTrainerValidation>
 
 export const CreateTrainerSlotValidation = z
   .object({

@@ -35,8 +35,9 @@ export default function Login() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data)
-    } catch (error: any) {
-      setError("email", { type: "server", message: error.message })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unable to sign in. Please try again."
+      setError("email", { type: "server", message })
     }
   }
 
@@ -50,8 +51,8 @@ export default function Login() {
             className="h-8 w-8 object-contain drop-shadow-md"
           />
         </div>
-        <h2 className="mb-1.5 text-[22px] font-semibold text-white">Selamat Datang Kembali</h2>
-        <p className="text-text-secondary text-[13px]">Masuk ke portal operasional SmartGym</p>
+        <h2 className="mb-1.5 text-[22px] font-semibold text-white">Welcome Back</h2>
+        <p className="text-text-secondary text-[13px]">Sign in to the SmartGym operations portal</p>
       </CardHeader>
 
       <CardContent className="pt-6">
@@ -70,7 +71,7 @@ export default function Login() {
           />
 
           <Input
-            label="Kata Sandi"
+            label="Password"
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             icon={Lock}
@@ -83,7 +84,7 @@ export default function Login() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="text-text-muted transition-colors hover:text-white focus:outline-none"
-                aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
                   <EyeOff
@@ -119,7 +120,7 @@ export default function Login() {
                 htmlFor="remember-me"
                 className="text-text-secondary ml-2.5 block cursor-pointer text-[13px] transition-colors hover:text-white"
               >
-                Ingat saya
+                Remember me
               </label>
             </div>
 
@@ -127,7 +128,7 @@ export default function Login() {
               to="/auth/forgot-password"
               className="text-primary hover:text-primary-hover text-[12px] font-semibold transition-colors"
             >
-              Lupa Kata Sandi?
+              Forgot Password?
             </Link>
           </div>
 
@@ -146,7 +147,7 @@ export default function Login() {
               )
             }
           >
-            {isSubmitting ? "Memproses..." : "Masuk"}
+            {isSubmitting ? "Processing..." : "Sign In"}
           </Button>
         </form>
       </CardContent>

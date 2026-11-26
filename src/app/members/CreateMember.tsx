@@ -9,7 +9,7 @@ import { Card, CardHeader, CardContent } from "~/components/ui/Card"
 import { Input } from "~/components/ui/Input"
 import { Button } from "~/components/ui/Button"
 import { CreateMemberValidation, type CreateMemberData } from "~/validation/member"
-import { useCreateMemberMutation, useRequestMemberOtpMutation } from "~/services/member"
+import { useCreateMemberMutation, useRequestMemberOtpMutation } from "~/services/member.service"
 
 export default function CreateMember() {
   const navigate = useNavigate()

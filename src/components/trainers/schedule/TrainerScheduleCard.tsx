@@ -1,10 +1,10 @@
-import { Award, Briefcase, Clock, Loader2, Phone, Plus, RotateCcw } from "lucide-react"
+import { Briefcase, Clock, Loader2, Phone, Plus, RotateCcw } from "lucide-react"
 
 import { Card, CardContent, CardFooter, CardHeader } from "~/components/ui/Card"
 import LocalDate from "~/components/ui/LocalDate"
 import { getAvatarUrl } from "~/utils/avatar"
-import { useGetTrainerSlotsQuery } from "~/services/trainer"
-import type { TrainerItem, TrainerSlotItem } from "~/types/trainer"
+import { useGetTrainerSlotsQuery } from "~/services/trainer.service"
+import type { TrainerItem, TrainerSlotItem } from "~/types/trainer.type"
 import { formatDateValue, getSlotStatusBadgeStyle } from "../../../utils/scheduleHelpers"
 
 const MAX_VISIBLE_SLOTS = 3
@@ -13,10 +13,8 @@ interface TrainerScheduleCardProps {
   trainer: TrainerItem
   selectedDate: string
   isSelected: boolean
-  selectedSlotId?: string
   isAdmin: boolean
   onSelectTrainer: (trainer: TrainerItem, firstSlot?: TrainerSlotItem) => void
-  onSelectSlot: (trainer: TrainerItem, slot: TrainerSlotItem) => void
   onOpenCreateModal: (trainerId: string) => void
 }
 
@@ -24,10 +22,8 @@ export default function TrainerScheduleCard({
   trainer,
   selectedDate,
   isSelected,
-  selectedSlotId,
   isAdmin,
   onSelectTrainer,
-  onSelectSlot,
   onOpenCreateModal
 }: TrainerScheduleCardProps) {
   const { currentData, isFetching, isError, refetch } = useGetTrainerSlotsQuery({
@@ -86,7 +82,7 @@ export default function TrainerScheduleCard({
               {isToday ? "TODAY'S SESSION SCHEDULE" : "SESSION SCHEDULE"}
             </span>
             <span className="text-text-muted inline-flex items-center gap-1 text-[10px] font-medium">
-              <Award className="text-primary h-3 w-3" />
+              <Clock className="text-primary h-3 w-3" />
               {isInitialDateLoad ? "..." : `${slots.length} Sessions`}
             </span>
           </div>
@@ -130,47 +126,35 @@ export default function TrainerScheduleCard({
             </div>
           ) : (
             <div className={`flex flex-col gap-1.5 transition-opacity ${isFetching ? "opacity-60" : "opacity-100"}`}>
-              {visibleSlots.map((slot) => {
-                const isSlotActive = selectedSlotId === slot.id
-                return (
-                  <button
-                    key={slot.id}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onSelectSlot(trainer, slot)
-                    }}
-                    className={`flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg border px-2.5 py-2 text-left transition-all ${
-                      isSlotActive
-                        ? "border-primary/60 bg-primary/15 text-white"
-                        : "border-white/5 bg-[#0B0C10]/70 text-white/85 hover:border-white/15 hover:bg-white/5"
-                    }`}
-                  >
-                    <div className="flex min-w-0 items-center gap-1.5 text-[12px] font-semibold text-white">
-                      <Clock className="text-primary h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate">
-                        <LocalDate
-                          date={slot.startTime}
-                          variant="hour"
-                        />
-                        <span className="text-text-muted mx-1">-</span>
-                        <LocalDate
-                          date={slot.endTime}
-                          variant="hour"
-                        />
-                      </span>
-                    </div>
-
-                    <span
-                      className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase ${getSlotStatusBadgeStyle(
-                        slot.status
-                      )}`}
-                    >
-                      {slot.status}
+              {visibleSlots.map((slot) => (
+                <div
+                  key={slot.id}
+                  className="flex w-full items-center justify-between gap-2 rounded-lg border border-white/5 bg-[#0B0C10]/70 px-2.5 py-2 text-white/85"
+                >
+                  <div className="flex min-w-0 items-center gap-1.5 text-[12px] font-semibold text-white">
+                    <Clock className="text-primary h-3.5 w-3.5 shrink-0" />
+                    <span className="shrink-0 tabular-nums">
+                      <LocalDate
+                        date={slot.startTime}
+                        variant="hour"
+                      />
+                      <span className="text-text-muted mx-1">-</span>
+                      <LocalDate
+                        date={slot.endTime}
+                        variant="hour"
+                      />
                     </span>
-                  </button>
-                )
-              })}
+                  </div>
+
+                  <span
+                    className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase ${getSlotStatusBadgeStyle(
+                      slot.status
+                    )}`}
+                  >
+                    {slot.status}
+                  </span>
+                </div>
+              ))}
 
               {remainingSlotsCount > 0 && (
                 <div className="text-text-muted flex justify-center pt-0.5 text-[11px] font-medium">
@@ -182,10 +166,7 @@ export default function TrainerScheduleCard({
         </CardContent>
       </div>
 
-      <CardFooter className="justify-between border-t border-white/5 p-4 pt-3 text-[11px] sm:p-4 sm:pt-3">
-        <span className="font-medium text-sky-400">
-          {isInitialDateLoad ? "Checking slots..." : slots.length > 0 ? `${slots.length} Scheduled Slots` : "No Slots"}
-        </span>
+      <CardFooter className="border-t border-white/5 p-2 pt-3 text-[11px] sm:pt-3">
         <span className="text-text-muted text-[10px]">Click to view details</span>
       </CardFooter>
     </Card>
