@@ -76,7 +76,7 @@ export default function CreateMembership() {
           <p className="text-text-secondary text-[12px]">Enter the package price, features, and duration.</p>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 mt-4">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"

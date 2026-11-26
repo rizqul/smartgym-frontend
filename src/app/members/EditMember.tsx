@@ -25,7 +25,7 @@ export default function EditMember() {
 
   const { data: membersRes, isLoading, isError } = useGetAllMemberQuery({ size: 50, page: 1 }, { skip: Boolean(stateMember) || !id })
 
-  const member = stateMember ?? membersRes?.data?.find((m) => m.id === id)
+  const member = stateMember ?? membersRes?.data?.find((m: { id: string }) => m.id === id)
   const [updateMember, { isLoading: isUpdating }] = useUpdateMemberMutation()
 
   const [photoFile, setPhotoFile] = useState<File | null>(null)
@@ -172,7 +172,7 @@ export default function EditMember() {
           <p className="text-text-secondary text-[12px]">Kosongkan foto dan password jika tidak ingin mengubahnya.</p>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 mt-4">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"

@@ -66,7 +66,7 @@ export default function CreateStaff() {
           <p className="text-text-secondary text-[12px]">Enter the profile details and initial password for the staff account.</p>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 mt-4">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"
