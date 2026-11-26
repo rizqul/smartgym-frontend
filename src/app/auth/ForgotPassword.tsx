@@ -17,17 +17,17 @@ export default function ForgotPassword() {
   const handleEmailSuccess = (submittedEmail: string) => {
     setEmail(submittedEmail)
     setStep(2)
-    toast.success("Kode OTP telah dikirim ke email Anda!")
+    toast.success("The OTP code has been sent to your email!")
   }
 
   const handleOtpSuccess = (code: string) => {
     setOtpCode(code)
     setStep(3)
-    toast.success("Kode OTP divalidasi! Silakan buat sandi baru.")
+    toast.success("The OTP code has been verified! Please create a new password.")
   }
 
   const handleResetSuccess = () => {
-    toast.success("Password berhasil diubah! Silakan login kembali.")
+    toast.success("Password changed successfully! Please log in again.")
 
     setTimeout(() => {
       navigate("/auth/login")

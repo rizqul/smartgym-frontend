@@ -143,8 +143,8 @@ export default function MembershipPage() {
             let cleanDesc = pkg.description || ""
             let featuresList: string[] = []
 
-            if (pkg.description && pkg.description.includes("Fasilitas:")) {
-              const parts = pkg.description.split("Fasilitas:")
+            if (pkg.description && /Fasilitas:|Facilities:/i.test(pkg.description)) {
+              const parts = pkg.description.split(/Fasilitas:|Facilities:/i)
               cleanDesc = parts[0].trim()
 
               featuresList = parts[1]
@@ -162,9 +162,9 @@ export default function MembershipPage() {
             return (
               <div
                 key={pkg.id}
-                className="flex h-full min-w-0 flex-col gap-3.5 rounded-2xl border border-white/10 bg-[#1C1F26] p-8 shadow-lg transition-all hover:border-white/20"
+                className="flex h-100 min-w-0 flex-col gap-3.5 rounded-2xl border border-white/10 bg-[#1C1F26] p-8 shadow-lg transition-all hover:border-white/20"
               >
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex shrink-0 items-center justify-between gap-2">
                   <Badge label={pkg.type || "PACKAGE"} />
 
                   {isAdmin && (
@@ -181,12 +181,12 @@ export default function MembershipPage() {
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1">
+                <div className="flex shrink-0 flex-col gap-1">
                   <h3 className="truncate text-base font-bold text-white">{pkg.name}</h3>
                   <p className="text-text-secondary line-clamp-2 min-h-9 text-xs leading-relaxed">{cleanDesc || "-"}</p>
                 </div>
 
-                <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 rounded-xl border border-white/5 bg-white/3 px-3.5 py-2.5">
+                <div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-2 gap-y-1 rounded-xl border border-white/5 bg-white/3 px-3.5 py-2.5">
                   <div className="flex min-w-0 items-baseline gap-1 text-white">
                     <span className="text-xs font-semibold text-white/70">Rp</span>
                     <span className="truncate text-xl font-bold tracking-tight tabular-nums">{formatRupiah(pkg.price)}</span>
@@ -194,9 +194,9 @@ export default function MembershipPage() {
                   <span className="text-primary text-xs font-semibold whitespace-nowrap">/ {pkg.duration} days</span>
                 </div>
 
-                <div className="flex flex-1 flex-col gap-2 border-t border-white/5 pt-3">
-                  <span className="text-text-muted text-[10px] font-bold tracking-wider uppercase">INCLUDED FACILITIES</span>
-                  <ul className="flex flex-col gap-1.5">
+                <div className="flex min-h-0 flex-1 flex-col gap-2 border-t border-white/5 pt-3">
+                  <span className="text-text-muted shrink-0 text-[10px] font-bold tracking-wider uppercase">INCLUDED FACILITIES</span>
+                  <ul className="flex flex-1 flex-col gap-1.5 overflow-y-auto pr-1.5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15 [&::-webkit-scrollbar-track]:bg-transparent">
                     {featuresList.map((feat, idx) => (
                       <li
                         key={idx}

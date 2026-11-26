@@ -29,6 +29,7 @@ import Trainers from "./app/trainers/Trainers"
 import NotFound from "./app/NotFound"
 import CreateTrainer from "./app/trainers/CreateTrainer"
 import LandingPage from "./app/LandingPage"
+import EditTrainer from "./app/trainers/EditTrainer"
 
 export const router = createBrowserRouter([
   {
@@ -123,7 +124,10 @@ export const router = createBrowserRouter([
               { index: true, Component: Trainers },
               {
                 element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
-                children: [{ path: "create", Component: CreateTrainer }]
+                children: [
+                  { path: "create", Component: CreateTrainer },
+                  { path: ":id/edit", Component: EditTrainer }
+                ]
               }
             ]
           }

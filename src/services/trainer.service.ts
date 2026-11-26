@@ -17,15 +17,17 @@ import {
   API_ADMIN_TRAINERS_BOOKING_LIST,
   API_ADMIN_TRAINERS_COUNT,
   API_ADMIN_TRAINERS_CREATE,
+  API_ADMIN_TRAINERS_DELETE,
   API_ADMIN_TRAINERS_LIST,
   API_ADMIN_TRAINERS_SLOT_CREATE,
   API_ADMIN_TRAINERS_SLOT_LIST,
   API_ADMIN_TRAINERS_SLOT_UPDATE,
+  API_ADMIN_TRAINERS_UPDATE,
   API_STAFF_TRAINERS_COUNT,
   API_STAFF_TRAINERS_LIST,
   API_STAFF_TRAINERS_SLOT_LIST
 } from "~/utils/endpoints"
-import type { CreateTrainerData } from "~/validation/trainer"
+import type { CreateTrainerData, UpdateTrainerData } from "~/validation/trainer"
 
 export const trainerServiceApi = createApi({
   reducerPath: "trainerApi",
@@ -114,6 +116,23 @@ export const trainerServiceApi = createApi({
         data
       }),
       invalidatesTags: (_result, _error, { trainerId }) => [{ type: "TrainerSlots", id: trainerId }, "TrainerCount"]
+    }),
+
+    updateTrainer: build.mutation<ApiResponse, { id: string; data: UpdateTrainerData | FormData }>({
+      query: ({ id, data }) => ({
+        url: API_ADMIN_TRAINERS_UPDATE(id),
+        method: "PUT",
+        data
+      }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: "Trainers", id }, { type: "Trainers", id: "LIST" }, "TrainerCount"]
+    }),
+
+    deleteTrainer: build.mutation<ApiResponse, string>({
+      query: (id) => ({
+        url: API_ADMIN_TRAINERS_DELETE(id),
+        method: "DELETE"
+      }),
+      invalidatesTags: [{ type: "Trainers", id: "LIST" }, "TrainerCount"]
     })
   })
 })
@@ -125,5 +144,7 @@ export const {
   useCreateTrainerSlotMutation,
   useGetTrainerCountQuery,
   useGetTrainerBookingsQuery,
-  useUpdateTrainerSlotMutation
+  useUpdateTrainerSlotMutation,
+  useUpdateTrainerMutation,
+  useDeleteTrainerMutation
 } = trainerServiceApi

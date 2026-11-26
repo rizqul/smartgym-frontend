@@ -48,7 +48,7 @@ export default function RecentTransactionCard({ transactions }: RecentTransactio
         <TableBody>
           {!transactions.length ? (
             <TableTR hideRowNumber>
-              <TableTD colSpan={4}>
+              <TableTD colSpan={5}>
                 <div className="text-text-muted py-10 text-center text-sm">No recent transactions.</div>
               </TableTD>
             </TableTR>

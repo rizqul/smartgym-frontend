@@ -120,20 +120,38 @@ export default function CreateMembership() {
 
               <Input
                 label="Package Price (IDR)"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="E.g., 4200000"
                 icon={CreditCard}
                 error={errors.price?.message}
-                {...register("price", { valueAsNumber: true })}
+                {...register("price", {
+                  setValueAs: (v) => {
+                    const cleaned = String(v ?? "").replace(/\D/g, "")
+                    return cleaned === "" ? NaN : Number(cleaned)
+                  }
+                })}
+                onInput={(e) => {
+                  e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "")
+                }}
               />
 
               <Input
                 label="Duration (Days)"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="E.g., 365"
                 icon={Clock}
                 error={errors.duration?.message}
-                {...register("duration", { valueAsNumber: true })}
+                {...register("duration", {
+                  setValueAs: (v) => {
+                    const cleaned = String(v ?? "").replace(/\D/g, "")
+                    return cleaned === "" ? NaN : Number(cleaned)
+                  }
+                })}
+                onInput={(e) => {
+                  e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "")
+                }}
               />
 
               <div className="space-y-1 sm:col-span-2">

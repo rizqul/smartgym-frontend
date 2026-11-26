@@ -29,6 +29,8 @@ export const API_ADMIN_TRAINERS_SLOT_LIST = (id: string) => `/admin/dashboard/tr
 export const API_ADMIN_TRAINERS_SLOT_CREATE = (id: string) => `/admin/dashboard/trainers/slot/create/${id}`
 export const API_ADMIN_TRAINERS_BOOKING_LIST = "/admin/dashboard/trainers/booking"
 export const API_ADMIN_TRAINERS_SLOT_UPDATE = (slotId: string) => `/admin/dashboard/trainers/slot/update/${slotId}`
+export const API_ADMIN_TRAINERS_UPDATE = (id: string) => `/admin/dashboard/trainers/update/${id}`
+export const API_ADMIN_TRAINERS_DELETE = (id: string) => `/admin/dashboard/trainers/delete/${id}`
 
 export const API_ADMIN_TRANSACTIONS_LIST = "/admin/dashboard/transactions"
 export const API_ADMIN_TRANSACTIONS_CSV_DATA = "/admin/dashboard/transactions/csv-data"

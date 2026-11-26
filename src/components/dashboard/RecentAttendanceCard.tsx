@@ -64,7 +64,7 @@ export default function RecentAttendanceCard({ attendances, isRefreshing, onRefr
         <TableBody>
           {!attendances.length ? (
             <TableTR hideRowNumber>
-              <TableTD colSpan={5}>
+              <TableTD colSpan={6}>
                 <div className="text-text-muted py-10 text-center text-sm">No recent attendance records.</div>
               </TableTD>
             </TableTR>

@@ -88,6 +88,20 @@ export interface UpdateTrainerSlotRequest {
   description?: string
 }
 
+export interface UpdateTrainerRequest {
+  name: string
+  email: string
+  phoneNumber: string
+  specialization: string
+  experience: string
+  rate: string
+}
+
+export interface UpdateTrainerPayload {
+  id: string
+  data: UpdateTrainerRequest
+}
+
 export type TrainersApi = ApiResponsePaginate & {
   data: TrainerItem[]
 }

@@ -22,7 +22,7 @@ export default function Dashboard() {
     return (
       <div className="w-full p-4 lg:p-6">
         <PageSkeleton
-          statCount={isAdmin ? 5 : 4}
+          statCount= {4}
           contentVariant="list"
         />
       </div>
