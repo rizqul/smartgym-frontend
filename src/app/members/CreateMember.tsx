@@ -105,7 +105,7 @@ export default function CreateMember() {
           <p className="text-text-secondary text-[12px]">Make sure the email address is active to receive the OTP.</p>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 mt-4">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"

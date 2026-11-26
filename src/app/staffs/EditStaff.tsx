@@ -139,7 +139,7 @@ export default function EditStaff() {
           <p className="text-text-secondary text-[12px]">Leave the photo and password blank if you do not want to change them.</p>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 mt-4">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6"
