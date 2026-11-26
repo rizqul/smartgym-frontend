@@ -22,7 +22,6 @@ import ManageStaffs from "./app/staffs/Staffs"
 import EditStaff from "./app/staffs/EditStaff"
 import CreateStaff from "./app/staffs/CreateStaff"
 import CreateMembership from "./app/membership/CreateMembership"
-import EditMembership from "./app/membership/EditMembership"
 import Transaction from "./app/transactions/Transaction"
 import TerminalKehadiran from "./app/attendance/TerminalKehadiran"
 import Trainers from "./app/trainers/Trainers"
@@ -97,7 +96,6 @@ export const router = createBrowserRouter([
                 element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
                 children: [
                   { path: "create", Component: CreateMembership },
-                  { path: ":id/edit", Component: EditMembership }
                 ]
               }
             ]

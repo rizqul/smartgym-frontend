@@ -101,29 +101,7 @@ export default function Login() {
             }
           />
 
-          <div className="flex items-center justify-between pt-1 pb-1">
-            <div className="relative flex items-center">
-              <div className="relative flex h-4 w-4 items-center justify-center">
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  {...register("remember")}
-                  className="peer bg-background checked:bg-primary checked:border-primary focus:ring-primary/50 h-4 w-4 cursor-pointer appearance-none rounded border border-white/20 transition-all focus:ring-2 focus:ring-offset-1 focus:ring-offset-[#1C1F26] focus:outline-none"
-                />
-
-                <div className="pointer-events-none absolute opacity-0 transition-opacity peer-checked:opacity-100">
-                  <div className="h-1.5 w-1.5 rounded-sm bg-white"></div>
-                </div>
-              </div>
-
-              <label
-                htmlFor="remember-me"
-                className="text-text-secondary ml-2.5 block cursor-pointer text-[13px] transition-colors hover:text-white"
-              >
-                Remember me
-              </label>
-            </div>
-
+          <div className="flex items-center justify-end pt-1 pb-1">
             <Link
               to="/auth/forgot-password"
               className="text-primary hover:text-primary-hover text-[12px] font-semibold transition-colors"

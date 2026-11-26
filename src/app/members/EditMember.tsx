@@ -71,13 +71,13 @@ export default function EditMember() {
     if (!file) return
 
     if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
-      setPhotoError("File photo harus berupa PNG, JPG, atau JPEG.")
+      setPhotoError("The photo file must be PNG, JPG, or JPEG.")
       e.target.value = ""
       return
     }
 
     if (file.size > MAX_PHOTO_SIZE) {
-      setPhotoError("Ukuran file photo tidak boleh lebih dari 2MB.")
+      setPhotoError("The photo file size must not exceed 2MB.")
       e.target.value = ""
       return
     }
@@ -112,11 +112,11 @@ export default function EditMember() {
 
     try {
       const res = await updateMember({ id, data: formData }).unwrap()
-      toast.success(res?.message || "Berhasil memperbarui data member!")
+      toast.success(res?.message || "Member data updated successfully!")
       navigate("/dashboard/members")
     } catch (err: unknown) {
       const apiErr = err as { data?: { message?: string }; message?: string }
-      toast.error(apiErr?.data?.message || apiErr?.message || "Gagal memperbarui data member.")
+      toast.error(apiErr?.data?.message || apiErr?.message || "Failed to update member data.")
     }
   }
 
@@ -124,7 +124,7 @@ export default function EditMember() {
     return (
       <div className="flex h-96 w-full items-center justify-center gap-2">
         <Loader2 className="text-primary h-5 w-5 animate-spin" />
-        <p className="text-text-muted font-medium">Memuat data member...</p>
+        <p className="text-text-muted font-medium">Loading member data...</p>
       </div>
     )
   }
@@ -132,12 +132,12 @@ export default function EditMember() {
   if (isError || !member) {
     return (
       <div className="flex h-96 w-full flex-col items-center justify-center gap-3">
-        <p className="text-sm text-red-400">Data member tidak ditemukan atau gagal dimuat.</p>
+        <p className="text-sm text-red-400">Member data was not found or could not be loaded.</p>
         <Button
           variant="secondary"
           onClick={() => navigate("/dashboard/members")}
         >
-          Kembali ke Daftar Member
+          Back to Member List
         </Button>
       </div>
     )
@@ -157,19 +157,19 @@ export default function EditMember() {
         </button>
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold text-white">Edit Data Member</h1>
+            <h1 className="text-2xl font-bold text-white">Edit Member Data</h1>
             <span className="bg-primary/20 text-primary border-primary/20 rounded-md border px-2 py-0.5 font-mono text-[11px] font-bold">
               #{id.slice(0, 8)}
             </span>
           </div>
-          <p className="text-text-secondary mt-1 text-[13px]">Perbarui profil, kontak, atau kata sandi member.</p>
+          <p className="text-text-secondary mt-1 text-[13px]">Update the member's profile, contact details, or password.</p>
         </div>
       </div>
 
       <Card className="shadow-2xl">
         <CardHeader className="border-b border-white/5 pb-4">
-          <h2 className="text-[16px] font-bold text-white">Informasi Dasar Member</h2>
-          <p className="text-text-secondary text-[12px]">Kosongkan foto dan password jika tidak ingin mengubahnya.</p>
+          <h2 className="text-[16px] font-bold text-white">Member Basic Information</h2>
+          <p className="text-text-secondary text-[12px]">Leave the photo and password blank if you do not want to change them.</p>
         </CardHeader>
 
         <CardContent className="pt-6 mt-4">
@@ -184,12 +184,12 @@ export default function EditMember() {
                 className="h-16 w-16 shrink-0 rounded-full border border-white/10 object-cover"
               />
               <div className="flex flex-1 flex-col gap-1.5">
-                <span className="text-xs font-semibold text-white">Foto Profil (Opsional)</span>
-                <p className="text-text-muted text-[11px]">Format PNG, JPG, atau JPEG. Maksimal ukuran 2MB.</p>
+                <span className="text-xs font-semibold text-white">Profile Photo (Optional)</span>
+                <p className="text-text-muted text-[11px]">PNG, JPG, or JPEG format. Maximum size 2MB.</p>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white/10">
                     <Upload className="h-3.5 w-3.5" />
-                    Pilih Foto Baru
+                    Choose New Photo
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/jpg"
@@ -204,7 +204,7 @@ export default function EditMember() {
                       className="text-text-muted inline-flex cursor-pointer items-center gap-1 rounded-lg px-2 py-1.5 text-xs hover:bg-white/5 hover:text-red-400"
                     >
                       <X className="h-3.5 w-3.5" />
-                      Batal pilih ({photoFile.name})
+                      Cancel selection ({photoFile.name})
                     </button>
                   )}
                 </div>
@@ -215,8 +215,8 @@ export default function EditMember() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 <Input
-                  label="Nama Lengkap"
-                  placeholder="Masukkan nama sesuai identitas"
+                  label="Full Name"
+                  placeholder="Enter the member's name"
                   icon={User}
                   error={errors.name?.message}
                   {...register("name")}
@@ -224,16 +224,16 @@ export default function EditMember() {
               </div>
 
               <Input
-                label="Alamat Email"
+                label="Email Address"
                 type="email"
-                placeholder="email@contoh.com"
+                placeholder="email@example.com"
                 icon={Mail}
                 error={errors.email?.message}
                 {...register("email")}
               />
 
               <Input
-                label="Nomor WhatsApp / Telepon"
+                label="WhatsApp / Phone Number"
                 type="tel"
                 placeholder="081234567890"
                 icon={Phone}
@@ -243,9 +243,9 @@ export default function EditMember() {
 
               <div className="sm:col-span-2">
                 <Input
-                  label="Password Baru (Opsional)"
+                  label="New Password (Optional)"
                   type="password"
-                  placeholder="Kosongkan jika tidak ingin mengubah password (min. 8 karakter)"
+                  placeholder="Leave blank to keep the current password (minimum 8 characters)"
                   icon={Lock}
                   error={errors.password?.message}
                   {...register("password")}
@@ -260,7 +260,7 @@ export default function EditMember() {
                 onClick={() => navigate("/dashboard/members")}
                 disabled={isUpdating}
               >
-                Batal
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -269,7 +269,7 @@ export default function EditMember() {
                 leftIcon={!isUpdating && <Save className="h-4 w-4" />}
                 className="font-bold"
               >
-                {isUpdating ? "Menyimpan..." : "Simpan Perubahan"}
+                {isUpdating ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
