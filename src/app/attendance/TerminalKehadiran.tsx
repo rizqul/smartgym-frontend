@@ -194,7 +194,6 @@ export default function TerminalKehadiran() {
             ) : (
               latestValidations.map((item) => {
                 const memberName = item.member?.name || "Member"
-                const memberId = item.member?.id
                 const isDenied = item.status === "DENIED"
                 const isOnFloor = !isDenied && !item.checkOutAt
 
@@ -232,9 +231,6 @@ export default function TerminalKehadiran() {
                       <div className="flex min-w-0 flex-col gap-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <h4 className="truncate text-[15px] font-bold text-white sm:text-[16px]">{memberName}</h4>
-                          <span className="text-text-muted shrink-0 rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px]">
-                            #{memberId?.slice(0, 8) ?? "-"}
-                          </span>
                         </div>
 
                         {isDenied ? (
