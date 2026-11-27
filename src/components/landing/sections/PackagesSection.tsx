@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { CalendarDays, Check, Headset, RefreshCw, Store, type LucideIcon } from "lucide-react"
+import { CalendarDays, Check, RefreshCw, Store } from "lucide-react"
 
 import { useGetLandingMembershipPackagesQuery } from "~/services/landing.service"
 import type { MembershipPackage, MembershipPackagesData } from "~/types/membership.type"
@@ -14,11 +14,13 @@ interface TierConfig {
   badgeClass: string
   period: string
   isPopular?: boolean
-  ctaLabel: string
-  ctaIcon: LucideIcon
-  ctaHref: string
   defaultFeatures: string[]
 }
+
+const REGISTER_CTA = {
+  label: "Register at Receptionist",
+  href: "#alur-pendaftaran"
+} as const
 
 const TIER_CONFIGS: TierConfig[] = [
   {
@@ -27,9 +29,6 @@ const TIER_CONFIGS: TierConfig[] = [
     badge: "Weekly Pass",
     badgeClass: "bg-card text-text-secondary",
     period: "/ week",
-    ctaLabel: "Register at Receptionist",
-    ctaIcon: Store,
-    ctaHref: "#alur-pendaftaran",
     defaultFeatures: ["Full Gym Equipment Access", "Daily Locker & Hot Shower", "SmartGym Member App Check-In"]
   },
   {
@@ -39,9 +38,6 @@ const TIER_CONFIGS: TierConfig[] = [
     badgeClass: "bg-primary/15 text-primary",
     period: "/ month",
     isPopular: true,
-    ctaLabel: "Register at Receptionist",
-    ctaIcon: Store,
-    ctaHref: "#alur-pendaftaran",
     defaultFeatures: ["Unlimited Gym Facility Access", "Personal Trainer Booking Access", "SmartGym Member App & QR Check-In"]
   },
   {
@@ -50,12 +46,11 @@ const TIER_CONFIGS: TierConfig[] = [
     badge: "All-In",
     badgeClass: "bg-secondary/15 text-secondary",
     period: "/ year",
-    ctaLabel: "Consult Yearly Plan",
-    ctaIcon: Headset,
-    ctaHref: "#kontak",
     defaultFeatures: ["Maximum Annual Savings", "Full All-Year Gym Access", "Priority Member Support"]
   }
 ]
+
+const FACILITIES_MARKER_REGEX = /^(facilities|fasilitas|features|benefits|includes)\s*:\s*(.*)$/i
 
 function getPackagesByTier(data: MembershipPackagesData | undefined, tierKey: TierKey): MembershipPackage[] {
   if (!data) return []
@@ -66,32 +61,73 @@ function getPackagesByTier(data: MembershipPackagesData | undefined, tierKey: Ti
   return [...(list ?? [])].sort((a, b) => a.price - b.price)
 }
 
-function extractFeatures(pkg: MembershipPackage, fallbackFeatures: string[]): { summary: string; features: string[] } {
+function cleanFeatureLine(line: string): string {
+  return line.replace(/^[-•*]\s*/, "").trim()
+}
+
+function parsePackageDescription(
+  pkg: MembershipPackage,
+  fallbackFeatures: string[]
+): {
+  summary: string
+  facilitiesLabel: string
+  features: string[]
+} {
   const rawDescription = pkg.description?.trim() ?? ""
-  const durationLabel = pkg.duration > 0 ? `Valid for ${pkg.duration} days` : null
 
   if (!rawDescription) {
     return {
       summary: "Flexible gym membership plan for your training routine.",
-      features: durationLabel ? [durationLabel, ...fallbackFeatures] : fallbackFeatures
+      facilitiesLabel: "Facilities",
+      features: fallbackFeatures
     }
   }
 
-  const lines = rawDescription
-    .split(/\r?\n|;/)
-    .map((item) => item.replace(/^[-•*]\s*/, "").trim())
+  const rawLines = rawDescription
+    .split(/\r?\n/)
+    .map((line) => line.trim())
     .filter(Boolean)
 
-  if (lines.length > 1) {
+  const markerIndex = rawLines.findIndex((line) => FACILITIES_MARKER_REGEX.test(line))
+
+  if (markerIndex !== -1) {
+    const markerMatch = rawLines[markerIndex].match(FACILITIES_MARKER_REGEX)
+    const labelText = markerMatch?.[1] ?? "Facilities"
+    const inlineItems = markerMatch?.[2]?.trim() ?? ""
+
+    const summary = rawLines.slice(0, markerIndex).join(" ")
+
+    const extractedFeatures = [
+      ...(inlineItems ? inlineItems.split(";") : []),
+      ...rawLines.slice(markerIndex + 1).flatMap((line) => line.split(";"))
+    ]
+      .map(cleanFeatureLine)
+      .filter((item) => item && !item.endsWith(":"))
+
     return {
-      summary: lines[0],
-      features: durationLabel ? [durationLabel, ...lines.slice(1)] : lines.slice(1)
+      summary,
+      facilitiesLabel: labelText.charAt(0).toUpperCase() + labelText.slice(1).toLowerCase(),
+      features: extractedFeatures.length > 0 ? extractedFeatures : fallbackFeatures
+    }
+  }
+
+  const fallbackLines = rawDescription
+    .split(/\r?\n|;/)
+    .map(cleanFeatureLine)
+    .filter((item) => item && !item.endsWith(":"))
+
+  if (fallbackLines.length > 1) {
+    return {
+      summary: fallbackLines[0],
+      facilitiesLabel: "Facilities",
+      features: fallbackLines.slice(1)
     }
   }
 
   return {
     summary: rawDescription,
-    features: durationLabel ? [durationLabel, ...fallbackFeatures] : fallbackFeatures
+    facilitiesLabel: "Facilities",
+    features: fallbackFeatures
   }
 }
 
@@ -162,7 +198,6 @@ export default function PackagesSection() {
               const tierPackages = getPackagesByTier(packagesMap, tier.key)
               const selectedIdx = Math.min(selectedIndexByTier[tier.key] ?? 0, Math.max(tierPackages.length - 1, 0))
               const activePkg = tierPackages[selectedIdx]
-              const CtaIcon = tier.ctaIcon
               const isPopular = Boolean(tier.isPopular)
 
               if (!activePkg) {
@@ -190,7 +225,7 @@ export default function PackagesSection() {
                 )
               }
 
-              const { summary, features } = extractFeatures(activePkg, tier.defaultFeatures)
+              const { summary, facilitiesLabel, features } = parsePackageDescription(activePkg, tier.defaultFeatures)
 
               return (
                 <div
@@ -241,7 +276,7 @@ export default function PackagesSection() {
                     </div>
                   )}
 
-                  <p className="text-text-muted mt-2 text-xs sm:text-[13px]">{summary}</p>
+                  {summary && <p className="text-text-muted mt-2 text-xs leading-relaxed sm:text-[13px]">{summary}</p>}
 
                   <div className="mt-6 flex items-baseline gap-1.5">
                     <span className="text-text-muted text-xs font-semibold">Rp</span>
@@ -255,28 +290,39 @@ export default function PackagesSection() {
                     <span className="text-text-muted text-xs font-medium">{tier.period}</span>
                   </div>
 
-                  <ul className="mt-6 flex flex-1 flex-col gap-3">
-                    {features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="text-text-secondary flex items-center gap-2.5 text-xs sm:text-[13.5px]"
-                      >
-                        <Check className="text-success h-4 w-4 shrink-0 stroke-[2.5]" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {activePkg.duration > 0 && (
+                    <div className="text-text-secondary mt-2.5 inline-flex w-fit items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1 text-[11px] font-semibold">
+                      <CalendarDays className="text-primary h-3.5 w-3.5 shrink-0" />
+                      <span>Valid for {activePkg.duration} days</span>
+                    </div>
+                  )}
+
+                  <div className="border-border/50 mt-5 flex flex-1 flex-col border-t pt-5">
+                    <span className="text-text-muted text-[11px] font-bold tracking-wider uppercase">{facilitiesLabel}</span>
+
+                    <ul className="mt-3 flex flex-1 flex-col gap-3">
+                      {features.map((feature, featureIndex) => (
+                        <li
+                          key={`${feature}-${featureIndex}`}
+                          className="text-text-secondary flex items-start gap-2.5 text-xs sm:text-[13.5px]"
+                        >
+                          <Check className="text-success mt-0.5 h-4 w-4 shrink-0 stroke-[2.5]" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
                   <a
-                    href={tier.ctaHref}
+                    href={REGISTER_CTA.href}
                     className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold transition-colors sm:text-sm ${
                       isPopular
                         ? "bg-primary hover:bg-primary-hover text-background shadow-[0_0_20px_rgba(255,107,0,0.3)]"
                         : "bg-card hover:bg-border border-border/60 text-text-primary border"
                     }`}
                   >
-                    <CtaIcon className="h-4 w-4 shrink-0" />
-                    <span>{tier.ctaLabel}</span>
+                    <Store className="h-4 w-4 shrink-0" />
+                    <span>{REGISTER_CTA.label}</span>
                   </a>
                 </div>
               )
