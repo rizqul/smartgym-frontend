@@ -140,17 +140,22 @@ export default function MembershipPage() {
       ) : (
         <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5 xl:grid-cols-3">
           {packagesList.map((pkg) => {
-            let cleanDesc = pkg.description || ""
+            let cleanDesc = pkg.description?.trim() || ""
             let featuresList: string[] = []
 
             if (pkg.description && /Fasilitas:|Facilities:/i.test(pkg.description)) {
-              const parts = pkg.description.split(/Fasilitas:|Facilities:/i)
-              cleanDesc = parts[0].trim()
+              const [descPart = "", ...restParts] = pkg.description.split(/Fasilitas:|Facilities:/i)
+              const facilitiesPart = restParts.join(" ")
+              cleanDesc = descPart.trim()
 
-              featuresList = parts[1]
-                .split("-")
-                .map((f) => f.trim())
-                .filter((f) => f.length > 0)
+              const rawLines = facilitiesPart
+                .split(/\r?\n|;/)
+                .map((line) => line.trim())
+                .filter(Boolean)
+
+              featuresList = (rawLines.length > 1 ? rawLines : facilitiesPart.split(/(?:^|\s+)[-•*]\s+/))
+                .map((f) => f.replace(/^[-•*]\s*/, "").trim())
+                .filter(Boolean)
             }
 
             if (featuresList.length === 0) {
