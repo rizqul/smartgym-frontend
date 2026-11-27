@@ -9,6 +9,7 @@ import { trainerServiceApi } from "~/services/trainer.service"
 import { transactionServiceApi } from "~/services/transaction.service"
 import { checkinServiceApi } from "~/services/checkin.service"
 import { dashboardServiceApi } from "~/services/dashboard.service"
+import { landingServiceApi } from "~/services/landing.service"
 
 export const store = configureStore({
   reducer: {
@@ -20,7 +21,8 @@ export const store = configureStore({
     [trainerServiceApi.reducerPath]: trainerServiceApi.reducer,
     [transactionServiceApi.reducerPath]: transactionServiceApi.reducer,
     [checkinServiceApi.reducerPath]: checkinServiceApi.reducer,
-    [dashboardServiceApi.reducerPath]: dashboardServiceApi.reducer
+    [dashboardServiceApi.reducerPath]: dashboardServiceApi.reducer,
+    [landingServiceApi.reducerPath]: landingServiceApi.reducer,
   },
   middleware: (getDefault) =>
     getDefault().concat(
@@ -31,7 +33,8 @@ export const store = configureStore({
       trainerServiceApi.middleware,
       transactionServiceApi.middleware,
       checkinServiceApi.middleware,
-      dashboardServiceApi.middleware
+      dashboardServiceApi.middleware,
+      landingServiceApi.middleware
     )
 })
 

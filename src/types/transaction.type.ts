@@ -48,3 +48,5 @@ export type TransactionCsvApi = ApiResponse & {
 export type TransactionCountApi = ApiResponse & {
   data: TransactionCount
 }
+
+export type TransactionRefundApi = ApiResponse

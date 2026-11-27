@@ -182,7 +182,7 @@ export default function Transaction() {
                     Membership
                   </option>
                   <option
-                    value="TRAINER"
+                    value="PT_BOOKING"
                     className="bg-[#16181D]"
                   >
                     PT Booking
@@ -305,13 +305,16 @@ export default function Transaction() {
                     <TableTH>
                       <div className="text-text-muted text-left text-[11px] font-bold tracking-wider uppercase">STATUS</div>
                     </TableTH>
+                    <TableTH>
+                      <div className="text-text-muted text-right text-[11px] font-bold tracking-wider uppercase">ACTION</div>
+                    </TableTH>
                   </TableTR>
                 </TableHead>
 
                 <TableBody>
                   {!transactions.length ? (
                     <TableTR hideRowNumber>
-                      <TableTD colSpan={6}>
+                      <TableTD colSpan={7}>
                         <div className="text-text-muted flex min-h-72 w-full flex-col items-center justify-center gap-3 text-center text-sm">
                           <Receipt className="h-8 w-8 opacity-30" />
                           <div className="flex flex-col gap-1">

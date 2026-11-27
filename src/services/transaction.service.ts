@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { axiosBaseQuery } from "~/config/axiosQuery"
-import type { TransactionCountApi, TransactionCsvApi, TransactionsApi, TransactionSearchQuery } from "~/types/transaction.type"
-import { API_ADMIN_TRANSACTIONS_COUNT, API_ADMIN_TRANSACTIONS_CSV_DATA, API_ADMIN_TRANSACTIONS_LIST } from "~/utils/endpoints"
+import type { TransactionCountApi, TransactionCsvApi, TransactionRefundApi, TransactionsApi, TransactionSearchQuery } from "~/types/transaction.type"
+import { API_ADMIN_TRANSACTION_REFUND_BOOKING, API_ADMIN_TRANSACTIONS_COUNT, API_ADMIN_TRANSACTIONS_CSV_DATA, API_ADMIN_TRANSACTIONS_LIST } from "~/utils/endpoints"
 
 export const transactionServiceApi = createApi({
   reducerPath: "transactionApi",
@@ -35,8 +35,15 @@ export const transactionServiceApi = createApi({
         url: API_ADMIN_TRANSACTIONS_CSV_DATA,
         method: "GET"
       })
+    }),
+    refundBooking: build.mutation<TransactionRefundApi, string>({
+      query: (id) => ({
+        url: API_ADMIN_TRANSACTION_REFUND_BOOKING(id),
+        method: "POST"
+      }),
+      invalidatesTags: ["Transactions"]
     })
   })
 })
 
-export const { useGetAllTransactionsQuery, useGetTransactionCountQuery, useLazyGetTransactionCsvDataQuery } = transactionServiceApi
+export const { useGetAllTransactionsQuery, useGetTransactionCountQuery, useLazyGetTransactionCsvDataQuery, useRefundBookingMutation } = transactionServiceApi

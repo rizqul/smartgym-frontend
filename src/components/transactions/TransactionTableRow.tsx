@@ -1,11 +1,13 @@
-import { Copy } from "lucide-react"
+import { Copy, Loader2, RotateCcw } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { TableTD, TableTR } from "~/components/ui/table"
 import LocalDate from "~/components/ui/LocalDate"
+import { Alert } from "~/utils/alert"
 import { getAvatarUrl } from "~/utils/avatar"
 import { formatRupiah } from "~/utils/format"
 import { getTransactionStatusMeta, getTransactionTypeMeta } from "~/utils/transaction"
+import { useRefundBookingMutation } from "~/services/transaction.service"
 import type { TransactionItem } from "~/types/transaction.type"
 
 interface TransactionTableRowProps {
@@ -14,10 +16,13 @@ interface TransactionTableRowProps {
 }
 
 export default function TransactionTableRow({ transaction, isEven }: TransactionTableRowProps) {
+  const [refundBooking, { isLoading: isRefunding }] = useRefundBookingMutation()
+
   const statusMeta = getTransactionStatusMeta(transaction.status)
   const typeMeta = getTransactionTypeMeta(transaction.type)
   const memberName = transaction.member?.name || "Member"
   const memberEmail = transaction.member?.email || "-"
+  const canRefund = transaction.type?.toUpperCase() === "PT_BOOKING" && transaction.status?.toUpperCase() === "SUCCESS"
 
   const handleCopyOrderId = async () => {
     try {
@@ -25,6 +30,25 @@ export default function TransactionTableRow({ transaction, isEven }: Transaction
       toast.success("Order ID successfully copied!")
     } catch {
       toast.error("Failed to copy Order ID.")
+    }
+  }
+
+  const handleRefund = async () => {
+    const result = await Alert.confirm({
+      title: "Refund PT Booking?",
+      text: `Are you sure you want to refund ${memberName}'s booking (Order ID: ${transaction.orderId}) for Rp ${formatRupiah(transaction.amount ?? 0)}? This action cannot be undone.`,
+      confirmText: "Yes, Refund",
+      isDanger: true
+    })
+
+    if (!result.isConfirmed) return
+
+    try {
+      const res = await refundBooking(transaction.orderId).unwrap()
+      toast.success(res?.message || "Refund successfully!")
+    } catch (error: unknown) {
+      const apiErr = error as { data?: { message?: string }; message?: string }
+      toast.error(apiErr?.data?.message || apiErr?.message || "Failed to refund booking.")
     }
   }
 
@@ -97,6 +121,26 @@ export default function TransactionTableRow({ transaction, isEven }: Transaction
               </>
             )}
           </span>
+        </div>
+      </TableTD>
+
+      <TableTD>
+        <div className="flex items-center justify-end">
+          {canRefund ? (
+            <button
+              type="button"
+              onClick={handleRefund}
+              disabled={isRefunding}
+              title="Refund PT Booking"
+              aria-label={`Refund ${transaction.orderId}`}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 py-1.5 text-[11px] font-bold text-amber-400 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isRefunding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+              <span>{isRefunding ? "Refunding..." : "Refund"}</span>
+            </button>
+          ) : (
+            <span className="text-text-muted text-xs">-</span>
+          )}
         </div>
       </TableTD>
     </TableTR>

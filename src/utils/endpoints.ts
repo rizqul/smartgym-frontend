@@ -34,6 +34,7 @@ export const API_ADMIN_TRAINERS_DELETE = (id: string) => `/admin/dashboard/train
 
 export const API_ADMIN_TRANSACTIONS_LIST = "/admin/dashboard/transactions"
 export const API_ADMIN_TRANSACTIONS_CSV_DATA = "/admin/dashboard/transactions/csv-data"
+export const API_ADMIN_TRANSACTION_REFUND_BOOKING = (id: string) => `/admin/dashboard/transactions/refund-booking/${id}`
 
 export const API_ADMIN_CHECKIN_LIST = "/admin/dashboard/attendances"
 export const API_ADMIN_CHECKIN_SUMMARY = "/admin/dashboard/attendances/summary"
@@ -68,3 +69,6 @@ export const API_STAFF_TRAINERS_COUNT = "/staff/dashboard/trainers/count"
 export const API_ADMIN_DASHBOARD_COUNT = "/admin/dashboard/summary/count"
 export const API_ADMIN_DASHBOARD_CHART = "/admin/dashboard/summary/chart"
 export const API_ADMIN_DASHBOARD_RECENT = "/admin/dashboard/summary/recent"
+
+export const API_LANDING_MEMBERSHIP_PACKAGES = "/landing/membership-packages"
+export const API_LANDING_TRAINERS = "/landing/trainer"
