@@ -158,9 +158,6 @@ export default function EditMember() {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold text-white">Edit Member Data</h1>
-            <span className="bg-primary/20 text-primary border-primary/20 rounded-md border px-2 py-0.5 font-mono text-[11px] font-bold">
-              #{id.slice(0, 8)}
-            </span>
           </div>
           <p className="text-text-secondary mt-1 text-[13px]">Update the member's profile, contact details, or password.</p>
         </div>

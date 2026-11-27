@@ -1,11 +1,36 @@
 import type { TransactionItem } from "~/types/transaction.type"
 
+const ISO_DATETIME_REGEX = /\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?/g
+const TIME_RANGE_REGEX = /\b(\d{1,2}:\d{2})(?::\d{2})?\s*(?:[-–—]|to)\s*(\d{1,2}:\d{2})(?::\d{2})?\b/gi
+const SINGLE_TIME_WITH_SECONDS_REGEX = /\b(\d{1,2}:\d{2}):\d{2}\b/g
+
 const escapeCsvValue = (value: string | number | null | undefined) => {
   const str = String(value ?? "")
   if (str.includes(",") || str.includes('"') || str.includes("\n")) {
     return `"${str.replace(/"/g, '""')}"`
   }
   return str
+}
+
+const formatTimeHHmm = (date: Date) => {
+  const hours = String(date.getHours()).padStart(2, "0")
+  const minutes = String(date.getMinutes()).padStart(2, "0")
+  return `${hours}:${minutes}`
+}
+
+const formatTransactionName = (name?: string | null) => {
+  const trimmed = name?.trim()
+  if (!trimmed) return "-"
+
+  const withParsedDateTimes = trimmed.replace(ISO_DATETIME_REGEX, (match) => {
+    const normalized = match.replace(" ", "T")
+    const parsedDate = new Date(normalized)
+    return Number.isNaN(parsedDate.getTime()) ? match : formatTimeHHmm(parsedDate)
+  })
+
+  return withParsedDateTimes
+    .replace(TIME_RANGE_REGEX, (_, start: string, end: string) => `${start.padStart(5, "0")} - ${end.padStart(5, "0")}`)
+    .replace(SINGLE_TIME_WITH_SECONDS_REGEX, (_, time: string) => time.padStart(5, "0"))
 }
 
 export function exportTransactionsToCsv(transactions: TransactionItem[], startDate: string, endDate: string) {
@@ -41,7 +66,7 @@ export function exportTransactionsToCsv(transactions: TransactionItem[], startDa
       trx.member?.email ?? "-",
       trx.member?.phoneNumber ?? "-",
       trx.type,
-      trx.name ?? "-",
+      formatTransactionName(trx.name),
       trx.paymentType ?? "-",
       trx.amount,
       trx.status
