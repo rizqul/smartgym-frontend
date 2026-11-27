@@ -1,10 +1,9 @@
 import { useState } from "react"
-import { Clock, Users, CheckCircle2, XCircle, ScanLine, QrCode, Loader2, LogOut, RefreshCw, ChevronDown } from "lucide-react"
+import { Clock, Users, CheckCircle2, XCircle, ScanLine, QrCode, Loader2, LogOut, RefreshCw } from "lucide-react"
 import toast from "react-hot-toast"
 
 import { Card } from "~/components/ui/Card"
 import { Button } from "~/components/ui/Button"
-import { Select } from "~/components/ui/Select"
 import { PageSkeleton } from "~/components/ui/PageSkeleton"
 import Avatar from "~/components/ui/Avatar"
 import LocalDate from "~/components/ui/LocalDate"
@@ -12,7 +11,6 @@ import { Table, TableHead, TableTR, TableTH, TableBody, TableTD } from "~/compon
 import LiveTokenGenerator from "~/components/attendance/LiveTokenGenerator"
 import { Alert } from "~/utils/alert"
 import { useCheckOutMemberMutation, useGetCheckinSummaryQuery, useGetRecentCheckinsQuery } from "~/services/checkin.service"
-import type { CheckinStatus } from "~/types/checkin.type"
 
 const CHECKIN_LIMIT = 5
 const POLLING_OPTIONS = {
@@ -22,7 +20,6 @@ const POLLING_OPTIONS = {
 
 export default function TerminalKehadiran() {
   const [checkingOutId, setCheckingOutId] = useState<string | null>(null)
-  const [statusFilter, setStatusFilter] = useState<CheckinStatus | "">("")
 
   const {
     data: summaryRes,
@@ -43,7 +40,6 @@ export default function TerminalKehadiran() {
 
   const summary = summaryRes?.data
   const checkins = checkinsRes?.data ?? []
-  const filteredCheckins = statusFilter ? checkins.filter((item) => item.status === statusFilter) : checkins
   const latestValidations = checkins.slice(0, 2)
   const isSyncing = isFetchingCheckins || isFetchingSummary
 
@@ -324,43 +320,11 @@ export default function TerminalKehadiran() {
           </div>
 
           <Card className="flex min-w-0 flex-col gap-4 p-4 sm:p-5">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div className="flex flex-col gap-0.5">
-                <h3 className="text-[16px] font-bold text-white sm:text-[17px]">Live Gate Validation Monitor</h3>
-                <p className="text-text-muted text-[12px] sm:text-[13px]">
-                  Showing the {CHECKIN_LIMIT} most recent live gate authentication transactions
-                </p>
-              </div>
-
-              <div className="relative w-full sm:w-40">
-                <Select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as CheckinStatus | "")}
-                  className="focus:border-primary focus:ring-primary w-full appearance-none rounded-xl border border-white/10 bg-[#0B0C10] py-2 pr-9 pl-3.5 text-[12px] text-white transition-all focus:ring-1 focus:outline-none"
-                >
-                  <option
-                    value=""
-                    className="bg-[#16181D]"
-                  >
-                    All Statuses
-                  </option>
-                  <option
-                    value="GRANTED"
-                    className="bg-[#16181D]"
-                  >
-                    Granted
-                  </option>
-                  <option
-                    value="DENIED"
-                    className="bg-[#16181D]"
-                  >
-                    Denied
-                  </option>
-                </Select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                  <ChevronDown className="text-text-muted h-3.5 w-3.5" />
-                </div>
-              </div>
+            <div className="flex flex-col gap-0.5">
+              <h3 className="text-[16px] font-bold text-white sm:text-[17px]">Live Gate Validation Monitor</h3>
+              <p className="text-text-muted text-[12px] sm:text-[13px]">
+                Showing the {CHECKIN_LIMIT} most recent live gate authentication transactions
+              </p>
             </div>
 
             {isError ? (
@@ -396,16 +360,14 @@ export default function TerminalKehadiran() {
                     </TableTR>
                   </TableHead>
                   <TableBody>
-                    {!filteredCheckins.length ? (
+                    {!checkins.length ? (
                       <TableTR hideRowNumber>
                         <TableTD colSpan={6}>
-                          <div className="text-text-muted flex min-h-48 items-center justify-center text-sm">
-                            {statusFilter ? "No check-in history matches this status." : "No check-in history yet."}
-                          </div>
+                          <div className="text-text-muted flex min-h-48 items-center justify-center text-sm">No check-in history yet.</div>
                         </TableTD>
                       </TableTR>
                     ) : (
-                      filteredCheckins.map((stream, index) => {
+                      checkins.map((stream, index) => {
                         const memberName = stream.member?.name || "Member"
                         const memberId = stream.member?.id || ""
                         const isDenied = stream.status === "DENIED"
@@ -418,11 +380,11 @@ export default function TerminalKehadiran() {
                             className={isDenied ? "bg-red-950/30" : index % 2 === 0 ? "bg-transparent" : "bg-white/5"}
                           >
                             <TableTD>
-                              <span className="text-text-muted font-mono text-[13px] whitespace-nowrap flex flex-col">
-                                  <LocalDate
-                                    date={stream.checkInAt}
-                                    variant="short"
-                                  />
+                              <span className="text-text-muted flex flex-col font-mono text-[13px] whitespace-nowrap">
+                                <LocalDate
+                                  date={stream.checkInAt}
+                                  variant="short"
+                                />
                                 <LocalDate
                                   date={stream.checkInAt}
                                   variant="hour"

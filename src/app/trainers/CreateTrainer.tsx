@@ -154,6 +154,9 @@ export default function CreateTrainer() {
               placeholder="Example: 5"
               error={errors.experience?.message}
               {...register("experience")}
+              onInput={(e) => {
+                e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "")
+              }}
             />
 
             <Input
@@ -163,6 +166,9 @@ export default function CreateTrainer() {
               placeholder="Example: 150000"
               error={errors.rate?.message}
               {...register("rate")}
+              onInput={(e) => {
+                e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "")
+              }}
             />
 
             <div className="col-span-full mt-2 flex items-center justify-end gap-3 border-t border-white/5 pt-4">
