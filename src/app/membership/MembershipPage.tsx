@@ -1,0 +1,223 @@
+import { useState } from "react"
+import { useNavigate } from "react-router"
+import { Layers, Wallet, Plus, CheckCircle2, Trash2, Loader2, SquareLibrary, Banknote } from "lucide-react"
+import toast from "react-hot-toast"
+
+import { Button } from "~/components/ui/Button"
+import { CardStats } from "~/components/ui/CardStats"
+import Badge from "~/components/ui/Badge"
+import { PageSkeleton } from "~/components/ui/PageSkeleton"
+import {
+  useGetAllMembershipPackagesQuery,
+  useGetMembershipCountQuery,
+  useDeleteMembershipPackageMutation
+} from "~/services/membershipPackage.service"
+import { formatRupiah } from "~/utils/format"
+import { Alert } from "~/utils/alert"
+import { useAppSelector } from "~/store/hooks"
+
+export default function MembershipPage() {
+  const navigate = useNavigate()
+  const user = useAppSelector((state) => state.user.data)
+  const isAdmin = user?.role?.toUpperCase() === "ADMIN"
+
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const { data, isLoading, isError, refetch } = useGetAllMembershipPackagesQuery()
+  const { data: countRes, isLoading: isLoadingCount, refetch: refetchCount } = useGetMembershipCountQuery(undefined, { skip: !isAdmin })
+
+  const [deletePackage] = useDeleteMembershipPackageMutation()
+
+  const packagesList = data?.data ? Object.values(data.data).flat() : []
+  const membershipStats = countRes?.data
+  const totalPackages = isAdmin ? (membershipStats?.countMembershipPackage ?? packagesList.length) : packagesList.length
+
+  if (isLoading || (isAdmin && isLoadingCount)) {
+    return (
+      <div className="w-full p-4 lg:p-6">
+        <PageSkeleton
+          statCount={isAdmin ? 2 : 1}
+          contentVariant="list"
+        />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+        <p className="text-sm text-red-400">Failed to load the membership catalog.</p>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            refetch()
+            if (isAdmin) refetchCount()
+          }}
+        >
+          Try Again
+        </Button>
+      </div>
+    )
+  }
+
+  const handleDelete = async (id: string, name: string) => {
+    const result = await Alert.confirm({
+      title: "Delete Package?",
+      text: `Are you sure you want to delete the package "${name}"? This action cannot be undone.`,
+      confirmText: "Yes, Delete",
+      isDanger: true
+    })
+
+    if (!result.isConfirmed) return
+
+    setDeletingId(id)
+    try {
+      await deletePackage(id).unwrap()
+      toast.success(`Package ${name} was deleted successfully!`)
+    } catch {
+      toast.error("Failed to delete the membership package.")
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  return (
+    <div className="flex w-full min-w-0 flex-col gap-6 p-4 lg:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex w-full max-w-2xl flex-col gap-1.5">
+          <h2 className="text-xl font-bold text-white sm:text-2xl">Membership Management</h2>
+          <p className="text-text-muted text-[13px] sm:text-[14px]">
+            Manage the membership package catalog and monitor registered members&apos; subscription status in real time.
+          </p>
+        </div>
+
+        <div className="flex shrink-0 gap-3">
+          {isAdmin ? (
+            <Button
+              variant="primary"
+              leftIcon={<Plus className="h-4 w-4" />}
+              onClick={() => navigate("/dashboard/membership/create")}
+              className="w-full whitespace-nowrap sm:w-auto"
+            >
+              Add Package
+            </Button>
+          ) : (
+            <div className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 sm:w-auto">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                <Layers className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-text-muted text-[11px] font-medium tracking-wider uppercase">Package</span>
+                <span className="text-sm font-bold text-white">{totalPackages} Available Packages</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {isAdmin && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <CardStats
+            topIcon={<Layers className="text-blue-400" />}
+            bottomIcon={<SquareLibrary className="text-blue-400" />}
+            label="Package"
+            subLabel="Total Available Packages"
+            value={totalPackages}
+          />
+
+          <CardStats
+            topIcon={<Wallet className="text-emerald-400" />}
+            bottomIcon={<Banknote className="text-emerald-400" />}
+            label="Total Membership Revenue"
+            subLabel="Accumulated Transactions"
+            value={`Rp ${formatRupiah(membershipStats?.totalMembershipIncome ?? 0)}`}
+          />
+        </div>
+      )}
+
+      {packagesList.length === 0 ? (
+        <div className="text-text-muted flex w-full justify-center py-20 text-sm">No membership packages are currently available.</div>
+      ) : (
+        <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-5 xl:grid-cols-3">
+          {packagesList.map((pkg) => {
+            let cleanDesc = pkg.description?.trim() || ""
+            let featuresList: string[] = []
+
+            if (pkg.description && /Fasilitas:|Facilities:/i.test(pkg.description)) {
+              const [descPart = "", ...restParts] = pkg.description.split(/Fasilitas:|Facilities:/i)
+              const facilitiesPart = restParts.join(" ")
+              cleanDesc = descPart.trim()
+
+              const rawLines = facilitiesPart
+                .split(/\r?\n|;/)
+                .map((line) => line.trim())
+                .filter(Boolean)
+
+              featuresList = (rawLines.length > 1 ? rawLines : facilitiesPart.split(/(?:^|\s+)[-•*]\s+/))
+                .map((f) => f.replace(/^[-•*]\s*/, "").trim())
+                .filter(Boolean)
+            }
+
+            if (featuresList.length === 0) {
+              featuresList = ["Access to all gym facilities"]
+            }
+
+            const isDeleting = deletingId === pkg.id
+
+            return (
+              <div
+                key={pkg.id}
+                className="flex h-100 min-w-0 flex-col gap-3.5 rounded-2xl border border-white/10 bg-[#1C1F26] p-8 shadow-lg transition-all hover:border-white/20"
+              >
+                <div className="flex shrink-0 items-center justify-between gap-2">
+                  <Badge label={pkg.type || "PACKAGE"} />
+
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(pkg.id, pkg.name)}
+                      disabled={isDeleting}
+                      title="Delete Package"
+                      aria-label={`Hapus ${pkg.name}`}
+                      className="text-text-muted flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors hover:border-red-500/30 hover:bg-red-500/15 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex shrink-0 flex-col gap-1">
+                  <h3 className="truncate text-base font-bold text-white">{pkg.name}</h3>
+                  <p className="text-text-secondary line-clamp-2 min-h-9 text-xs leading-relaxed">{cleanDesc || "-"}</p>
+                </div>
+
+                <div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-2 gap-y-1 rounded-xl border border-white/5 bg-white/3 px-3.5 py-2.5">
+                  <div className="flex min-w-0 items-baseline gap-1 text-white">
+                    <span className="text-xs font-semibold text-white/70">Rp</span>
+                    <span className="truncate text-xl font-bold tracking-tight tabular-nums">{formatRupiah(pkg.price)}</span>
+                  </div>
+                  <span className="text-primary text-xs font-semibold whitespace-nowrap">/ {pkg.duration} days</span>
+                </div>
+
+                <div className="flex min-h-0 flex-1 flex-col gap-2 border-t border-white/5 pt-3">
+                  <span className="text-text-muted shrink-0 text-[10px] font-bold tracking-wider uppercase">INCLUDED FACILITIES</span>
+                  <ul className="flex flex-1 flex-col gap-1.5 overflow-y-auto pr-1.5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/15 [&::-webkit-scrollbar-track]:bg-transparent">
+                    {featuresList.map((feat, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-start gap-2 text-xs text-white/90"
+                      >
+                        <CheckCircle2 className="text-primary mt-0.5 h-3.5 w-3.5 shrink-0" />
+                        <span className="leading-snug">{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
